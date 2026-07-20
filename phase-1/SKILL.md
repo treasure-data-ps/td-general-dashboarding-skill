@@ -1,9 +1,9 @@
 ---
-name: fde-custom-dashboard-phase-1-lite
+name: td-general-dashboarding-skill-phase-1
 description: |
-  INTERNAL — invoked by custom-dashboard-agent-lite root skill only. Do not trigger directly.
+  INTERNAL — invoked by td-general-dashboarding-skill root skill only. Do not trigger directly.
   Phase 1: Requirements & Data Discovery (merged). Run session-setup questions, gather business requirements, validate against real data, score promotion (0-6), and produce a local state.md + approved dashboard plan.
-  Use when: Routed here by root custom-dashboard-agent-lite SKILL.md after Step 0 (new engagement path).
+  Use when: Routed here by root td-general-dashboarding-skill SKILL.md after Step 0 (new engagement path).
 ---
 
 # Phase 1: Requirements & Data Discovery (Custom Dashboard Agent — Lite)

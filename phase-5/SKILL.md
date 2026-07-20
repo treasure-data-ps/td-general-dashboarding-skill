@@ -1,9 +1,9 @@
 ---
-name: fde-custom-dashboard-phase-5-lite
+name: td-general-dashboarding-skill-phase-5
 description: |
-  INTERNAL — invoked by custom-dashboard-agent-lite root skill only. Do not trigger directly.
+  INTERNAL — invoked by td-general-dashboarding-skill root skill only. Do not trigger directly.
   Phase 5: Handoff Documentation (Lite). Optional final phase — create 4 local markdown files (Architecture, Usage Guide, Runbook, Access & Ownership), update state.md, and share with the user. No Confluence, no git.
-  Use when: Routed here by the root custom-dashboard-agent-lite SKILL.md after Phase 3 (and optional Phase 4).
+  Use when: Routed here by the root td-general-dashboarding-skill SKILL.md after Phase 3 (and optional Phase 4).
 ---
 
 # Phase 5: Handoff Documentation (Custom Dashboard Agent — Lite)

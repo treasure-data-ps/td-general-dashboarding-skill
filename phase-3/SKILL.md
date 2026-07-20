@@ -1,7 +1,7 @@
 ---
-name: fde-custom-dashboard-phase-3-lite
+name: td-general-dashboarding-skill-phase-3
 description: |
-  INTERNAL — invoked by custom-dashboard-agent-lite root skill only. Do not trigger directly.
+  INTERNAL — invoked by td-general-dashboarding-skill root skill only. Do not trigger directly.
   Phase 3: Build + Validate Interactive Dashboard (HTML Client only). Execute the build+validate loop — generate queries, build structure, connect data via generate-data.js, render, validate accuracy, test filters, and get approval.
   Use when: Routed here by the root SKILL.md after Phase 1 (Requirements + Data Discovery) or Phase 2 (Workflow deployment, if used).
 ---

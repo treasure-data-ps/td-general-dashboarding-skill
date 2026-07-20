@@ -1,7 +1,7 @@
 ---
-name: fde-custom-dashboard-phase-4-lite
+name: td-general-dashboarding-skill-phase-4
 description: |
-  INTERNAL — invoked by custom-dashboard-agent-lite root skill only. Do not trigger directly.
+  INTERNAL — invoked by td-general-dashboarding-skill root skill only. Do not trigger directly.
   Phase 4: Automate & Deploy (Track A — reusable skill extraction, Track B — companion Foundry agent). Both tracks optional.
   Use when: Routed here by the root SKILL.md after Phase 3 (Build Dashboard) is user-approved.
 ---

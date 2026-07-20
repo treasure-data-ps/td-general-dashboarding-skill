@@ -1,9 +1,9 @@
 ---
-name: fde-custom-dashboard-phase-2-lite
+name: td-general-dashboarding-skill-phase-2
 description: |
-  INTERNAL — invoked by custom-dashboard-agent-lite root skill only. Do not trigger directly.
+  INTERNAL — invoked by td-general-dashboarding-skill root skill only. Do not trigger directly.
   Phase 2: Deploy Dashboard Workflow (optional). Copy the locally embedded workflow templates, configure with project parameters, deploy to Treasure Data, and validate SINK tables.
-  Use when: Routed here by the root custom-dashboard-agent-lite SKILL.md when the Stage B path decision is Workflow (score 4-6, or skip_workflow = false/partial).
+  Use when: Routed here by the root td-general-dashboarding-skill SKILL.md when the Stage B path decision is Workflow (score 4-6, or skip_workflow = false/partial).
 ---
 
 # Phase 2: Deploy Dashboard Workflow (Custom Dashboard Agent — Lite)
