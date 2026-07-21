@@ -49,22 +49,38 @@ Compliance requirements:
 
 ---
 
+## ⚠️ REQUIRED CHECKPOINT: Phase 3 → Phase 4 Transition Gate
+
+**Before proceeding, confirm Phase 3 is complete:**
+
+- ✅ Dashboard approved by user (in this session or from prior `state.md`)
+- ✅ `dashboard.html` + `generate-data.js` are in `./<project-slug>/dashboards/`
+- ✅ `state.md` accessible with project_slug, confirmed metrics, and database names
+
+**If Phase 3 is NOT complete:** go back to Phase 3, complete the dashboard, and get user approval before continuing.
+
+---
+
 ## Phase 4 Decision: Ask the User Which Tracks to Run
+
+**This is the entry decision gate for Phase 4.** Do NOT skip this question. Make it explicit and unmissable:
 
 ```
 AskUserQuestion:
-  header: "Automate & Deploy"
-  question: "Your dashboard is approved. Would you like to turn it into a reusable skill, deploy a companion AI agent, both, or skip this phase?"
+  header: "Phase 4: Automate & Deploy (Choose Your Path)"
+  question: "Your dashboard is approved! Phase 4 has two optional tracks. Which would you like to do?"
   options:
     - label: "Track A — Reusable Skill"
-      description: "Package the dashboard as a parameterized skill for faster future builds (~10-30 min to replicate vs 2-3 hours from scratch)"
+      description: "Extract as a reusable, parameterized skill for faster future builds (~10-30 min to replicate vs 2-3 hours from scratch). Standalone HTML dashboard others can deploy."
     - label: "Track B — Companion AI Agent"
-      description: "Deploy a Foundry agent so users can ask questions in plain English about the dashboard data"
+      description: "Deploy a Foundry agent so users can ask questions in plain English about the dashboard data (e.g., 'What drove the spike?', 'Which region grew most?'). Requires Foundry access."
     - label: "Both Track A and Track B"
-      description: "Extract the skill AND deploy the agent"
+      description: "Extract the reusable skill AND deploy the Foundry agent (recommended for mission-critical dashboards)."
     - label: "Skip — go to Phase 5 or close"
-      description: "No automation needed right now"
+      description: "No automation/deployment needed right now. Proceed to Phase 5 (Handoff Documentation) or close the engagement."
 ```
+
+**After user selects, record the choice in state.md before proceeding to the track instructions.**
 
 | Track | What it produces | Best for |
 |---|---|---|

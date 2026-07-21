@@ -102,15 +102,17 @@ If either file below is missing, go back to Phase 3 and confirm the dashboard wa
 | File | Created in | Copy from | Copy to |
 |---|---|---|---|
 | `dashboard.html` | Phase 3 | `./<project-slug>/dashboards/dashboard.html` | `./<project-slug>/skills/dashboard.html` |
+| `dashboard.template.html` | Phase 3 | `./<project-slug>/dashboards/dashboard.template.html` | `./<project-slug>/skills/dashboard.template.html` |
 | `generate-data.js` | Phase 3 | `./<project-slug>/dashboards/generate-data.js` | `./<project-slug>/skills/generate-data.js` |
 
 ```bash
 mkdir -p ./<project-slug>/skills
-cp ./<project-slug>/dashboards/dashboard.html      ./<project-slug>/skills/dashboard.html
-cp ./<project-slug>/dashboards/generate-data.js    ./<project-slug>/skills/generate-data.js
+cp ./<project-slug>/dashboards/dashboard.html           ./<project-slug>/skills/dashboard.html
+cp ./<project-slug>/dashboards/dashboard.template.html  ./<project-slug>/skills/dashboard.template.html
+cp ./<project-slug>/dashboards/generate-data.js        ./<project-slug>/skills/generate-data.js
 ```
 
-**`dashboard.html` and `generate-data.js` are the static artifacts** — they never change between runs. Only the env vars passed to `generate-data.js` (`SOURCE_DB`/`SINK_DB`) change per database. Never recreate them in Phase 4; always copy from the approved Phase 3 output.
+**`dashboard.html`, `dashboard.template.html`, and `generate-data.js` are the static artifacts** — they never change between runs. Only the env vars passed to `generate-data.js` (`SOURCE_DB`/`SINK_DB`) change per database. Never recreate them in Phase 4; always copy from the approved Phase 3 output. The template file is required because `generate-data.js` references it via `__dirname` when rebuilding the dashboard.
 
 The skill's execution flow must:
 1. Check if SINK tables exist → fall back to source tables if Phase 2 was skipped
@@ -587,23 +589,23 @@ Lock in the confirmed `<skill-name>` before proceeding.
 
 **Step 2: Choose skill scope** — Where should the skill live?
 
-| Scope | Location | Who can use it | Best for |
-|-------|----------|---|---|
-| **Project-local** (current default) | `./<project-slug>/skills/` | Only you, in this project session | One-off dashboards, temporary prototypes |
-| **Your workspace** | `~/.claude/skills/<skill-name>/` | Only you, across all your Treasure Work sessions | Personal reusable skills, internal tools |
-| **All users (shared)** | `fde-skills` marketplace | Everyone on the Treasure AI Studio instance | Team tools, org-wide dashboards |
+| Scope | Location | Visibility | How to use | Best for |
+|-------|----------|---|---|---|
+| **Project-local** (Recommended) | `./<project-slug>/skills/` in TAIS | This project's Develop tab | TAIS: Develop tab → Trigger skill directly; Treasure Work: N/A | Current project, easy iteration, internal dashboards |
+| **Personal workspace** | `~/.claude/skills/<skill-name>/` | All your TAIS + Treasure Work sessions (you only) | TAIS: Develop tab (auto-loaded); Treasure Work: `/plugin install <skill-name>` | Recurring builds, personal tools, cross-project reuse |
+| **Zip distribution** | `./<project-slug>/<skill-name>.zip` | Manual transfer between systems | TAIS: unzip → copy to project; Treasure Work: `/plugin install <skill-name>-skill.zip` | Cross-team sharing, offline distribution, non-TAIS systems |
 
 ```
 AskUserQuestion:
-  header: "Skill scope"
-  question: "Where should this skill live? (Choose your deployment scope)"
+  header: "Skill scope & distribution"
+  question: "Where should this skill live and how will it be used?"
   options:
-    - label: "Keep it project-local"
-      description: "Leave in ./<project-slug>/skills/ — available only in this project, easy to iterate"
-    - label: "(Recommended) Add to my workspace"
-      description: "Copy to ~/.claude/skills/ — available in all your Treasure Work sessions, personal reuse"
-    - label: "Publish to shared marketplace"
-      description: "Publish to fde-skills marketplace — available to all Treasure AI users on your instance (requires permissions)"
+    - label: "Project-local (Recommended)"
+      description: "Keep in ./<project-slug>/skills/ → visible in this project's TAIS Develop tab only. Easy to iterate; others must copy the folder to use."
+    - label: "Personal workspace"
+      description: "Copy to ~/.claude/skills/ → available in all your TAIS sessions + Treasure Work via /plugin install. You can use it across all projects."
+    - label: "Package as Zip"
+      description: "Create <skill-name>.zip for manual distribution to teammates or other TAIS/Treasure Work instances."
 ```
 
 Branch to the appropriate section below based on the user's choice.
@@ -809,6 +811,101 @@ Sink database: <sink-database>
 
 ---
 
+
+---
+
+## Step 4a-vii: Generate Installation Guide (INSTALL.md)
+
+After packaging and before sharing, create `skills/INSTALL.md` with platform-specific instructions so recipients know exactly how to install and run the skill.
+
+**What to include in INSTALL.md:**
+
+```markdown
+# Installation & Usage Guide: [Skill Name]
+
+## Prerequisites
+- TAIS (Treasure AI Studio) OR Treasure Work
+- Treasure Data account with access to:
+  - Database: [SINK_DB from state.md]
+  - Tables: [list confirmed tables]
+- API key (if not using default auth)
+
+## Installation
+
+### Option 1: TAIS (Project-local)
+1. Unzip `<skill-name>.zip` into your TAIS project directory
+2. Navigate to **Develop** tab → find `<skill-name>` in the list
+3. Click to load the skill
+
+### Option 2: TAIS (Workspace)
+1. Unzip `<skill-name>.zip`
+2. Copy the `<skill-name>` folder to `~/.claude/skills/`
+3. Restart TAIS or refresh the Develop tab
+4. Skill appears in Develop tab across all projects
+
+### Option 3: Treasure Work
+```bash
+/plugin install <skill-name>-skill.zip
+# Or if published to marketplace:
+/plugin install <skill-name>@fde-skills
+```
+
+## Running the Skill
+
+### TAIS
+1. Open Develop tab → select the skill
+2. Environment variables required:
+   - `SINK_DB=<database-name>` (default: `[SINK_DB from state.md]`)
+   - `SOURCE_DB=<database-name>` (if Phase 2 was skipped, same as SINK_DB)
+3. Click **Run** or type the trigger phrase
+
+### Treasure Work
+```bash
+/plugin run <skill-name> --env SINK_DB=<database-name>
+```
+
+## Verification Checklist
+- [ ] Dashboard loads without errors (F12 → Console: no red errors)
+- [ ] All KPI cards show numbers (not "undefined" or dashes)
+- [ ] Filters work (date, region, segment — if applicable)
+- [ ] Data matches confirmed values from original build (within ±5%)
+
+Confirmed spot-check values (from original build):
+- [Metric 1]: [value from state.md]
+- [Metric 2]: [value from state.md]
+- [Metric 3]: [value from state.md]
+
+## Troubleshooting
+
+| Issue | Cause | Fix |
+|---|---|---|
+| "undefined" in KPI cards | Query failed or env var wrong | Check SINK_DB env var; run `tdx query` manually |
+| Filters don't work | `generate-data.js` failed | Check console errors; run `generate-data.js` manually |
+| Dashboard layout broken | browser compatibility | Use Chrome/Firefox; check browser console |
+
+## Support
+For questions about the data, see `skills/knowledge/` files:
+- `business_context.md` — why this dashboard exists
+- `data_dictionary.md` — table/column definitions
+- `metrics_catalog.md` — KPI formulas
+- `sql_templates.md` — underlying queries
+
+---
+
+**Skill Version:** [from skills/SKILL.md]  
+**Built:** [YYYY-MM-DD from state.md]  
+**Data Source:** [SINK_DB]
+```
+
+**Fill in the bracketed placeholders from `state.md` and Phase 3 confirmed values.**
+
+**Store as:** `./<project-slug>/skills/INSTALL.md`
+
+**Then include INSTALL.md in the final zip (Step 4a-vi packaging):**
+```bash
+zip -r <skill-name>.zip <skill-name>/ -x "*.DS_Store"
+# INSTALL.md is already in skills/ folder, so it's included automatically
+```
 
 ---
 

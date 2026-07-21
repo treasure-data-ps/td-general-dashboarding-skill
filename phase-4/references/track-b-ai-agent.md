@@ -108,18 +108,44 @@ Before deploying a new agent, check if a Foundry project already exists for this
 tdx llm project list | grep -i "<project-slug>\|<dashboard-type>"
 ```
 
-If found:
+If found, pull to `/tmp/` to avoid leaving debris in the project directory:
+
 ```bash
+mkdir -p /tmp/agent-inspect-$$
+cd /tmp/agent-inspect-$$
 tdx llm project pull <project_name>
-# Review: do the table names in dashboard_tables.yml match the CURRENT schema,
+# Review: do the table names match the CURRENT schema,
 # or are they stale (e.g. from an earlier version of this dashboard)?
+cd -
+rm -rf /tmp/agent-inspect-$$  # Clean up immediately
 ```
 
-**Action:**
-- [ ] Search for an existing project matching the project slug or dashboard type
-- [ ] If found and current: update the existing KBs rather than creating a new project
-- [ ] If found and stale: do a full KB replacement in Step 4b-iv rather than patching
-- [ ] If not found: proceed normally (create a new project)
+**Why `/tmp/`?** 
+- Inspection-only; no need to keep in project
+- Avoids confusion from leftover `agents-existing/` folders in the working directory
+- Uses `$$` (PID) to avoid naming collisions if multiple inspections run in parallel
+
+⚠️ **DECISION GATE — Ask user before overwriting existing Foundry resource:**
+
+If an existing project is found, do NOT proceed directly to replacement. Foundry projects are shared, live resources. Ask first:
+
+```
+AskUserQuestion:
+  header: "Existing Foundry project found"
+  question: "Found existing Foundry project: [project-name]. What should we do?"
+  options:
+    - label: "Update it"
+      description: "Replace its knowledge bases with the current versions (overwrite)"
+    - label: "Create a new project"
+      description: "Deploy as a separate Foundry project under a different name"
+    - label: "Cancel — skip Track B"
+      description: "Don't deploy an agent right now"
+```
+
+**Action after user selects:**
+- [ ] **Update it:** Proceed to Step 4b-iv with the existing project name (full KB replacement)
+- [ ] **Create new:** Change project name and proceed normally with a fresh project
+- [ ] **Cancel:** Exit Track B; proceed to Phase 5 or close engagement
 
 **Check 4: Required credentials**
 - [ ] Treasure Data API key (for the agent to query tables)
@@ -177,21 +203,59 @@ cp phase-4/references/templates/agent-prompt-template.md \
 
 Then fill `[DOMAIN]`, `[DATABASE]`, `[SINK_TABLES]`, `[CRITICAL_RULES]`, `[KEY_FACTS]`.
 
-**`dashboard_tables.yml` format is `tables: [{name, td_query}]` — NOT a plain string list.** Incorrect format causes push failures:
+**⚠️ Format Alert: Individual .yml files per KB, NOT a single dashboard_tables.yml**
+
+The guide shows a single `dashboard_tables.yml`, but `tdx agent push` actually scans `knowledge_bases/` for **individual `.yml` files per table**, one file per knowledge base (KB). Each file is a separate KB that gets registered.
+
+**CORRECT format — create one .yml file per SINK table:**
+
+```bash
+# File structure
+knowledge_bases/
+├── system_prompt.md
+├── business_context.md
+├── metrics_dictionary.md
+├── sql_templates.md
+├── sink_sales_revenue.yml         ← One KB per table
+├── sink_customer_segments.yml     ← One KB per table
+└── sink_regional_summary.yml      ← One KB per table
+```
+
+**Example: `knowledge_bases/sink_sales_revenue.yml`**
 
 ```yaml
-# ✅ Correct dashboard_tables.yml format
+name: sink_sales_revenue
+type: database
+database: td_reporting_agents
 tables:
   - name: sink_sales_revenue
     td_query: "SELECT * FROM <sink_db>.sink_sales_revenue LIMIT 1000"
-  - name: sink_customer_segments
-    td_query: "SELECT * FROM <sink_db>.sink_customer_segments LIMIT 1000"
-
-# ❌ Wrong — plain string list fails on push
-tables:
-  - sink_sales_revenue
-  - sink_customer_segments
+    grain: "one row per order_date × region × channel"
+    confirmed_totals:
+      total_revenue: 1284302.55
+enable_data: false
+enable_data_index: false
 ```
+
+**Example: `knowledge_bases/sink_customer_segments.yml`**
+
+```yaml
+name: sink_customer_segments
+type: database
+database: td_reporting_agents
+tables:
+  - name: sink_customer_segments
+    td_query: "SELECT * FROM <sink_db>.sink_customer_segments LIMIT 10000"
+    grain: "one row per customer_id"
+    confirmed_totals:
+      total_customers: 50423
+enable_data: false
+enable_data_index: false
+```
+
+**Why individual files?** `tdx agent push` reads each `.yml` file as a separate KB. It registers each one in Foundry with its own name (e.g., `sink_sales_revenue`, `sink_customer_segments`). The agent's `system_prompt.md` and `agent.yml` then reference each KB by name via `@ref(type: "knowledge_base", name: "sink_sales_revenue")`.
+
+**Naming convention:** Use table names as KB names (e.g., `sink_orders.yml` creates a KB named `sink_orders`).
 
 ### First Push — Schema + Behavioral Rules Only
 
@@ -200,14 +264,50 @@ Populate `system_prompt.md` and `dashboard_tables.yml` fully. Stub the other thr
 | File | First-push action | Source |
 |------|-------------------|--------|
 | `system_prompt.md` | ✅ **Populate fully** — CRITICAL RULES at the top | Copied from `phase-4/references/templates/agent-prompt-template.md`; fill `[DOMAIN]`, `[DATABASE]`, `[SINK_TABLES]`, `[CRITICAL_RULES]`, `[KEY_FACTS]` |
-| `dashboard_tables.yml` | ✅ **Populate fully** — schema is confirmed | Phase 3 schema + Phase 2 confirmed totals (if run); include `confirmed_totals:` and `grain:` for every table; use `{name, td_query}` format |
+| `dashboard_tables.yml` | ✅ **Populate fully** — schema is confirmed | Phase 3 schema + Phase 2 confirmed totals (if run); include `confirmed_totals:` and `grain:` for every table; **use ONLY `{name, td_query}` format (not plain table names)** — see format example below |
 | `business_context.md` | ⚡ **Stub** — 3-5 bullets max | Phase 1 requirements (company, industry, dashboard purpose); full distillation happens post-validation |
 | `metrics_dictionary.md` | ⚡ **Stub** — name + SQL formula only | Phase 3 validated queries; NL phrasings added post-validation |
-| `sql_templates.md` | ⚡ **Stub** — one KPI-summary template + one trend template only | Phase 3 core queries |
+| `sql_templates.md` | ⚡ **Stub for agent KB** — one KPI-summary template + one trend template only; **omit workflow SQL section** | Phase 3 core queries; agent doesn't need source→SINK transformation SQL |
+
+### ⚠️ Gap Alert: `sql_templates.md` for Agent KBs Must Be Trimmed
+
+If you're copying `sql_templates.md` from Track A (or creating fresh for Track B), the full version with all 8 workflow SQL blocks (WF-Q1–WF-Q8) will exceed the 18,000 character KB size limit when pushed to Foundry.
+
+**For agent KBs only:** create a trimmed version with only the SINK query examples (the agent queries SINK directly and doesn't need source→SINK transformation SQL).
+
+```bash
+# Check file size before push
+wc -c ./<project-slug>/agents/knowledge_bases/sql_templates.md
+# If > 18000: remove workflow SQL section and re-check
+
+# Trim: remove the "## Workflow SQL" section entirely
+# Keep only: KPI-summary queries, trend queries, breakdown queries
+```
+
+**Stub content for first push:**
+```markdown
+## KPI Summary Query
+
+SELECT [dimension_cols], COUNT(*) as total_records, SUM(metric) as total_metric
+FROM {SINK_DB}.[table]
+GROUP BY [dimension_cols];
+
+## Trend Query
+
+SELECT DATE([date_col]) as date, COUNT(*) as records
+FROM {SINK_DB}.[table]
+GROUP BY DATE([date_col])
+ORDER BY date DESC
+LIMIT 30;
+```
+
+Don't include workflow SQL (WF-Q1, WF-Q2, etc.) — remove that section entirely for agent KBs.
 
 **Why:** the agent needs `dashboard_tables.yml` (schema) and `system_prompt.md` (behavioral rules) to pass Test 1 (connectivity). The other KBs can be stubs — Round 1 test failures reveal exactly what's missing before you spend time writing them.
 
 > **Track A → Track B reuse (avoid re-authoring):** If Track A ran, `./<project-slug>/skills/knowledge/` already has `business_context.md`, `metrics_catalog.md`, and `sql_templates.md`. Copy these directly into `agents/knowledge_bases/` as the starting point — do NOT re-write from scratch. Track B adds `dashboard_tables.yml` and `system_prompt.md` on top.
+>
+> ⚠️ **CRITICAL before copying `sql_templates.md` to agents/:** Remove the entire "## Workflow SQL" section (WF-Q1 through WF-Q8 blocks). The agent queries SINK tables directly and does NOT need source→SINK transformation SQL. Workflow SQL blocks inflate the file to 18,000+ characters, exceeding the Foundry KB text limit (~18K chars). Strip these blocks before copying to `agents/knowledge_bases/`.
 
 **CRITICAL: System Prompt Character Limit (⚠️ 9,000 CHARACTER MAXIMUM)**
 
@@ -319,17 +419,54 @@ tdx llm project create <project-slug>
 - Round 1: `system_prompt.md` + `dashboard_tables.yml` fully populated, other 3 files stubbed
 - Round 2: all 5 files fully populated
 
-**Step 4 — Push:**
+**Step 4 — CONFIRMATION GATE — Show the deployment preview before pushing:**
+
+Display the proposed deployment config to the user (never auto-push):
+
+```
+AskUserQuestion:
+  header: "Review before deploying to Foundry"
+  question: "Ready to deploy this agent to Foundry? Review the config below and confirm:"
+  options:
+    - label: "Yes, deploy now"
+      description: "Push to Foundry: tdx agent push -y"
+    - label: "No, let me review the KBs first"
+      description: "Cancel this push. I want to review/edit the knowledge bases"
+    - label: "No, cancel Track B"
+      description: "Skip the agent deployment entirely"
+```
+
+**Show this preview to the user:**
+```markdown
+**Foundry Deployment Preview:**
+- Project name: <project-slug>
+- Agent name: <agent-name>
+- Knowledge bases ready:
+  - system_prompt.md: [file size] chars
+  - dashboard_tables.yml: [N tables listed]
+  - business_context.md: [stub|full]
+  - metrics_dictionary.md: [stub|full]
+  - sql_templates.md: [stub|full]
+- Deployment round: Round 1 or 2
+- Location: `./<project-slug>/agents/`
+```
+
+**If user selects "Yes, deploy now":**
+
+**Step 5 — Push:**
 ```bash
 cd ./<project-slug>/agents
 tdx agent push -y
 ```
 
-**Step 5 — Verify in the Foundry UI:**
+**Step 6 — Verify in the Foundry UI:**
 - Confirm the agent project is visible and the KB files uploaded correctly
 - Open the chat interface and send a simple test query (e.g., "what tables do you have access to?")
 
-**Step 6 — Record the deployment** in `state.md`: agent name, project name, push timestamp, KB round (1 or 2).
+**If user selects "No, let me review" or "Cancel":**
+- Return to Step 4b-iv to edit KBs, or exit Track B entirely
+
+**Step 7 — Record the deployment** in `state.md`: agent name, project name, push timestamp, KB round (1 or 2).
 
 Append to `state.md`:
 ```markdown
@@ -363,12 +500,24 @@ Ask before running: *"KBs ready for Round [1/2]? Reply **run** to execute `tdx a
 | 4 — Error Handling | Graceful failure, no crashes | No raw SQL errors; helpful alternatives offered |
 | 5 — Business Question | NL→SQL, context usage, reasoning | Logical answer with real numbers from dashboard data |
 
-Run each test as a direct chat prompt to the agent, e.g.:
-- Test 1: "How many total [records] are in the dataset?"
-- Test 2: "How did [metric] trend over the last 30 days?"
-- Test 3: "Break down [metric] by [dimension]."
-- Test 4: "What's the [nonsense metric that doesn't exist]?" — should decline gracefully, not error
-- Test 5: "What's driving the change in [metric] this month?"
+Run each test as a direct chat prompt to the agent using `tdx chat`:
+
+```bash
+tdx chat --agent "<project-slug>/<agent-name>" --new "your test question here"
+```
+
+**Example test queries:**
+- Test 1: `tdx chat --agent "automotive-demo/automotive-analyzer" --new "How many total orders are in the dataset?"`
+- Test 2: `tdx chat --agent "automotive-demo/automotive-analyzer" --new "How did revenue trend over the last 30 days?"`
+- Test 3: `tdx chat --agent "automotive-demo/automotive-analyzer" --new "Break down revenue by region."`
+- Test 4: `tdx chat --agent "automotive-demo/automotive-analyzer" --new "What's the nonsense_metric_that_doesnt_exist?"` — agent should decline gracefully, not error
+- Test 5: `tdx chat --agent "automotive-demo/automotive-analyzer" --new "What's driving the change in revenue this month?"`
+
+**Or run the full automated validation suite:**
+```bash
+cd ./<project-slug>/agents
+tdx agent test --run all
+```
 
 ### Failure-to-Fix Quick Reference
 
