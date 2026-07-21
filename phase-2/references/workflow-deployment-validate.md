@@ -164,24 +164,42 @@ If you run `tdx wf push` without a prior `tdx.json`, it fails with "no workflow 
    tdx query "CREATE SCHEMA IF NOT EXISTS <sink_database>"
    ```
 
-4. **Confirm before pushing:**
+4. **⚠️ CONFIRMATION GATE — Show deployment preview before pushing:**
+
+   Display the proposed deployment configuration and wait for explicit user confirmation:
 
    ```
    AskUserQuestion:
-     header: "Confirm push"
-     question: "Push workflow: <PROJECT_NAME> → <sink_database>?"
+     header: "Review before deploying workflow"
+     question: "Ready to deploy this workflow to Treasure Data? Review config below:"
      options:
-       - label: "Yes — push now"
-       - label: "Review first"
-       - label: "Show dry-run"
+       - label: "Yes, deploy now"
+         description: "Push workflow: tdx wf upload/push"
+       - label: "No, let me review first"
+         description: "Cancel this push. Let me review the .dig files / SQL / config"
+       - label: "Show dry-run output first"
+         description: "Run dry-run, then ask again"
    ```
 
-   If user selects **"Show me the dry-run output first"**:
+   **Show this preview to the user:**
+   ```markdown
+   **Workflow Deployment Preview:**
+   - Project name: <PROJECT_NAME>
+   - SINK database: <sink_database>
+   - SINK table prefix: ${project_prefix}
+   - Schedule: [cron expression, e.g., daily 2 AM UTC]
+   - First run: full history from [start_date] to [end_date]
+   - Tables to create: [list from .dig files, e.g., aggregate_final, path_stats]
+   - Incremental mode: [append-only / lookback / state]
+   - Location: <PROJECT_NAME console URL>
+   ```
+
+   If user selects **"Show dry-run output first"**:
    ```bash
    cd ./<project_slug>/workflows
    tdx wf push --dry-run
    ```
-   Then re-ask the confirmation above. Do NOT push until explicit "Yes".
+   Display output, then re-ask the confirmation above. **Do NOT push until user explicitly selects "Yes, deploy now"**.
 
 5. **First deployment: Create project with `tdx wf upload`** (only after confirmation above)
 
@@ -219,18 +237,37 @@ If you run `tdx wf push` without a prior `tdx.json`, it fails with "no workflow 
    # Revision: <timestamp>
    ```
 
-7. **Confirm before triggering first run:**
+7. **⚠️ CONFIRMATION GATE — Confirm before triggering first run:**
+
+   The workflow is now deployed, but hasn't run yet. Show the user what will happen and get explicit approval:
 
    ```
    AskUserQuestion:
-     header: "Trigger first run"
-     question: "Run workflow: <PROJECT_NAME> covering <start_date> to <end_date>? (~2-5 min)"
+     header: "Trigger first workflow run"
+     question: "Start the first workflow run covering historical data? This will create SINK tables in Treasure Data."
      options:
-       - label: "Yes — start now"
-       - label: "No — I'll trigger manually"
+       - label: "Yes, trigger now"
+         description: "Run: tdx wf run <PROJECT_NAME>.dashboard-workflow-launch — creates SINK tables"
+       - label: "No, I'll trigger manually"
+         description: "Cancel this run. I'll trigger it manually from the TAS console"
+       - label: "No, cancel — review first"
+         description: "Cancel. Let me review the .dig files before running"
    ```
 
-   Only run `tdx wf run` after explicit Yes.
+   **Show this run preview to the user:**
+   ```markdown
+   **First Workflow Run Preview:**
+   - Project: <PROJECT_NAME>
+   - Workflow: dashboard-workflow-launch
+   - Date range: [start_date] to [end_date] (historical full load)
+   - SINK tables created: [aggregate_final, path_stats, unique_visitors, etc.]
+   - Row count: [N rows expected per SINK table]
+   - Estimated duration: 2-5 minutes
+   - SINK location: <sink_database>
+   - Status tracking: https://console.us01.treasuredata.com/app/workflows/<PROJECT_ID>/info
+   ```
+
+   **Only run `tdx wf run` after user explicitly selects "Yes, trigger now".**
 
 8. **Trigger first historical run manually:**
 
