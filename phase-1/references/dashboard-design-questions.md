@@ -155,6 +155,78 @@ options:
 
 ---
 
+## Question Set 6: Choose HTML Client Template
+
+**After gathering all dashboard design details, ask user which template fits:**
+
+```
+header: "HTML Template Type"
+question: "Which template best matches your dashboard needs?"
+multiSelect: false
+options:
+  - label: "KPI Dashboard (Executive Summary)"
+    description: "4 large numbers + summary. Best for status reports, exec briefings. Email-friendly."
+    
+  - label: "Table Dashboard (Data Explorer)"
+    description: "Sortable/searchable rows + metrics. Best for operators needing detail, compliance reports."
+    
+  - label: "Multi-Chart Dashboard (Analysis)"
+    description: "Line/bar/pie charts + KPI cards. Best for trends, benchmarking, storytelling."
+    
+  - label: "Not sure — I'll decide based on data"
+    description: "I'll recommend based on your metrics, dimensions, and audience."
+```
+
+**Mapping to template:**
+
+| Your Needs | Template | Why |
+|-----------|----------|-----|
+| "Show executives 5 key metrics" | KPI | Simple, scan-friendly, decision-focused |
+| "Let teams explore order details" | Table | Sortable columns, search, CSV export |
+| "Show me sales trends vs targets" | Multi-Chart | Line chart for trends, bar for comparison |
+| "Display compliance audit data" | Table | Detail-oriented, row-level drilling |
+| "Executive status report to email" | KPI | Self-contained, portable, no interaction needed |
+| "BI team needs multiple views" | Multi-Chart | Multiple visualizations tell the story |
+
+**Capture in state.md:**
+```yaml
+HTML Template Selection:
+  - Chosen Template: [KPI / Table / Multi-Chart]
+  - Reasoning: [Why this template fits their needs]
+  - Customizations needed: [Additional charts, fields, colors, etc.]
+```
+
+---
+
+## Why 3 Templates Exist
+
+**Different audiences need different UX:**
+
+```
+KPI Dashboard
+├─ Audience: Executives, Leadership
+├─ Use Case: Status reports, briefings
+├─ UI Style: Scan-friendly (4 big numbers)
+├─ Interaction: Read-only
+└─ Share method: Email, Confluence
+
+Table Dashboard
+├─ Audience: Operators, Analysts
+├─ Use Case: Data exploration, compliance
+├─ UI Style: Detail-oriented (rows + columns)
+├─ Interaction: Sort, search, export
+└─ Share method: Web link, Zip file
+
+Multi-Chart Dashboard
+├─ Audience: Business Analysts, PMs
+├─ Use Case: Trends, benchmarking, storytelling
+├─ UI Style: Story-focused (multiple charts)
+├─ Interaction: Visualizations, tooltips
+└─ Share method: Email, embedded link
+```
+
+---
+
 ## Example: Complete Dashboard Design Specification
 
 ```yaml
