@@ -7,11 +7,10 @@ description: INTERNAL — Phase 4 only. Optional: extract reusable skill (Track 
 
 > **Read in this order:**
 > 1. `../INSTRUCTIONS.md` (master rules, load_order: 0)
-> 2. `./INSTRUCTIONS.md` (Phase 4 rules, load_order: 1.4)
-> 3. `./CHECKLIST.md` (quick decision guide)
-> 4. `./SKILL.md` (this file — full details)
-> 5. `./references/phase-4-walkthrough.md` (step-by-step walkthrough)
-> 6. `../references/INSTRUCTIONS.md` (cross-phase guardrails)
+> 2. `./INSTRUCTIONS.md` (Phase 4 rules, load_order: 1.4) — includes Quick Checklist
+> 3. `./SKILL.md` (this file — full details)
+> 4. `./references/phase-4-walkthrough.md` (step-by-step walkthrough)
+> 5. `../references/INSTRUCTIONS.md` (cross-phase guardrails)
 
 **Phase Goal:** Optionally turn the approved dashboard into a reusable asset — Track A extracts it as a parameterized skill, Track B deploys a companion Foundry agent for conversational analysis. Both are entirely optional; skip this phase to go straight to Phase 5 (Handoff) or close the engagement.
 
@@ -31,7 +30,7 @@ description: INTERNAL — Phase 4 only. Optional: extract reusable skill (Track 
 
 ## How to Execute
 
-**Quick start:** See `./CHECKLIST.md` for a fast gate-check before proceeding.
+**Quick start:** See Quick Checklist in `./INSTRUCTIONS.md` for a fast gate-check before proceeding.
 
 Ask the user which track(s) to run. Then follow the detailed guides:
 

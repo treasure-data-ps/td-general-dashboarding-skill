@@ -8,11 +8,10 @@ description: |
 
 > **Read in this order:**
 > 1. `../INSTRUCTIONS.md` (master rules, load_order: 0)
-> 2. `./INSTRUCTIONS.md` (Phase 3 rules, load_order: 1.3)
-> 3. `./CHECKLIST.md` (quick decision guide)
-> 4. `./SKILL.md` (this file — full details)
-> 5. `./references/phase-3-walkthrough.md` (step-by-step walkthrough)
-> 6. `../references/INSTRUCTIONS.md` (cross-phase guardrails)
+> 2. `./INSTRUCTIONS.md` (Phase 3 rules, load_order: 1.3) — includes Quick Checklist
+> 3. `./SKILL.md` (this file — full details)
+> 4. `./references/phase-3-walkthrough.md` (step-by-step walkthrough)
+> 5. `../references/INSTRUCTIONS.md` (cross-phase guardrails)
 
 **Phase Goal:** See `../references/architecture-and-state.md` for phase overview.
 
@@ -26,7 +25,7 @@ description: |
 
 → **See `./references/phase-3-data-patterns.md`** for: Non-Workflow vs Workflow path SQL patterns and data accuracy handling.
 
-→ **See `./CHECKLIST.md`** for a condensed Phase 3 decision checklist (build, validate, filter/performance gates).
+→ **See Quick Checklist in `./INSTRUCTIONS.md`** for a condensed Phase 3 decision checklist (build, validate, filter/performance gates).
 
 ---
 

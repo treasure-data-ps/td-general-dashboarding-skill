@@ -45,7 +45,7 @@ fde-tais-dashboard-builder/
 │   │   ├── Common blocks + solutions
 │   │   └── After Phase 1 completes section
 │   │
-│   ├── CHECKLIST.md (quick reference)
+│   ├── Quick Checklist in INSTRUCTIONS.md (quick reference)
 │   │   ├── Prerequisites
 │   │   ├── Stage A checklist
 │   │   ├── Stage B checklist
@@ -91,7 +91,7 @@ fde-tais-dashboard-builder/
 │   │   ├── Common blocks + solutions
 │   │   └── After Phase 2 completes section
 │   │
-│   ├── CHECKLIST.md
+│   ├── Quick Checklist in INSTRUCTIONS.md
 │   │   ├── Prerequisites from Phase 1
 │   │   ├── TD account setup
 │   │   ├── Workflow planning
@@ -116,7 +116,7 @@ fde-tais-dashboard-builder/
 │   │   ├── Common blocks + solutions
 │   │   └── After Phase 3 completes section
 │   │
-│   ├── CHECKLIST.md
+│   ├── Quick Checklist in INSTRUCTIONS.md
 │   │   ├── Prerequisites
 │   │   ├── Query readiness
 │   │   ├── Dashboard scope
@@ -141,7 +141,7 @@ fde-tais-dashboard-builder/
 │   │   ├── Common blocks + solutions
 │   │   └── After Phase 4 completes section
 │   │
-│   ├── CHECKLIST.md
+│   ├── Quick Checklist in INSTRUCTIONS.md
 │   │   ├── Prerequisites
 │   │   ├── Track A setup (if chosen)
 │   │   ├── Track B setup (if chosen)
@@ -165,7 +165,7 @@ fde-tais-dashboard-builder/
     │   ├── Common blocks + solutions
     │   └── After Phase 5 completes section
     │
-    ├── CHECKLIST.md
+    ├── Quick Checklist in INSTRUCTIONS.md
     │   ├── Prerequisites
     │   ├── 4 documentation files to create
     │   ├── Content validation checklist
@@ -207,7 +207,7 @@ Load Order 1.N — PHASE-SPECIFIC (Read THIRD, where N=1-5)
 │  - Decision trees
 │  - Common blocks + solutions
 │
-├─ ./phase-N/CHECKLIST.md (optional quick reference)
+├─ Quick Checklist in ./phase-N/INSTRUCTIONS.md (optional quick reference)
 │  - Quick decision guide (2-3 min read)
 │  - Prerequisites
 │  - Quality gates
@@ -258,7 +258,7 @@ Context compaction occurred.
 |------|---------|--------------|-----------|
 | **INSTRUCTIONS.md** | Master rules for all phases | Before any phase | 0 (first) |
 | **phase-N/INSTRUCTIONS.md** | Phase-specific rules | Before starting phase | 1.1-1.5 |
-| **phase-N/CHECKLIST.md** | Quick decision guide | When time is limited | — (optional) |
+| **Quick Checklist in phase-N/INSTRUCTIONS.md** | Quick decision guide | When time is limited | — (optional) |
 | **phase-N/SKILL.md** | Full phase details | When you need details | — (fallback) |
 | **phase-N/references/phase-N-walkthrough.md** | Step-by-step walkthrough | New to phase | — (reference) |
 | **references/INSTRUCTIONS.md** | Cross-phase guardrails | After phase-specific rules | 1 (second) |
@@ -449,7 +449,7 @@ Each phase has a **Quality Gate** checklist before proceeding to the next phase:
 - ✅ Master INSTRUCTIONS.md (load_order: 0)
 - ✅ Cross-phase INSTRUCTIONS.md (load_order: 1)
 - ✅ Phase 1-5 INSTRUCTIONS.md (load_order: 1.1-1.5)
-- ✅ Phase 1-5 CHECKLIST.md (quick reference)
+- ✅ Phase 1-5 Quick Checklists in INSTRUCTIONS.md (quick reference)
 - ✅ Phase 1-5 SKILL.md (full details, updated with load order ref)
 - ✅ Phase 1-5 walkthroughs (step-by-step)
 - ✅ state.md template (context bridge)
@@ -463,8 +463,8 @@ Each phase has a **Quality Gate** checklist before proceeding to the next phase:
 **Starting a new engagement:**
 ```
 1. Read: ./INSTRUCTIONS.md (load_order: 0)
-2. Read: ./phase-1/INSTRUCTIONS.md (load_order: 1.1)
-3. Refer: ./phase-1/CHECKLIST.md (quick decision guide)
+2. Read: ./phase-1/INSTRUCTIONS.md (load_order: 1.1) — includes Quick Checklist
+3. Refer: Quick Checklist section in ./phase-1/INSTRUCTIONS.md (quick decision guide)
 4. Fallback: ./phase-1/SKILL.md (full details)
 5. Walkthrough: ./phase-1/references/phase-1-walkthrough.md (step-by-step)
 ```

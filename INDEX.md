@@ -36,12 +36,14 @@ Quick decision-guide checklists — read before the full guide when only a fast 
 
 | File | Purpose |
 |------|---------|
-| `phase-1/CHECKLIST.md` | Stage A/B quick decision guide — session setup, requirements, discovery, scoring, exit gates |
-| `phase-2/CHECKLIST.md` | Workflow deployment quick decision guide — pre-phase gate, 3a-3g steps, SINK validation |
-| `phase-3/CHECKLIST.md` | Dashboard build quick decision guide — pre-phase gate, 4a-4l steps, quality gates |
-| `phase-4/CHECKLIST.md` | Track A/B quick decision guide — pre-phase gate, 4a-0-4a-vii, 4b-i-4b-vi, handoff to Phase 5 |
+**Quick Checklists:**
+These are now embedded in each phase's `INSTRUCTIONS.md` file (not separate files).
 
-Referenced directly by `phase-2/SKILL.md` and `phase-3/SKILL.md` via `./CHECKLIST.md`.
+- Phase 1 Quick Checklist: In `phase-1/INSTRUCTIONS.md` → Quick Checklist section
+- Phase 2 Quick Checklist: In `phase-2/INSTRUCTIONS.md` → Quick Checklist section  
+- Phase 3 Quick Checklist: In `phase-3/INSTRUCTIONS.md` → Quick Checklist section
+- Phase 4 Quick Checklist: In `phase-4/INSTRUCTIONS.md` → Quick Checklist section
+- Phase 5 Quick Checklist: In `phase-5/INSTRUCTIONS.md` → Quick Checklist section
 
 ---
 

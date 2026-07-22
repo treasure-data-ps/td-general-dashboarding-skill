@@ -7,11 +7,10 @@ description: INTERNAL — Phase 2 only. Deploy a scheduled workflow that pre-agg
 
 > **Read in this order:**
 > 1. `../INSTRUCTIONS.md` (master rules, load_order: 0)
-> 2. `./INSTRUCTIONS.md` (Phase 2 rules, load_order: 1.2)
-> 3. `./CHECKLIST.md` (quick decision guide)
-> 4. `./SKILL.md` (this file — full details)
-> 5. `./references/phase-2-walkthrough.md` (step-by-step walkthrough)
-> 6. `../references/INSTRUCTIONS.md` (cross-phase guardrails)
+> 2. `./INSTRUCTIONS.md` (Phase 2 rules, load_order: 1.2) — includes Quick Checklist
+> 3. `./SKILL.md` (this file — full details)
+> 4. `./references/phase-2-walkthrough.md` (step-by-step walkthrough)
+> 5. `../references/INSTRUCTIONS.md` (cross-phase guardrails)
 
 **Phase Goal:** Convert approved Stage B queries into a scheduled Treasure Data Workflow that pre-aggregates metrics into workflow output tables (SINK tables) — making Phase 3 dashboard queries fast, fresh, and production-grade.
 
@@ -92,7 +91,7 @@ GROUP BY DATE(date), vehicle_make, customer_segment;
 
 → **See `./references/phase-2-walkthrough.md`** for: deliverables, end-of-phase checklist, quick reference, performance expectations, and next-phase routing.
 
-→ **See `./CHECKLIST.md`** for a condensed Phase 2 decision checklist (setup, deploy, SINK validation gates).
+→ **See Quick Checklist in `./INSTRUCTIONS.md`** for a condensed Phase 2 decision checklist (setup, deploy, SINK validation gates).
 ---
 
 **Version:** 1.0.0 (Lite)
