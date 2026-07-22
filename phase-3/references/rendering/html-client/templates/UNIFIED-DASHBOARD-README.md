@@ -9,9 +9,9 @@ A single, flexible HTML template that combines **KPI cards**, **charts**, and **
 
 ---
 
-## Why Unified?
+## Why Unified? Combining All Individual Templates
 
-Instead of choosing between 3 templates:
+Instead of choosing between 3 separate templates:
 
 ```
 ❌ KPI Dashboard (4 cards only)
@@ -19,14 +19,27 @@ Instead of choosing between 3 templates:
 ❌ Multi-Chart Dashboard (multiple charts only)
 ```
 
-**✅ Unified Dashboard provides ALL features in one file:**
+**✅ Unified Dashboard provides ALL features in one file with tabs:**
+
+### Feature Mapping from Individual Templates
+
+| Original Template | Now in Unified Tab | Features |
+|-------------------|-------------------|----------|
+| **KPI Dashboard** | 📊 **KPI Overview** | 4+ KPI cards, formatted numbers, auto-populated from metrics |
+| **Multi-Chart Dashboard** | 📈 **Analysis** | Line chart (trends), Bar chart (comparisons), Pie chart (distribution) |
+| **Table Dashboard** | 📋 **Data Explorer** | Sortable columns, full-text search, status badges, responsive |
+| *(New bonus feature)* | ⬇️ **Export** | CSV export, JSON export, PDF print |
+
+### Complete Tab Feature List
 
 | Tab | Purpose | Features |
 |-----|---------|----------|
-| **📊 KPI Overview** | Executive summary | 4 KPI cards with values |
-| **📈 Analysis** | Trend & analysis | Line chart, Bar chart, Pie chart |
-| **📋 Data Explorer** | Data exploration | Sortable table, Search, Filter |
-| **⬇️ Export** | Data download | CSV, JSON, PDF print |
+| **📊 KPI Overview** | Executive summary | 4+ KPI cards with auto-formatted numbers, hover effects, custom borders |
+| **📈 Analysis** | Trend & analysis | 3 charts (line/bar/pie), Chart.js, Treasure Data colors, responsive resize |
+| **📋 Data Explorer** | Data exploration | Sortable table (click headers), full-text search, status badges, CSV/JSON export |
+| **⬇️ Export** | Data download | Download as CSV, Download as JSON, Print to PDF |
+
+**All in ONE file. No more choosing. All features together.**
 
 ---
 

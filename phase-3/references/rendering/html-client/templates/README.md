@@ -17,11 +17,21 @@ Self-contained HTML files you can download and share. No backend required - all 
 **Best for:** All dashboard types in one flexible template  
 **Build time:** 15 minutes  
 **File size:** ~800KB (single file includes everything)  
-**Features:**
+
+### Combines All Individual Templates in One File:
+
+| Individual Template | Now in Unified | Features |
+|-------------------|---|---|
+| **KPI Dashboard** | 📊 Tab 1 | 4+ metric cards, formatted numbers |
+| **Multi-Chart Dashboard** | 📈 Tab 2 | Line/Bar/Pie charts, trends, analysis |
+| **Table Dashboard** | 📋 Tab 3 | Sortable table, search, status badges |
+| *(New)* | ⬇️ Tab 4 | CSV/JSON/PDF export |
+
+### All Features in One Template:
 - ✅ 4 tabs: KPI Overview, Analysis, Data Explorer, Export
-- ✅ KPI cards with formatted numbers
+- ✅ KPI cards with auto-formatted numbers
 - ✅ 3 chart types: Line (trends), Bar (comparisons), Pie (distribution)
-- ✅ Sortable/searchable data table
+- ✅ Sortable/searchable data table with status badges
 - ✅ CSV/JSON export and PDF print
 - ✅ Treasure Data 2026 branding (dark blue + purple theme)
 - ✅ Fully responsive (mobile/tablet/desktop)
