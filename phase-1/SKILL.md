@@ -6,7 +6,13 @@ description: |
 
 # Phase 1: Requirements & Data Discovery (Custom Dashboard Agent — Lite)
 
-> **GUARDRAILS: Read `../references/guardrails-lite.md` before doing anything else in this session.**
+> **Read in this order:**
+> 1. `../INSTRUCTIONS.md` (master rules, load_order: 0)
+> 2. `./INSTRUCTIONS.md` (Phase 1 rules, load_order: 1.1)
+> 3. `./CHECKLIST.md` (quick decision guide)
+> 4. `./SKILL.md` (this file — full details)
+> 5. `./references/phase-1-walkthrough.md` (step-by-step walkthrough)
+> 6. `../references/INSTRUCTIONS.md` (cross-phase guardrails)
 
 **Phase Goal:** Gather business requirements (Stage A), validate them against real data (Stage B), calculate the promotion score (0–6), decide Workflow vs Non-Workflow path, and get user approval — all in one session, with no Confluence and no git branching.
 **Deliverable:** A local `state.md` file at `./<project-slug>/state.md` containing the approved requirements, confirmed data findings, promotion score, and path decision.

@@ -5,7 +5,13 @@ description: INTERNAL — Phase 4 only. Optional: extract reusable skill (Track 
 
 # Phase 4: Automate & Deploy (Custom Dashboard Agent — Lite)
 
-> **GUARDRAILS: Read `../references/guardrails-lite.md` before doing anything else in this session.**
+> **Read in this order:**
+> 1. `../INSTRUCTIONS.md` (master rules, load_order: 0)
+> 2. `./INSTRUCTIONS.md` (Phase 4 rules, load_order: 1.4)
+> 3. `./CHECKLIST.md` (quick decision guide)
+> 4. `./SKILL.md` (this file — full details)
+> 5. `./references/phase-4-walkthrough.md` (step-by-step walkthrough)
+> 6. `../references/INSTRUCTIONS.md` (cross-phase guardrails)
 
 **Phase Goal:** Optionally turn the approved dashboard into a reusable asset — Track A extracts it as a parameterized skill, Track B deploys a companion Foundry agent for conversational analysis. Both are entirely optional; skip this phase to go straight to Phase 5 (Handoff) or close the engagement.
 
