@@ -140,7 +140,7 @@ Skill will:
 Skill components:
   • SKILL.md (instructions)
   • INSTRUCTIONS.md (rules)
-  • CHECKLIST.md (quick reference)
+  • Quick Checklist in INSTRUCTIONS.md (quick reference)
   • references/ (query templates, theme)
   • tests/ (end-to-end verification)
 
