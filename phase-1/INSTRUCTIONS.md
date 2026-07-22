@@ -116,6 +116,63 @@ SELECT DISTINCT country FROM sales_table LIMIT 10;
 
 ---
 
+### Rule P1-2b: Dashboard Design Specification (ENFORCEMENT)
+
+**⚠️ CRITICAL: Phase 1 Stage A must capture complete dashboard design before moving to Stage B.**
+
+During Step 1c (Dimensions, Filters, Layout), capture:
+
+1. **Tab Structure:**
+   - How many tabs? (single or multiple)
+   - What is each tab called?
+   - Which metrics go on each tab?
+
+2. **Global vs Tab Filters:**
+   - Which filters apply to ALL tabs? (date, region, etc.)
+   - Which filters apply to specific tabs only?
+
+3. **Visualization Type per Metric:**
+   - KPI card? Line chart? Bar chart? Pie chart? Table?
+   - What dimensions slice each metric?
+
+4. **Widget Details:**
+   - Widget name
+   - Chart type
+   - Metric and calculation (SUM/COUNT/AVG/etc)
+   - Dimensions (what to slice by)
+   - Filters applied
+   - Business definition
+
+5. **Interactivity:**
+   - Can users click to drill down?
+   - Can users export data?
+   - Which widgets update together?
+
+**See:** `./references/dashboard-design-questions.md` for question sets and examples
+
+**Capture in state.md:**
+```yaml
+### Dashboard Design Specification
+
+**Tabs:** [number and names]
+
+**Global Filters:**
+  - [filter 1]: [type]
+  - [filter 2]: [type]
+
+**Widgets:**
+  - [Tab Name] - [Widget Name]
+    Chart Type: [KPI/Line/Bar/Pie/Table/...]
+    Metric: [metric name]
+    Calculation: [formula]
+    Dimensions: [sliced by]
+    Definition: [business meaning]
+```
+
+**Why:** This prevents rework in Phase 3. Users approve the complete design in Phase 1, so Phase 3 is execution, not design iteration.
+
+---
+
 ### Rule P1-3: Join Key Validation (Phase 1→2 gate)
 
 If requirements include 2+ tables:
@@ -294,18 +351,33 @@ At end of Phase 1, create `state.md` with this structure:
 
 ### Dashboard Plan Summary (Displayed to User)
 
-**Metrics:**
-- [Metric 1]: [definition] — Sample value: [value]
-- [Metric 2]: [definition] — Sample value: [value]
-- [Metric 3]: [definition] — Sample value: [value]
+**Dashboard Filters (applied to all tabs):**
+- [Filter 1]: [dimension/field], type: [dropdown/date-picker/search]
+- [Filter 2]: [dimension/field], type: [dropdown/date-picker/search]
 
-**Dimensions:**
-- [Dimension 1]: [cardinality] values
-- [Dimension 2]: [cardinality] values
+**Tabs:**
+- Tab 1: [name] — Widgets: [count]
+- Tab 2: [name] — Widgets: [count]
 
-**Date Range:** [range]
-**Data Freshness:** [last updated]
-**Rendering:** HTML Client (standalone, portable)
+**Tab 1: [Tab Name]**
+
+| Widget | Type | Metric | Dimensions | Filters | Calculation |
+|--------|------|--------|-----------|---------|-------------|
+| [Widget 1 Name] | [Chart Type: KPI/Bar/Line/Table] | [Metric] | [Sliced by] | [Filter 1, Filter 2] | [Formula/Aggregation] |
+| [Widget 2 Name] | [Chart Type] | [Metric] | [Sliced by] | [Filters] | [Formula/Aggregation] |
+
+**Tab 2: [Tab Name]**
+
+| Widget | Type | Metric | Dimensions | Filters | Calculation |
+|--------|------|--------|-----------|---------|-------------|
+| [Widget Name] | [Chart Type] | [Metric] | [Sliced by] | [Filters] | [Formula/Aggregation] |
+
+**Data Source:**
+- Database: [database]
+- Tables: [table1, table2, ...]
+- Date Range: [range]
+- Data Freshness: [last updated]
+- Rendering: HTML Client (standalone, portable)
 
 ### Path Decision
 
@@ -385,27 +457,122 @@ Conflicts detected: <None | list conflicts>
 ```
 📊 Dashboard Plan — sales-performance
 
+=== DASHBOARD FILTERS (Global - applies to all tabs) ===
+
+Filters:
+  • Date Range: date-picker (Last 90 days default)
+  • Region: dropdown (North America, Europe, APAC, LATAM, EMEA, APJC)
+  • Order Status: multi-select (Completed, Pending, Cancelled, Returned)
+
+=== TABS ===
+
+Tab 1: "Revenue Overview" — 4 widgets
+Tab 2: "Orders & Customers" — 3 widgets
+Tab 3: "Trends" — 2 widgets
+
+=== TAB 1: REVENUE OVERVIEW ===
+
+Widget 1: Total Revenue (KPI)
+  • Chart Type: KPI card with trend
+  • Metric: Total Revenue
+  • Calculation: SUM(amount) WHERE status NOT IN ('cancelled', 'refunded')
+  • Sample Value: $4,859,839
+  • Filters Applied: Date Range, Region, Order Status
+  • Definition: Total revenue from all completed orders (excludes cancelled/refunded)
+
+Widget 2: Revenue by Region (Bar Chart)
+  • Chart Type: Horizontal Bar Chart
+  • Metric: Total Revenue
+  • Dimensions: Region (x-axis shows region, y-axis shows revenue)
+  • Calculation: SUM(amount) BY region WHERE status NOT IN ('cancelled', 'refunded')
+  • Sample Data: North America ($2.1M), Europe ($1.5M), APAC ($900K), ...
+  • Filters Applied: Date Range, Order Status (not Region — Region is displayed)
+  • Definition: Revenue breakdown by geographic region
+
+Widget 3: Revenue Trend (Line Chart)
+  • Chart Type: Line Chart
+  • Metric: Daily Revenue
+  • Dimensions: Date (x-axis), Revenue (y-axis)
+  • Calculation: SUM(amount) BY DATE(order_date) WHERE status NOT IN ('cancelled', 'refunded')
+  • Period: Last 90 days (daily data points)
+  • Filters Applied: Date Range, Region, Order Status
+  • Definition: Daily revenue trend over time to spot seasonal patterns
+
+Widget 4: Revenue by Order Status (Pie Chart)
+  • Chart Type: Pie Chart
+  • Metric: Revenue by Status
+  • Dimensions: Order Status (slices)
+  • Calculation: SUM(amount) BY status
+  • Sample Data: Completed (85%, $4.1M), Cancelled (3%, $150K), Returned (2%, $80K), Pending (10%, $530K)
+  • Filters Applied: Date Range, Region (not Status — Status is displayed)
+  • Definition: Revenue distribution across order statuses
+
+=== TAB 2: ORDERS & CUSTOMERS ===
+
+Widget 1: Order Count (KPI)
+  • Chart Type: KPI card
+  • Metric: Order Count
+  • Calculation: COUNT(*) FROM orders
+  • Sample Value: 2,156,492
+  • Filters Applied: Date Range, Region, Order Status
+  • Definition: Total number of orders
+
+Widget 2: Active Customers (KPI)
+  • Chart Type: KPI card
+  • Metric: Unique Customers
+  • Calculation: COUNT(DISTINCT customer_id) WHERE purchase_date >= DATE_SUB(NOW(), 90 DAY)
+  • Sample Value: 1,234,567
+  • Filters Applied: Date Range, Region
+  • Definition: Customers with at least 1 purchase in last 90 days
+
+Widget 3: Orders by Status (Table)
+  • Chart Type: Data Table
+  • Metrics: Count, Revenue, Avg Order Value
+  • Dimensions: Order Status (rows)
+  • Calculation: COUNT(*), SUM(amount), AVG(amount) BY status
+  • Sample Data:
+    | Status     | Count   | Revenue  | Avg Value |
+    | Completed  | 1.8M    | $4.1M    | $2,281    |
+    | Pending    | 215K    | $530K    | $2,465    |
+    | Cancelled  | 107K    | $150K    | $1,402    |
+    | Returned   | 34K     | $80K     | $2,353    |
+  • Filters Applied: Date Range, Region (not Status — Status is displayed)
+  • Definition: Detailed breakdown of orders by status with metrics
+
+=== TAB 3: TRENDS ===
+
+Widget 1: Orders per Day (Line Chart)
+  • Chart Type: Line Chart
+  • Metric: Daily Order Count
+  • Dimensions: Date (x-axis), Order Count (y-axis)
+  • Calculation: COUNT(*) BY DATE(order_date)
+  • Period: Last 90 days
+  • Filters Applied: Date Range, Region, Order Status
+  • Definition: Daily order volume trend
+
+Widget 2: Customer Acquisition (Cumulative Line)
+  • Chart Type: Cumulative Area Chart
+  • Metric: New Customers
+  • Dimensions: Date (x-axis), Cumulative Count (y-axis)
+  • Calculation: COUNT(DISTINCT customer_id) CUMULATIVE BY DATE(first_purchase_date)
+  • Period: Last 90 days
+  • Filters Applied: Date Range, Region
+  • Definition: Cumulative new customer count over time
+
+=== DATA SOURCE ===
+
 Source Database:   analytics_prod
 Tables:
   • orders (2.1M rows, updated 2h ago) — FACT
   • customers (156K rows, updated 1d ago) — DIMENSION
   • regions (6 rows, static) — DIMENSION
 
-Metrics confirmed:
-  • Total Revenue: SUM(amount) WHERE status NOT IN ('cancelled', 'refunded') = $4.8M
-  • Order Count: COUNT(*) = 2.1M
-  • Avg Order Value: AVG(amount) = $2,254
-
-Dimensions confirmed:
-  • Region: 6 values (North America, Europe, APAC, LATAM, EMEA, APJC)
-  • Order Status: 4 values (Completed, Pending, Cancelled, Returned)
-
-Date range:        Last 90 days
-Data freshness:    Updated 2 hours ago
+Promotion Score:   5/6
+Date Range:        Last 90 days
+Data Freshness:    Updated 2 hours ago
 Rendering:         HTML Client (standalone, portable)
-Promotion score:   5/6
 
-Conflicts detected: None
+Conflicts Detected: None
 ```
 
 **Then ask:**
