@@ -3,7 +3,6 @@
   "name": "Custom Dashboard Agent (Lite)",
   "version": "2.0.0",
   "author": "Treasure AI FDE Team",
-  "license": "MIT",
   "status": "production",
 
   "description": "Build or resume custom HTML dashboards from Treasure Data using a 5-phase self-serve pipeline. No Confluence, no git — everything local. Routes to Non-Workflow (Score 0-2) or Workflow (Score 4-6) based on requirements.",
@@ -236,13 +235,5 @@
     "documentation_link": "https://github.com/treasure-data/td-general-dashboarding-skill",
     "issues": "GitHub Issues",
     "contact": "Treasure AI FDE Team"
-  },
-
-  "sharing": {
-    "shareable": true,
-    "license_type": "MIT",
-    "can_modify": true,
-    "requires_attribution": true,
-    "attribution_format": "Generated with Treasure Work powered by Claude Code"
   }
 }
