@@ -14,7 +14,7 @@
 > ```
 > If "Read it now" → read `../../references/guardrails-lite.md` in full before any step.
 
-## Step 1v: Discover & Select Database
+## Step 2a: Discover & Select Database
 
 **What to do:**
 - Use `state.md` Session Setup block to narrow database search
@@ -22,7 +22,7 @@
 
 **Stage A context (preferred path):**
 1. Read the **Session Setup** block in `state.md` from Stage A
-   - If a database was named: confirm it exists, verify access → skip to Step 1w
+   - If a database was named: confirm it exists, verify access → skip to Step 2b
    - If a domain was mentioned ("sales data", "CDP data"): filter databases by name pattern
    - If no hint given: list all databases (fallback)
 
@@ -38,7 +38,7 @@
 
 ---
 
-## Step 1w: Discover & Confirm Tables (WITH EXTENDED DISCOVERY)
+## Step 2b: Discover & Confirm Tables (WITH EXTENDED DISCOVERY)
 
 **What to do:**
 - List tables containing Stage A metrics/dimensions
@@ -63,7 +63,7 @@
    - Ask: "Do you have a transactions or sales table?" (if revenue is needed and not found)
    - Ask: "What revenue columns are available? (unit price, total price, service revenue, gross profit?)"
    - Ask: "Are there any metrics from Stage A you're unsure if we have data for?"
-   - **Document any gaps** before proceeding to Step 1x
+   - **Document any gaps** before proceeding to Step 2c
 
 3. **Extended Search (if gaps found):**
    - Don't stop if the initial database lacks data
@@ -134,8 +134,8 @@ Recommendation:
    | Candidate column has a wide date range (months/years) AND differs from `time` column | ✅ Business event datetime found | Record column name + type; use for all date filters |
    | Candidate column matches `time` column within minutes on most rows | ⚠️ Likely insert time too | Flag — ask the user if a separate event datetime exists |
    | No candidate column found beyond `time` | ⚠️ Insert-time only | Table is time-ordered by ingestion, not by event; flag for the user |
-   | Table has no date-like columns at all (no `time`, no candidates) | 🔴 Snapshot / reference table | Classify as snapshot; omit all date filters for this table (see Step 1y-filter) |
-   | Table has no system-usable time column, but has a varchar date column (e.g. `join_date`, `signup_date`) | 🟡 Attribute with date field | Treat as **snapshot for filter scope** (date range filter silently ignored); varchar date available for **cohort analysis only** (see Step 1y-filter cohort note) |
+   | Table has no date-like columns at all (no `time`, no candidates) | 🔴 Snapshot / reference table | Classify as snapshot; omit all date filters for this table (see Step 2d-filter) |
+   | Table has no system-usable time column, but has a varchar date column (e.g. `join_date`, `signup_date`) | 🟡 Attribute with date field | Treat as **snapshot for filter scope** (date range filter silently ignored); varchar date available for **cohort analysis only** (see Step 2d-filter cohort note) |
 
    **Ask the user if the correct column is not obvious:**
 
@@ -201,11 +201,11 @@ Recommendation:
 
    Record: `<col_name> (bigint epoch — divide by 1000 for ms, or use as-is for s)` in the time column summary.
 
-   **Output of this sub-step** — added to the Step 1w table classification output:
+   **Output of this sub-step** — added to the Step 2b table classification output:
    - Time column summary table (one row per confirmed table)
    - For each behavior table: business event datetime column identified (or flagged as unknown/snapshot)
    - Epoch conversion note where applicable
-   - List of snapshot tables → fed directly into Step 1y-filter (these tables ignore date range filters)
+   - List of snapshot tables → fed directly into Step 2d-filter (these tables ignore date range filters)
 
 ---
 
@@ -219,7 +219,7 @@ Recommendation:
 
 ---
 
-## Step 1x: Discover Metrics & INFER Definitions (WITH RECOMMENDATIONS)
+## Step 2c: Discover Metrics & INFER Definitions (WITH RECOMMENDATIONS)
 
 **What to do:**
 - Run queries to INFER metric definitions from real data (not just validate)
@@ -328,11 +328,11 @@ If table has billions of rows or query timeout risk:
   - Definition inferred and confirmed with the user if uncertain
 - **Recommended metrics list** (user-approved additions)
 - **Recommended exclusions list** (use case-based)
-- **Benchmark Values** — populate `state.md` Session Setup `Benchmark Values` field NOW with the real sample values discovered here (e.g. `"Revenue: $4.3M/month, AOV: $658, Open Rate: 46%"`). Do NOT leave it as a placeholder — Step 1aa-4 will read this field when appending Stage B content.
+- **Benchmark Values** — populate `state.md` Session Setup `Benchmark Values` field NOW with the real sample values discovered here (e.g. `"Revenue: $4.3M/month, AOV: $658, Open Rate: 46%"`). Do NOT leave it as a placeholder — Step 2f-4 (see `stage-b-path-routing.md`) will read this field when appending Stage B content.
 
 ---
 
-## Step 1y: Discover Dimensions & INFER Definitions (WITH RECOMMENDATIONS)
+## Step 2d: Discover Dimensions & INFER Definitions (WITH RECOMMENDATIONS)
 
 **What to do:**
 - Run DISTINCT queries to find actual dimension values
@@ -452,9 +452,9 @@ WHERE region NOT IN ('North America', 'Europe', 'APAC');
 
 ---
 
-## Step 1y-filter: Classify Filter Scope
+## Step 2d-filter: Classify Filter Scope
 
-**When to run:** After Step 1y dimensions are confirmed, before Step 1y-ext tab grouping.
+**When to run:** After Step 2d dimensions are confirmed, before Step 2d-ext tab grouping.
 
 **What to do:** For every confirmed filter/dimension, determine whether it can be applied at dashboard level, tab level, or widget level — based on which tables/columns it can actually reach. This prevents silent pass-through bugs (Snapshot tables ignore date filters) and produces the correct filter hierarchy for the Phase 3 build.
 
@@ -472,7 +472,7 @@ WHERE region NOT IN ('North America', 'Europe', 'APAC');
 
 **Action — for each confirmed filter candidate:**
 
-1. List all tables used across all tabs (from Step 1y + Step 1y-ext layout)
+1. List all tables used across all tabs (from Step 2d + Step 2d-ext layout)
 2. For each filter: check which tables contain the filter column
 3. Classify:
 
@@ -502,7 +502,7 @@ Filter: Campaign
   → Add info block: "Campaign filter only changes this chart — other widgets on this tab are not affected"
 ```
 
-4. **Produce filter scope map** (input to Step 1y-ext and the Phase 3 build):
+4. **Produce filter scope map** (input to Step 2d-ext and the Phase 3 build):
 
 ```
 FILTER SCOPE MAP
@@ -556,15 +556,15 @@ Filter: Region (region column exists in ALL tables)
     • Apply globally across all tabs
 ```
 
-**Output:** Filter scope map — fed directly into Step 1y-ext tab layout and the Phase 3 HTML Client build.
+**Output:** Filter scope map — fed directly into Step 2d-ext tab layout and the Phase 3 HTML Client build.
 
 ---
 
-## Step 1y-ext: Propose Tab Grouping
+## Step 2d-ext: Propose Tab Grouping
 
-**When to run:** After Step 1y-filter filter scope map is complete.
+**When to run:** After Step 2d-filter filter scope map is complete.
 
-**What to do:** Group confirmed metrics and dimensions into proposed tabs. Use `proposed_tabs` from `state.md` if provided; otherwise infer from metric/dimension clusters. Apply the filter scope map from Step 1y-filter to each tab — tab-level and widget-level filters must already be assigned before this layout is presented.
+**What to do:** Group confirmed metrics and dimensions into proposed tabs. Use `proposed_tabs` from `state.md` if provided; otherwise infer from metric/dimension clusters. Apply the filter scope map from Step 2d-filter to each tab — tab-level and widget-level filters must already be assigned before this layout is presented.
 
 **Action:**
 
@@ -578,7 +578,7 @@ Filter: Region (region column exists in ALL tables)
 
 3. **Estimate widget count per tab** — count KPIs + charts + tables planned per tab. The HTML Client template inlines all data at build time, so very high total widget/row counts (100K+ rows) are a poor fit — flag and consider pre-aggregating harder in Phase 2 (Workflow) if this comes up.
 
-4. **Apply filter scope map to each tab** — for each tab, pull its applicable filters from the Step 1y-filter output:
+4. **Apply filter scope map to each tab** — for each tab, pull its applicable filters from the Step 2d-filter output:
    - Dashboard-level filters: list which ones apply on this tab
    - Tab-level filters (demoted from dashboard): list with reason for demotion
    - Widget-level filters: assign to specific widgets; mark those widgets for info block
@@ -636,7 +636,7 @@ AskUserQuestion:
 
 ---
 
-## Step 1z: Rendering (Fixed — HTML Client)
+## Step 2e: Rendering (Fixed — HTML Client)
 
 Rendering is always **HTML Client** — a single portable `dashboard.html` with data inlined at build time. No engine selection step runs here; this step is a no-op carried forward only for numbering continuity with the internal skill.
 
@@ -646,7 +646,7 @@ Rendering is always **HTML Client** — a single portable `dashboard.html` with 
 
 ---
 
-## Step 1aa: Validate Join Keys (If Joining Tables)
+## Step 2e-join: Validate Join Keys (If Joining Tables)
 
 **Purpose:** Confirm that any join keys used across tables are compatible — same data type, same format — to prevent silent join failures.
 
@@ -726,7 +726,7 @@ JOIN table_b b ON a.user_id = b.user_id
 
 ---
 
-## Step 1ab: Compliance & PII Handling (If Applicable)
+## Step 2e-pii: Compliance & PII Handling (If Applicable)
 
 **When to run:** If your dashboard will include personally identifiable information (PII) — emails, phone numbers, names, addresses, IP addresses, etc.
 

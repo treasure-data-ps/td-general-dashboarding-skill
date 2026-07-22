@@ -18,7 +18,7 @@
  * ☐ GROUP BY filter dimensions only (not raw cardinality)
  * ☐ SUBSTR for date truncation (month/week, not full ISO-8601)
  * ☐ Numeric coercion: 3.14159 vs "3.14159" (JSON output ~40% smaller with numbers)
- * ☐ Final dashboard.html < 300 KB (or 200 KB with gzip)
+ * ☐ Tiered budget: < 500 KB ideal (fast load, easiest to share); up to 2 MB acceptable; beyond 2 MB, switch to Pattern B
  *
  * Pattern A (< 2 MB): Inline data via <!-- DATA_PLACEHOLDER --> (default)
  * Pattern B (> 2 MB): Separate data.json + fetch at runtime (not used in lite)

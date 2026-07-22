@@ -100,6 +100,7 @@ AskUserQuestion:
 | 4a-iv | Document deployment & replication checklist | `references/track-a-automation.md` § Step 4a-iv |
 | 4a-v | Validate the extracted skill end-to-end | `references/track-a-automation.md` § Step 4a-v |
 | 4a-vi | Package & share the skill | `references/track-a-automation.md` § Step 4a-vi |
+| 4a-vii | Generate Installation Guide (`INSTALL.md`) | `references/track-a-automation.md` § Step 4a-vii |
 
 ## Track B: Quick Reference
 
@@ -136,7 +137,7 @@ AskUserQuestion:
 
 **Track B (if run) — Quick Self-Check:**
 - [ ] `agents/system_prompt.md` ≤ 9,000 characters (`wc -c`)
-- [ ] `agents/dashboard_tables.yml` uses `{name, td_query}` format, includes `confirmed_totals`
+- [ ] `agents/knowledge_bases/<table>.yml` (one per SINK table) uses `{name, td_query}` format, includes `confirmed_totals`
 - [ ] Compliance flags from `state.md` (if any) reflected in `system_prompt.md` CRITICAL RULES
 - [ ] `tdx agent test --run all` passing (or documented, understood exceptions)
 - [ ] Agent verified in the Foundry UI

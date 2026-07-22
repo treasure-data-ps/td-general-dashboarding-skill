@@ -4,6 +4,14 @@
 
 ---
 
+> **⚠️ Read this first: the DEFAULT and RECOMMENDED path needs none of this.**
+>
+> `dashboard.html` is a single, fully self-contained file (Chart.js and all data inlined) — the default delivery method is simply **emailing the file or sharing it via Confluence/Drive**, and the recipient double-clicks to open it in any browser. **No server, no hosting, and no internet connection are required** for that default path.
+>
+> Everything below this note (Ngrok, cloud platforms, internal/Nginx servers, Confluence server-hosting) is an **optional fallback** for edge cases only — e.g., a dataset that genuinely cannot stay under the payload budget and must switch to a server-hosted `data.json` pattern (Pattern B), or a team that specifically wants a persistent shared URL instead of a file attachment. Don't reach for these options by default; only use them if the single-file approach truly doesn't fit the situation.
+
+---
+
 ## Deployment Options Overview
 
 ```
@@ -179,7 +187,7 @@ Connections       ttl     opn     rt1     rt5     p50     p95
 <html>
 <head>
   <title>Sales Dashboard</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Chart.js is inlined directly (no CDN) so the file works fully offline — see templates/*.html for the actual inlined <script> block -->
   <style>/* CSS */</style>
 </head>
 <body>
@@ -626,7 +634,7 @@ Just testing locally?                  → Localhost
 
 Before deploying, verify:
 
-- [ ] Dashboard passes all 95 tests (see testing-checklist.md)
+- [ ] Dashboard passes all 95 tests (see ../../testing-troubleshooting.md)
 - [ ] All data is accurate (spot-checked 5+ metrics)
 - [ ] All filters work (alone, pairs, all together)
 - [ ] Performance acceptable (< 1s filter updates)

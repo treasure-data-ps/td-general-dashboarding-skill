@@ -32,6 +32,7 @@ Should list your databases. If it fails with 401/403/not found, see [`references
 | Setup-B | Business goal / dashboard purpose | ✅ Always | One sentence — what decision does this dashboard support? |
 | Setup-C | Target platform | ✅ Always | Treasure Work / Treasure AI Studio — gates sharing constraints (rendering is always HTML Client in lite) |
 | Setup-D | Data source type | ✅ Always | Raw/Transactional vs Pre-aggregated vs Snapshot — determines whether Phase 2 (Workflow) can be skipped |
+| Setup-E | Reference resources | ✅ Always | Existing dashboard/spec to replicate? If a `.dash`/Sisense/Treasure Insights export is provided, jump to the `.dash` Special Case in `steps-1pre.md` instead of Stage A |
 | **Stage A: Core Requirements (1a-1j, 1o — Always Ask)** | | | See [`steps-1a-1o.md`](references/steps-1a-1o.md) |
 | 1a | Purpose, Business Context & Success Criteria | ✅ | Dashboard purpose, prior art, success metric, audience + technical depth |
 | 1b | Metrics + Top Questions + Business Glossary | ✅ | 5-10 KPIs with formulas, top 3-5 analytical questions, glossary |
@@ -71,18 +72,18 @@ Phase 1 has two stages with continuous step numbering:
 | Stage | Steps | File |
 |---|---|---|
 | **Stage A** | 1a-1u | This guide |
-| **Stage B** | 1v-1ab | `references/stage-b-database-discovery.md` |
+| **Stage B** | 2a-2f (+ sub-steps) | `references/stage-b-database-discovery.md` |
 
-**Steps 1v-1ab breakdown:**
-- 1v: Discover & select database
-- 1w: Discover & confirm tables
-- 1x: Discover metrics & infer definitions
-- 1y: Discover dimensions & infer definitions
-- 1y-filter: Classify filter scope
-- 1y-ext: Propose tab grouping
-- 1z: Rendering (HTML Client)
-- 1aa: Validate join keys
-- 1ab: Compliance & PII handling
+**Stage B breakdown:**
+- 2a: Discover & select database
+- 2b: Discover & confirm tables
+- 2c: Discover metrics & infer definitions
+- 2d: Discover dimensions & infer definitions
+- 2d-filter: Classify filter scope
+- 2d-ext: Propose tab grouping
+- 2e: Rendering (HTML Client, no-op)
+- 2e-join: Validate join keys
+- 2e-pii: Compliance & PII handling
 
 ---
 
@@ -91,7 +92,9 @@ Phase 1 has two stages with continuous step numbering:
 
 ### Session Setup (ask before anything else)
 
-Batch project slug, business goal, platform, and data source type into a single `AskUserQuestion` call. These four answers gate everything downstream: data source type may skip Phase 2, platform affects sharing guidance.
+Batch project slug, business goal, platform, and data source type into a single `AskUserQuestion` call (Setup-A–D). These four answers gate everything downstream: data source type may skip Phase 2, platform affects sharing guidance.
+
+Then ask Setup-E (reference resources) as its own call. If the user provides a `.dash`/Sisense/Treasure Insights export, stop the normal flow and follow the `.dash` Special Case in `./references/steps-1pre.md` — it fast-tracks Stage A/B by deriving requirements and data discovery directly from the export.
 
 ### Stage A: Ask Business Requirements Questions Using AskUserQuestion
 

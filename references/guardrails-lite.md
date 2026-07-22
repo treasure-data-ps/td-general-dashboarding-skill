@@ -9,6 +9,8 @@ load_order: 0
 
 **Read this before doing anything else in a dashboarding session.**
 
+**⚠️ CRITICAL — RE-READ THIS AFTER CONTEXT COMPACTION:** If context gets compressed/summarized, or when moving between phases, **STOP and re-read this entire file** before proceeding. Guardrails must not be lost or forgotten due to context boundaries.
+
 These rules are derived from production incidents and real re-work on the full dashboarding-skills solution. Every rule has a reason. Violating any of them has caused rebuilds, wrong customer data, or lost trust in past engagements.
 
 ---
@@ -117,12 +119,175 @@ Re-run only the failing test with `tdx agent test --reeval --name <test_id>`. Do
 
 ---
 
+## 6. Critical Phase Checkpoints
+
+These rules prevent phase-specific failures. Violating any causes rework or data loss.
+
+### Time Column Validation (Phase 2 critical)
+**RULE:** Every metric table MUST have exactly ONE valid business-event or insert-time column.
+
+**Check before Phase 2:**
+- Run `tdx describe <db>.<table>` for each source table
+- Identify the time column: is it `created_at`, `event_time`, `timestamp`, or `updated_at`?
+- Is it nullable? If yes, you have a data quality issue — raise with user
+- **Do NOT proceed to Phase 2 without this confirmed**
+
+**Why:** Phase 2 workflow uses time column for daily scheduling and incremental loads. Wrong column → meaningless schedules, missed data, duplicate loads.
+
+### Join Key Validation (Phase 2 critical)
+**RULE:** For multi-table dashboards, join keys MUST be unique and consistent across tables.
+
+**Check before Phase 2:**
+- If dashboard joins 2+ tables, test the join: `SELECT COUNT(DISTINCT join_key) FROM table_a` vs `SELECT COUNT(DISTINCT join_key) FROM table_b`
+- Counts MUST be equal (or close within 5%)
+- Check column types: `tdx describe <db>.table_a` — join columns must be same type
+- **Do NOT proceed to Phase 2 without join validation queries**
+
+**Why:** Invalid joins cause silent data duplication, inflated metrics, wrong customer segments. Past incident: revenue inflated from $4.3M to $6.9M due to undetected fan-out join.
+
+### state.md Preservation (Phase continuity critical)
+**RULE:** NEVER overwrite, modify, or lose `state.md` between phases.
+
+**Check before each phase:**
+- The file `./<project-slug>/state.md` MUST exist and be readable
+- Each phase APPENDS a new section — never replaces old sections
+- The "Next action" pointer MUST be present so users can resume
+- **If state.md is missing or corrupted, STOP and ask user to recover it**
+
+**Why:** state.md is the single source of truth for phase continuity. Loss of state.md = complete project restart.
+
+### Phase Sequencing Enforcement (Routing critical)
+**RULE:** Follow promotion score routing strictly. Do NOT allow users to skip phases arbitrarily.
+
+**Check at end of Phase 1:**
+- Score 0-2 → Phase 1 → Phase 3 (skip Phase 2) ✓
+- Score 3 → Ask user: "Workflow or quick build?" ✓
+- Score 4-6 → Phase 1 → Phase 2 → Phase 3 ✓
+- **Do NOT allow Score 0-2 to enter Phase 2, or Score 4-6 to skip Phase 2 without explicit user override + documented reason**
+
+**Why:** Score routing is based on data complexity and refresh frequency. Skipping Phase 2 on a high-scoring project = performance problems downstream.
+
+### Special Case Path Enforcement (Flow critical)
+**RULE:** Once on `.dash` migration path OR Treasure Insights API path, do NOT mix with normal Phase 1 flow.
+
+**Check at setup (Setup-E):**
+- If user provides `.dash` file → Follow "`.dash` Special Case" path ONLY
+- If user provides datamodel name/OID → Follow "Treasure Insights API Special Case" path ONLY
+- If user provides both → Follow "Combined Resources Path" ONLY
+- **Do NOT ask normal Stage A questions (1a–1o) if on a special case path**
+
+**Why:** Special case paths have their own prefilling logic. Mixing paths causes duplicate requirements, conflicting decisions, wasted effort.
+
+### Treasure Data Account Access (Phase 2 critical)
+**RULE:** Before Phase 2 starts, verify `tdx auth show` works and user has database create permissions.
+
+**Check before Phase 2:**
+- Ask user: "Can you run `tdx auth show` and paste me the output?"
+- Verify: profile shows `endpoint`, `apikey`, `database` (default or chosen)
+- Verify: user has CREATE TABLE permission (ask them to run `tdx databases`)
+- **If auth fails or permissions missing, STOP and ask user to run `tdx auth setup`**
+
+**Why:** Phase 2 creates SINK tables in Treasure Data. Without valid auth, workflow deployment fails and blocks Phase 3.
+
+### SINK Table Naming Convention (Phase 2→3 critical)
+**RULE:** SINK table names MUST follow pattern: `<project_slug>_sink_<metric_group>` and match dashboard query expectations.
+
+**Check before Phase 3:**
+- Generate expected names based on project slug and metric groups (from Phase 1)
+- Example: project_slug = "sales-dashboard", metric_groups = ["revenue", "pipeline"]
+  - → SINK table names: `sales_dashboard_sink_revenue`, `sales_dashboard_sink_pipeline`
+- Verify Phase 3 dashboard queries reference these exact names
+- **If names don't match, Phase 3 queries will find no data**
+
+**Why:** Misnamed SINK tables → dashboard shows empty tables, requires Phase 2 rework.
+
+---
+
+## 7. Physical Object Creation — Approval Gates
+
+**RULE: BEFORE creating, modifying, or deleting any physical object in Treasure Data or external systems, you MUST get explicit user approval.**
+
+Physical objects that require approval:
+- ✅ SINK tables (Phase 2)
+- ✅ Workflows / scheduled jobs (Phase 2)
+- ✅ Segments or parent segments (Phase 2)
+- ✅ Foundry agents or skills (Phase 4)
+- ✅ External activations (any phase)
+
+**Approval workflow (NON-NEGOTIABLE):**
+
+1. **BEFORE Phase 2 deployment:**
+   ```
+   📋 Ready to create the following in Treasure Data:
+   
+   - Database: <db_name>
+   - SINK tables: <sink_table_1>, <sink_table_2>, ...
+   - Workflow: <workflow_name>
+   - Schedule: <daily/weekly/custom>
+   
+   ✓ This will cost approximately: $X per month
+   ✓ First run: <estimated time>
+   
+   Do you approve? (YES / NO / REVIEW DETAILS)
+   ```
+
+2. **BEFORE Phase 4 agent/skill creation:**
+   ```
+   📋 Ready to create the following in Foundry:
+   
+   - Foundry Agent/Skill name: <name>
+   - Knowledge Base tables: <table_1>, <table_2>, ...
+   - Visibility: <internal/shared/public>
+   
+   Do you approve? (YES / NO / MAKE CHANGES)
+   ```
+
+3. **BEFORE any external activation (journey, segment push, etc.):**
+   ```
+   📋 Ready to activate the following:
+   
+   - Destination: <Salesforce / Slack / Email / ...>
+   - Audience size: <N> records
+   - Action: <send email / update CRM / ...>
+   
+   Do you approve? (YES / NO / REVIEW)
+   ```
+
+**If user says NO or REVIEW:**
+- STOP immediately — do not proceed
+- Gather feedback on what to change
+- Return to planning phase, adjust, and re-present
+
+**Why:** Physical objects are real costs (compute, storage), real consequences (data modifications), and hard to undo. Approval gates prevent accidental deployments, runaway costs, and unintended side effects.
+
+---
+
 ## Quick Pre-Flight Checklist
 
 Before starting any dashboarding session, verify:
 
+**Data & Queries:**
 - [ ] I will ask for the DB name — never assume
 - [ ] I will run queries in parallel (`Promise.all`)
 - [ ] I will verify column names before writing inject scripts
 - [ ] I will spot-check 3+ KPIs against the database after rendering
+
+**Rendering:**
 - [ ] I will confirm the final `dashboard.html` opens standalone in a browser
+- [ ] I will never let AI read raw query results directly
+
+**Phase Checkpoints:**
+- [ ] I will validate time columns before Phase 2
+- [ ] I will validate join keys before Phase 2
+- [ ] I will preserve state.md between all phases
+- [ ] I will enforce promotion score routing strictly
+- [ ] I will NOT mix special case paths (.dash / API) with normal Phase 1 flow
+- [ ] I will verify TD account access before Phase 2
+- [ ] I will use correct SINK table naming convention
+
+**Approval Gates:**
+- [ ] I will get explicit user approval BEFORE creating any SINK tables (Phase 2)
+- [ ] I will get explicit user approval BEFORE creating any workflows (Phase 2)
+- [ ] I will get explicit user approval BEFORE creating any Foundry agents/skills (Phase 4)
+- [ ] I will get explicit user approval BEFORE any external activations
+- [ ] I will present clear cost/scope details in every approval request

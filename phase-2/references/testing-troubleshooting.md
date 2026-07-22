@@ -117,7 +117,7 @@ tdx query "SELECT MIN(FROM_UNIXTIME(time)) as earliest, MAX(FROM_UNIXTIME(time))
 > Row counts should be identical after run 1 and run 2. No truncate step needed.
 > Scheduled runs are safe — each run produces a clean, fresh set of SINK tables.
 
-**When duplicates CAN occur:** Only if you use `insert_into:` without a preceding DELETE/truncate. For incremental workflows where you want to append only new rows, use `insert_into:` with a time-filtered SQL window (see Step 3h in `workflow-deployment-validate.md`).
+**When duplicates CAN occur:** Only if you use `insert_into:` without a preceding DELETE/truncate. For incremental workflows where you want to append only new rows, use `insert_into:` with a time-filtered SQL window (see Step 2h in `workflow-deployment-validate.md`).
 
 ---
 

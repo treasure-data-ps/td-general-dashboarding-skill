@@ -10,11 +10,12 @@ This directory contains detailed, reusable patterns for Phase 3: Build + Validat
 
 | File | Purpose |
 |---|---|
-| **[steps.md](steps.md)** | **All steps 4b–4l in a single linear file** — queries, structure, data connection, generate-data.js (HTML Client), error handling, rendering, validation, filter testing, performance, feedback, documentation, mobile, load UX, approval |
-| **[query-patterns-for-dashboards.md](query-patterns-for-dashboards.md)** | SQL patterns for Phase 3 dashboard queries: schema exploration, KPI totals, dimension breakdowns, time series, top-N rankings, crosstab, filtering, joins, DISTINCT, ratios, NULL handling, data quality, join validation, and performance testing |
-| **[testing-troubleshooting.md](testing-troubleshooting.md)** | Comprehensive testing checklist, troubleshooting guide, common anti-patterns, quality gates, and manual validation checklist template |
-| **[filter-architecture.md](filter-architecture.md)** | Filter design patterns, data architecture decisions (row-level vs pre-aggregated), Golden Rules |
-| **[rendering/](rendering/SKILL.md)** | HTML Client rendering engine — templates, patterns, deployment, customization |
+| **[steps.md](steps.md)** | All steps 4b–4l: query scaffolding, structure, data connection, rendering, validation, filters, performance, approval. |
+| **[query-patterns-for-dashboards.md](query-patterns-for-dashboards.md)** | SQL patterns for dashboard queries: KPI totals, time series, top-N rankings, filtering, joins, performance. |
+| **[testing-troubleshooting.md](testing-troubleshooting.md)** | Testing checklist, troubleshooting guide, common anti-patterns, quality gates. |
+| **[filter-architecture.md](filter-architecture.md)** | Filter design patterns, row-level vs pre-aggregated architecture, Golden Rules. |
+| **[phase-3-data-patterns.md](phase-3-data-patterns.md)** | Non-Workflow vs Workflow path SQL patterns, build loop stages, data accuracy handling. |
+| **[rendering/](rendering/SKILL.md)** | HTML Client rendering engine: templates, patterns, deployment, customization. |
 
 ---
 

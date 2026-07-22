@@ -1,4 +1,4 @@
-# Phase 2: Steps 3a-3d (Copy, Configure, Build, Datamodel)
+# Phase 2: Steps 2a-2d (Copy, Configure, Build, Datamodel)
 
 > **⛔ GUARDRAILS CHECK — before doing anything else:**
 > Have you read `../../references/guardrails-lite.md` this session?
@@ -19,7 +19,7 @@
 
 ## ⚠ CRITICAL: Schema Inspection BEFORE Any SQL (5 min)
 
-**Do this first, before Steps 3a-3d:**
+**Do this first, before Steps 2a-2d:**
 
 Before writing ANY SQL queries, run `tdx describe` on EVERY source table to validate actual column names against Stage A/B assumptions. Real databases often have different naming:
 
@@ -183,6 +183,7 @@ source_db_commerce: commerce_db
    └── sql/
        ├── 01_data_prep.sql
        ├── 02_data_validation.sql
+       ├── 03_create_time_filter.sql  ← optional/reference-only, not wired into the default .dig files
        ├── 10_create_aggregates.sql
        ├── 11_create_path_stats.sql
        └── 12_create_unique_visitors.sql
@@ -259,7 +260,7 @@ Ask the user: "Can metrics change after being recorded?"
 
 ```bash
 # Test execution time
-tdx query -d sales_db < queries/kpi_daily_optimized.sql
+tdx query -d sales_db < sql/kpi_daily_optimized.sql
 
 # Should return results in < 5 seconds
 ```

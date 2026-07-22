@@ -115,8 +115,18 @@ AskUserQuestion:
       question: "Which metric groups should this dashboard include?"
       multiSelect: true
       options:
+        - label: "Sales"
+          description: "Revenue, deals, pipeline"
+        - label: "Customers"
+          description: "Acquisition, retention, churn, LTV"
+        - label: "Operations"
+          description: "Costs, efficiency, capacity"
+        - label: "Products"
+          description: "Usage, engagement, adoption"
+        - label: "Marketing"
+          description: "Campaigns, conversions, ROI"
         - label: "Custom groups"
-          description: "I'll type (e.g. Sales, Customers, Products, comma-separated)"
+          description: "I'll type custom metric groups"
         - label: "Generate from metrics"
           description: "Suggest groups based on our metrics discussion"
 
@@ -128,6 +138,8 @@ AskUserQuestion:
           description: "e.g., Revenue ≈ $5M/month, Churn < 3%"
         - label: "No benchmarks yet"
           description: "Skip now — Phase 4 will flag unexpected values"
+        - label: "Other context"
+          description: "I'll describe benchmarks differently"
 ```
 
 **Output:** List of 5-10 metrics + user's formula for each + metric groups + `benchmark_values` (top metric → expected range) + top 3-5 analytical questions + business glossary (domain terms, abbreviations, column value meanings)
@@ -158,11 +170,14 @@ AskUserQuestion:
 AskUserQuestion:
   header: "Dashboard theme"
   question: "Do you have brand colors or a logo for this dashboard?"
+  multiSelect: false
   options:
-    - label: "Yes — I'll provide brand colors / logo (Recommended)"
+    - label: "Yes — I'll provide brand colors/logo (Recommended)"
       description: "Share hex codes, brand guide link, or logo. I'll apply to header, charts, KPI cards."
     - label: "No — use Treasure Data theme"
       description: "Clean blue/grey palette. Professional and neutral."
+    - label: "Custom theme"
+      description: "I'll describe the theme style I want"
     - label: "Not sure — decide later"
       description: "Build with TD theme now. Rebrand before Phase 3 if needed."
 ```
@@ -173,7 +188,7 @@ AskUserQuestion:
 - `logo_url` — URL or file path to customer logo — displayed in dashboard header
 - `logo_background` — `transparent` or `white` — determines header background treatment
 
-**If no brand provided:** Set `dashboard_theme = "td-default"` — uses a clean Treasure Data blue/grey palette applied directly in the HTML Client template.
+**If no brand provided:** Set `dashboard_theme = "td-default"` — uses the clean Treasure Data blue/grey palette. See `../../references/treasure-data-theme.md` for the complete theme specification (CSS variables, chart colors, component styling).
 
 **AskUserQuestion — Metrics/Dimensions Confirmation (Step 1b-1c):**
 
@@ -188,16 +203,20 @@ From your data, I found these metrics and dimensions:
 
 ```
 AskUserQuestion:
-  question: "Should we track these metrics and dimensions?"
-  header: "Metrics confirmation"
-  multiSelect: false
+  question: "Which of these would you like to do?"
+  header: "Metrics & dimensions adjustment"
+  multiSelect: true
   options:
-    - label: "Confirm all (Recommended)"
+    - label: "Confirm all as listed (Recommended)"
       description: "Track all metrics across all dimensions"
     - label: "Remove some"
-      description: "Skip specific metrics like Category or Segment"
-    - label: "Add metrics"
-      description: "Include additional metrics"
+      description: "Skip specific metrics or dimensions"
+    - label: "Add custom metrics"
+      description: "Include additional metrics not yet discovered"
+    - label: "Add custom dimensions"
+      description: "Include additional dimensions or groupings"
+    - label: "Other adjustments"
+      description: "Something different — I'll describe what's needed"
 ```
 
 **Output:**
@@ -242,14 +261,18 @@ AskUserQuestion:
       question: "What should the default date range be when the dashboard first loads?"
       multiSelect: false
       options:
+        - label: "Last 7 days"
+          description: "Rolling 7-day window — good for weekly views"
         - label: "Last 30 days (Recommended)"
           description: "Rolling 30-day window — most common for operational dashboards"
         - label: "Last 90 days"
           description: "Rolling 90-day window — good for trend analysis"
-        - label: "Last 7 days"
-          description: "Rolling 7-day window — good for weekly views"
-        - label: "QTD / YTD / custom"
-          description: "Quarter/year-to-date or fixed period"
+        - label: "QTD (Quarter-to-date)"
+          description: "From start of quarter to today"
+        - label: "YTD (Year-to-date)"
+          description: "From start of year to today"
+        - label: "Custom period"
+          description: "Fixed or custom date range"
         - label: "Not sure"
           description: "I'll recommend based on Stage B data freshness"
 
@@ -261,19 +284,25 @@ AskUserQuestion:
           description: "Users can select any date range"
         - label: "No — fixed range only"
           description: "Dashboard always shows same window"
-        - label: "Not sure"
-          description: "I'll decide based on audience"
+        - label: "Partially — preset ranges only"
+          description: "Users pick from predefined ranges (e.g., last 7/30/90 days)"
+        - label: "Other configuration"
+          description: "Something different — I'll describe it"
 
     - header: "Core lookback window"
       question: "What lookback window should core metrics use? (separate from date slider)"
-      multiSelect: false
+      multiSelect: true
       options:
+        - label: "Last 7 days"
+          description: "Rolling 7-day window — fast-moving metrics"
+        - label: "Last 30 days"
+          description: "Rolling 30-day window — monthly view"
         - label: "Last 90 days (Recommended)"
           description: "Rolling 90-day window — RFM, engagement, churn"
-        - label: "Last 30 days"
-          description: "Rolling 30-day window — fast-moving metrics"
         - label: "Current quarter (QTD)"
           description: "Quarter-to-date — sales pipeline, quota"
+        - label: "Current year (YTD)"
+          description: "Year-to-date metrics"
         - label: "Custom per metric"
           description: "Different metrics use different windows"
         - label: "Not sure"
@@ -292,10 +321,14 @@ AskUserQuestion:
           description: "Coordinated Universal Time"
         - label: "JST (Tokyo)"
           description: "Japan Standard Time, UTC+9"
-        - label: "PST/PDT (US West)"
-          description: "Pacific Time"
-        - label: "Other"
-          description: "Provide IANA name (e.g., America/New_York)"
+        - label: "PST/PDT (US Pacific)"
+          description: "Pacific Standard/Daylight Time"
+        - label: "EST/EDT (US Eastern)"
+          description: "Eastern Standard/Daylight Time"
+        - label: "GMT/BST (London)"
+          description: "Greenwich Mean Time"
+        - label: "Other timezone"
+          description: "Provide IANA name (e.g., America/New_York, Europe/Berlin)"
 
     - header: "Data freshness"
       question: "How fresh does the data need to be?"
@@ -303,10 +336,12 @@ AskUserQuestion:
       options:
         - label: "Daily (Recommended)"
           description: "Updated nightly — suitable for most dashboards"
-        - label: "Near real-time (hourly)"
+        - label: "Near real-time (hourly or sub-hourly)"
           description: "Frequent updates — workflow or live query"
         - label: "Weekly or less"
           description: "Batch reporting — executive summaries"
+        - label: "Custom schedule"
+          description: "I'll describe the exact refresh cadence needed"
         - label: "Not sure"
           description: "I'll determine based on data source in Stage B"
 ```
@@ -394,12 +429,22 @@ AskUserQuestion:
 
 ```
 AskUserQuestion:
-  header: "Exclusion rules"
-  question: "Should we exclude any data types? (e.g., cancelled orders, test users, internal emails)"
-  multiSelect: false
+  header: "Data exclusions & quality"
+  question: "Should we exclude or filter any data? (Select all that apply)"
+  multiSelect: true
   options:
-    - label: "Yes — I'll describe"
-      description: "SQL WHERE format (e.g., status NOT IN ('cancelled'), email NOT LIKE 'test%')"
+    - label: "Exclude cancelled/failed transactions"
+      description: "Skip cancelled orders, failed events, or similar"
+    - label: "Exclude test or internal data"
+      description: "Skip test accounts, internal team activity, QA data"
+    - label: "Exclude refunds or returns"
+      description: "Exclude refunds, returns, or chargeback data"
+    - label: "Normalize/standardize values"
+      description: "Clean up data (e.g., uppercase, remove whitespace)"
+    - label: "Handle nulls or missing data"
+      description: "Replace nulls with defaults, exclude nulls, or flag them"
+    - label: "Other exclusions"
+      description: "I'll describe custom filtering rules"
     - label: "No exclusions"
       description: "Include all data as-is"
     - label: "Not sure — check Stage B"

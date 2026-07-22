@@ -1,9 +1,7 @@
 ---
 name: td-general-dashboarding-skill-phase-1
 description: |
-  INTERNAL — invoked by td-general-dashboarding-skill root skill only. Do not trigger directly.
-  Phase 1: Requirements & Data Discovery (merged). Run session-setup questions, gather business requirements, validate against real data, score promotion (0-6), and produce a local state.md + approved dashboard plan.
-  Use when: Routed here by root td-general-dashboarding-skill SKILL.md after Step 0 (new engagement path).
+  INTERNAL — Phase 1 only. Gather business requirements, validate against real data, score promotion (0-6), and route to Phase 2/3. Produces local state.md with requirements, data findings, and path decision.
 ---
 
 # Phase 1: Requirements & Data Discovery (Custom Dashboard Agent — Lite)
@@ -17,17 +15,7 @@ description: |
 
 ## 🔑 Append-Only Pattern (Critical for All Phases)
 
-`state.md` follows **append-only** — never rewrite or overwrite existing sections:
-
-| Phase | Appends |
-|---|---|
-| Phase 1 (this phase) | Session Setup + Requirements block + Data Discovery block + Promotion Score + Path Decision |
-| Phase 2 (Workflow, if run) | Workflow deployment details (SINK tables, schedule) |
-| Phase 3 (Dashboard Build) | Rendering details, confirmed metrics/dimensions used |
-| Phase 4 (Automate & Deploy, if run) | Skill/agent artifact locations |
-| Phase 5 (Handoff, if run) | Doc file locations |
-
-**The Rule:** Never edit prior sections. Each phase appends a new dated section at the bottom. This lets any future session read `state.md` top to bottom and understand what was decided and why.
+→ **state.md is append-only:** Each phase appends a new dated section at the bottom. See `./references/append-only-pattern.md` for details.
 
 ---
 
@@ -35,10 +23,9 @@ description: |
 
 Before starting, confirm:
 
-- ✅ Engagement type confirmed (new project or resuming an existing `./<project-slug>/`)
-- ✅ TD account is accessible (for data discovery via `tdx`)
-
-**If resuming (not starting fresh):** Ask for the project slug, read `./<project-slug>/state.md`, and resume at the step listed under "Next action" at the bottom of the file — don't re-ask answered questions.
+- ✅ Engagement type: new project or resuming existing `./<project-slug>/`
+- ✅ TD account accessible for data discovery
+- ✅ If resuming: read `./<project-slug>/state.md` and resume at "Next action" — don't re-ask answered questions
 
 ---
 
@@ -46,9 +33,16 @@ Before starting, confirm:
 
 ### Stage A: Requirements Gathering
 
-→ **See `./requirements-gathering-guide.md`** for the full step reference table and batching plan.
+→ **See `./references/phase-1-walkthrough.md`** for the full step reference table and batching plan.
 
-Run the session-setup questions (project slug, business goal, platform, data source type) in one batch, then gather core requirements (purpose, metrics, dimensions, filters, date range, sharing) in a small number of batched `AskUserQuestion` calls.
+Run the session-setup questions (project slug, business goal, platform, data source type) in one batch, then ask Setup-E (reference resources) as a separate call before gathering core requirements. **Setup-E is now MULTI-SELECT** — users may have multiple resources available (`.dash` file, datamodel, existing workflow).
+
+**Special cases — Sisense/Treasure Insights exports, datamodels, and workflows:** If Setup-E turns up any of these, do not run the normal Stage A/B flow. Instead follow the appropriate path in `./references/steps-1pre.md`:
+- **`.dash` export alone** → "`.dash` / Sisense Special Case" — converts the file with `../references/dash_to_html.py`, prefills requirements and discovery
+- **Treasure Insights datamodel alone** → "Treasure Insights API Special Case" — fetches schema via Reporting API with `../references/insights-api-helper.py`, prefills requirements and discovery
+- **Multiple resources (`.dash` + datamodel ± workflow)** → "Combined Resources Path" — fetches datamodel, converts `.dash` file, cross-validates both, incorporates workflow metadata if present, then prefills Stage A/B with unified context
+
+All paths fast-track routing to Phase 2/3 based on the user's migration goal (Replicate / Replicate+improve / Modernize) and workflow selection.
 
 → **See `./references/steps-1a-1o.md`** for detailed guidance on core requirement steps
 → **See `./references/steps-1k-1n-optional.md`** for optional step details (only ask if relevant)

@@ -1,4 +1,4 @@
-# Phase 4: Track A — Extract Reusable Skill (4a-0 to 4a-vi)
+# Phase 4: Track A — Extract Reusable Skill (4a-0 to 4a-vii)
 
 **Goal:** Extract the approved dashboard as a reusable, parameterized skill so future builds against a different database take ~10-30 minutes instead of 2-3 hours.
 
@@ -71,16 +71,16 @@ Do this for every SQL task in the workflow, so no one needs to open the workflow
 ```bash
 mkdir -p ./<project-slug>/skills/knowledge
 
-cp phase-4/references/templates/knowledge-base-business-context-template.md \
+cp references/templates/knowledge-base-business-context-template.md \
    ./<project-slug>/skills/knowledge/business_context.md
 
-cp phase-4/references/templates/knowledge-base-data-dictionary-template.md \
+cp references/templates/knowledge-base-data-dictionary-template.md \
    ./<project-slug>/skills/knowledge/data_dictionary.md
 
-cp phase-4/references/templates/knowledge-base-sql-templates-template.md \
+cp references/templates/knowledge-base-sql-templates-template.md \
    ./<project-slug>/skills/knowledge/sql_templates.md
 
-cp phase-4/references/templates/knowledge-base-metrics-dictionary-template.md \
+cp references/templates/knowledge-base-metrics-dictionary-template.md \
    ./<project-slug>/skills/knowledge/metrics_catalog.md
 ```
 
@@ -622,7 +622,6 @@ Branch to the appropriate section below based on the user's choice.
 ├── dashboard.html
 ├── dashboard.template.html        ← includes Chart.js inline (self-contained)
 ├── generate-data.js               ← do NOT include data.json — regenerated at runtime
-├── render.js
 ├── config-templates.yaml
 ├── deployment-checklist.md
 └── knowledge/
@@ -695,6 +694,7 @@ ls -lh ./<project-slug>/<skill-name>.zip
 <skill-name>/
 <skill-name>/SKILL.md
 <skill-name>/dashboard.html
+<skill-name>/dashboard.template.html
 <skill-name>/generate-data.js
 <skill-name>/config-templates.yaml
 <skill-name>/deployment-checklist.md

@@ -12,7 +12,7 @@ Reference files for Phase 4: Automate & Deploy
 
 ## Phase 4 Quick Start
 
-### Track A: Dashboard Automation (4a-0 through 4a-vi)
+### Track A: Dashboard Automation (4a-0 through 4a-vii)
 
 **Goal:** Extract the Phase 3 dashboard as a reusable skill for faster future builds
 
@@ -26,8 +26,9 @@ Reference files for Phase 4: Automate & Deploy
 5. **Step 4a-iv:** Document deployment checklist (10 min) → See `track-a-automation.md` § "Step 4a-iv"
 6. **Step 4a-v:** Validate extracted skill end-to-end (10 min) → Run `generate-data.js` against the target database, spot-check `data.json`, reproduce the dashboard
 7. **Step 4a-vi:** Package & share skill → Zip the `skills/` folder (excluding `data.json`, `.DS_Store`, `__MACOSX`)
+8. **Step 4a-vii:** Generate Installation Guide (`INSTALL.md`) (5 min) → See `track-a-automation.md` § "Step 4a-vii"; include it in the packaged zip
 
-**Output:** Dashboard skill + query script + templates + checklist (ready for the next build)
+**Output:** Dashboard skill + query script + templates + checklist + `INSTALL.md` (ready for the next build)
 
 ---
 
@@ -93,7 +94,7 @@ Reference files for Phase 4: Automate & Deploy
 **Q: What if agent tests fail?**
 
 **A:** See `track-b-ai-agent.md` § "Failure-to-Fix Quick Reference". Common fixes:
-- Update `dashboard_tables.yml` with correct table names
+- Update the per-table `.yml` file(s) in `knowledge_bases/` with correct table names
 - Expand `business_context.md` with more examples
 - Verify queries in knowledge bases match Phase 3 queries
 

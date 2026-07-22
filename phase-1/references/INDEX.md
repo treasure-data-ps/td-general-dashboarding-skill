@@ -12,29 +12,30 @@ This directory contains detailed, reusable patterns for Phase 1: Requirements Ga
 
 | File | Purpose |
 |---|---|
-| **[steps-1pre.md](steps-1pre.md)** | The 4 mandatory session-setup questions (Setup-A through Setup-D): project slug, business goal, target platform, data source type. Includes full AskUserQuestion templates, batch summary table, and Session Setup quality checklist. Ask ALL before any business requirements. |
-| **[steps-1a-1o.md](steps-1a-1o.md)** | Detailed WHAT + AskUserQuestion templates for core requirements steps: database selection, table confirmation, metrics/dimensions confirmation, plus steps 1a–1o. Includes iterative/rollback patterns and Stage A→B continuity examples. |
-| **[steps-1k-1n-optional.md](steps-1k-1n-optional.md)** | Optional steps: 1k (mobile), 1l (compliance + data sensitivity), 1m (data complexity + canonical ID + ID Unification status), 1n (drill-down depth), 1o-ext (CDP activation intent — pre-aggregated sources only) |
-| **[steps-1p-1t.md](steps-1p-1t.md)** | Promotion scoring (0-6), workflow config (gated by `skip_workflow` flag), agent config, Stage A→B bridging, solution-specific requirements. Includes field capture tables for Steps 1q-1s and Stage A Quality Checklist. Rendering is recorded automatically as HTML Client — no question asked. |
-| **[step-1u-finalization.md](step-1u-finalization.md)** | User approval on Stage A requirements, quality gates, `state.md` creation (inline template, no external repo dependency), and comprehensive end-of-Stage-A checklist. **Note:** `state.md` is created here (Step 1u), then appended by Stage B and all subsequent phases. |
+| **[steps-1pre.md](steps-1pre.md)** | Session-setup questions (Setup-A through Setup-E). Includes two Special Cases: (1) `.dash`/Sisense export fast-track (converts file, prefills Stage A/B), (2) Treasure Insights datamodel API fast-track (fetches schema via API, prefills Stage A/B). Also includes AskUserQuestion templates and batch summary tables. |
+| **[treasure-insights-api-integration.md](treasure-insights-api-integration.md)** | Treasure Insights Reporting API reference and extraction logic. Documents regional endpoints, authentication, datamodel endpoints, and how to extract metrics/dimensions/joins from API responses. Used by the Treasure Insights API Special Case. |
+| **[steps-1a-1o.md](steps-1a-1o.md)** | Core requirements steps (1a–1o): metrics, dimensions, filters, date range, sharing, exclusions. Includes AskUserQuestion templates and iterative patterns. |
+| **[steps-1k-1n-optional.md](steps-1k-1n-optional.md)** | Optional steps: mobile, compliance, data complexity, drill-down, CDP activation. |
+| **[steps-1p-1t.md](steps-1p-1t.md)** | Promotion scoring (0-6), workflow config, agent config, Stage A→B bridging. Includes field capture tables and Stage A Quality Checklist. |
+| **[step-1u-finalization.md](step-1u-finalization.md)** | User approval, quality gates, `state.md` creation (Step 1u — then appended by Stage B and subsequent phases). Includes end-of-Stage-A checklist. |
 
 ### Stage B: Data Discovery & Validation
 
 | File | Purpose |
 |---|---|
-| **[stage-b-database-discovery.md](stage-b-database-discovery.md)** | Core discovery steps: database selection (2a), table discovery + extended search + time column discovery (2b), metric discovery/inference (2c), dimension discovery/inference (2d), filter scope classification (2d-filter), tab grouping proposal (2d-ext), and rendering confirmation (2e — fixed HTML Client, no-op). |
-| **[validation-queries.md](validation-queries.md)** | Reusable SQL patterns: metric/dimension validation, exclusion rule checks, join path validation, freshness checks, large table optimization, and the 12-point Data Quality Gate (Go/No-Go template) run before routing to Phase 2 or Phase 3. |
-| **[confirmed-values-checkpoint.md](confirmed-values-checkpoint.md)** | Pattern for writing confirmed metric/dimension values to `state.md` once at the end of Stage B, then referencing them in Phases 2/3/4 instead of re-running identical queries. |
-| **[workflow-notes.md](workflow-notes.md)** | Stage B edge cases: resume checklist, large table performance handling, conflict resolution (Stage A vs Stage B findings), stale data detection, exclusion rule handling, join validation, and the Stage B deliverables checklist. |
-| **[stage-b-path-routing.md](stage-b-path-routing.md)** | Stage B path confirmation: updates `state.md`, applies the `skip_workflow` routing logic, and confirms with the user whether to proceed to Phase 2 (Workflow) or Phase 3 (Build) directly. |
-| **[exit-checklist.md](exit-checklist.md)** | Final Stage B exit checklist — gates that must close before routing to Phase 2 or Phase 3. |
+| **[stage-b-database-discovery.md](stage-b-database-discovery.md)** | Core discovery steps: database/table selection (2a-2b), time column discovery, metric/dimension discovery, filter scope classification, join key + compliance validation (2c-2e). |
+| **[validation-queries.md](validation-queries.md)** | SQL patterns + 12-point Data Quality Gate (Go/No-Go template) run before routing to Phase 2 or Phase 3. |
+| **[confirmed-values-checkpoint.md](confirmed-values-checkpoint.md)** | Write confirmed metric/dimension values to `state.md` once (Stage B), then reference in later phases — avoid re-querying. |
+| **[workflow-notes.md](workflow-notes.md)** | Stage B edge cases: resume, large tables, conflict resolution, stale data, exclusion rules, joins, deliverables. |
+| **[stage-b-path-routing.md](stage-b-path-routing.md)** | Path confirmation (Step 2f): update `state.md`, apply routing logic, route to Phase 2 or Phase 3. |
+| **[exit-checklist.md](exit-checklist.md)** | Final gates before routing to Phase 2 or Phase 3. |
 
 ---
 
 ## How to Use These Files
 
 ### I'm starting a new Phase 1 — where do I start?
-→ Open `steps-1pre.md` first — run the 4 session-setup questions (Setup-A through Setup-D) before anything else
+→ Open `steps-1pre.md` first — run the session-setup questions (Setup-A through Setup-E) before anything else. If Setup-E turns up a `.dash`/Sisense export, jump to the `.dash` Special Case in that same file instead of Stage A.
 
 ### I'm implementing Stage A requirements — where do I go after setup?
 → Open `../requirements-gathering-guide.md` (the main file with quick reference)
@@ -49,7 +50,10 @@ This directory contains detailed, reusable patterns for Phase 1: Requirements Ga
 
 ### I need detailed guidance for a specific step
 → Use the navigation below:
-- **Setup-A to Setup-D (session setup):** See `steps-1pre.md`
+- **Setup-A to Setup-E (session setup + reference resources — multi-select):** See `steps-1pre.md`
+- **`.dash`/Sisense Special Case (fast-track migration):** See `steps-1pre.md`
+- **Treasure Insights API Special Case (datamodel schema fetch):** See `steps-1pre.md`
+- **Combined Resources Path (`.dash` + datamodel ± workflow):** See `steps-1pre.md`
 - **Steps 1a-1o (core requirements):** See `steps-1a-1o.md`
 - **Steps 1k-1n (optional requirements):** See `steps-1k-1n-optional.md`
 - **Steps 1p-1t (scoring & config):** See `steps-1p-1t.md`
@@ -71,6 +75,7 @@ This directory contains detailed, reusable patterns for Phase 1: Requirements Ga
 | **Setup-B. Business goal** | `steps-1pre.md` |
 | **Setup-C. Target platform** | `steps-1pre.md` |
 | **Setup-D. Data source type** | `steps-1pre.md` |
+| **Setup-E. Reference resources / `.dash` detection** | `steps-1pre.md` |
 | 1a. Purpose + Business Model + Prior Art + Success Metric | `steps-1a-1o.md` |
 | 1b. Metrics + Top Questions + Glossary | `steps-1a-1o.md` |
 | 1c. Dimensions + Output Preferences | `steps-1a-1o.md` |

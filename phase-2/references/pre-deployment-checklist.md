@@ -53,7 +53,7 @@ tdx describe -d <source_db> service_history
     database: ${database}      # ✅ Separate line
     create_table: table_name   # ✅ Not: ${database}.table_name
   ```
-- [ ] All aggregation tasks use `create_table:` (full-refresh), unless intentionally switched to `insert_into:` for incremental (Step 3h)
+- [ ] All aggregation tasks use `create_table:` (full-refresh), unless intentionally switched to `insert_into:` for incremental (Step 2h)
 - [ ] No truncate step needed alongside `create_table:` (replaces on every run)
 - [ ] Schedule confirmed with the user (daily 2 AM typical)
 - [ ] `td_time_range` parameters match schedule frequency (if daily schedule, use 1-day window)

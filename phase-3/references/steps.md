@@ -333,7 +333,7 @@ document.getElementById('loyalty-filter').addEventListener('change', (e) => {
 
 ### Payload size budget (Pattern A)
 
-`generate-data.js` injects the full RAW payload inline into `dashboard.html` — this is what keeps the file a single portable artifact (double-click to open, email as an attachment, no server required). Target staying under 2MB:
+`generate-data.js` injects the full RAW payload inline into `dashboard.html` — this is what keeps the file a single portable artifact (double-click to open, email as an attachment, no server required). Use the tiered budget (see `html-dashboard-patterns.md` → "Data Size Budget & Optimization"): under 500KB is ideal, up to 2MB is acceptable, beyond 2MB requires action:
 
 1. Pre-aggregate more in SQL (`GROUP BY` instead of row-level) to reduce row count.
 2. Drop unused columns from the RAW payload.
@@ -877,6 +877,19 @@ If fixes needed:
 **When to run:**
 - Requirements specified: "Mobile responsive design needed" or "Accessed on mobile devices"
 
+**If mobile support NOT required:**
+- Skip this step
+- Document in deployment-checklist.md: "Desktop-only dashboard; not tested on mobile"
+
+**Test Matrix (Viewport Sizes):**
+
+| Device | Viewport | Browser |
+|---|---|---|
+| **Desktop** | 1920×1080 | Chrome, Firefox, Safari |
+| **Tablet** | 768×1024 (iPad portrait) | Chrome, Safari |
+| **Mobile** | 375×667 (iPhone SE) | Chrome, Safari |
+| **Mobile** | 412×915 (Android) | Chrome, Firefox |
+
 **Test on Desktop (1920x1080):**
 ```
 ✓ Fully visible without horizontal scrolling
@@ -892,7 +905,7 @@ If fixes needed:
 ✓ No horizontal scrolling
 ```
 
-**Test on Mobile (375x667):**
+**Test on Mobile (375x667 and 412x915):**
 ```
 ✓ Dashboard usable on small screen
 ✓ All elements touch-friendly (44px+ tap target)
@@ -900,13 +913,52 @@ If fixes needed:
 ✓ Text readable (not too small <14px)
 ```
 
+**Testing Procedure:**
+
+1. **Open DevTools → Device Toolbar (F12 → toggle device toolbar)**
+2. **Test each breakpoint:** Select device from dropdown → Dashboard auto-resizes. Verify: charts are readable, no horizontal overflow, filters are accessible.
+3. **Test interactions (per breakpoint):**
+   - [ ] Can you click a filter dropdown without scroll?
+   - [ ] Do charts render without overlap?
+   - [ ] Is text readable (minimum 14px)?
+   - [ ] Are buttons/inputs large enough to tap (44×44px)?
+
 **Common Mobile Issues:**
 - ❌ Horizontal scrolling at any screen size
 - ❌ Text too small (<14px on mobile)
 - ❌ Buttons too small (<44px touch target)
 - ❌ Charts cramped or unreadable
+- ❌ Chart legend covering data
 
-Testing approach: Chrome/Firefox F12 → device toolbar. Test breakpoints: 1920px, 1366px, 768px, 375px.
+**Fixing Issues:**
+
+**Issue: Content too wide (horizontal scroll)**
+```css
+/* In dashboard.html <style> section */
+body { max-width: 100vw; overflow-x: hidden; }
+.container { width: 100%; }
+```
+
+**Issue: Buttons too small**
+```css
+button { min-width: 44px; min-height: 44px; padding: 10px 16px; }
+```
+
+**Issue: Chart overlap on mobile**
+```javascript
+// In generate-data.js, reduce chart data on mobile
+var chartRows = window.innerWidth < 768 ? 5 : 20;  // Fewer lines on mobile
+```
+
+Testing approach: Chrome/Firefox F12 → device toolbar. Test breakpoints: 1920px, 1366px, 768px, 375px, 412px.
+
+**Acceptance Criteria:**
+
+- [ ] All test matrix breakpoints tested (4 device types)
+- [ ] No horizontal scrolling needed
+- [ ] All text readable at minimum 14px
+- [ ] All touch targets ≥ 44×44px
+- [ ] Charts render without overlap
 
 **Output:** Mobile responsiveness validated
 
@@ -999,75 +1051,6 @@ Save `state.md` locally before routing to the next phase.
 **Version:** 1.0.0 (Lite)
 **Last Updated:** 15 July 2026
 **Author:** FDE Team
-
----
-
-## Step 3k: Mobile & Responsive Testing (Procedures)
-
-**Objective:** Verify dashboard works on mobile devices (if required).
-
-**If mobile support NOT required:**
-- Skip this step
-- Document in deployment-checklist.md: "Desktop-only dashboard; not tested on mobile"
-
-**If mobile support IS required:**
-
-### Test Matrix (Viewport Sizes)
-
-| Device | Viewport | Browser |
-|---|---|---|
-| **Desktop** | 1920×1080 | Chrome, Firefox, Safari |
-| **Tablet** | 768×1024 (iPad portrait) | Chrome, Safari |
-| **Mobile** | 375×667 (iPhone SE) | Chrome, Safari |
-| **Mobile** | 412×915 (Android) | Chrome, Firefox |
-
-### Testing Procedure
-
-1. **Open DevTools → Device Toolbar (F12 → toggle device toolbar)**
-
-2. **Test each breakpoint:**
-   - Select device from dropdown → Dashboard auto-resizes
-   - Verify: Charts are readable, no horizontal overflow, filters are accessible
-
-3. **Test interactions (per breakpoint):**
-   - [ ] Can you click a filter dropdown without scroll?
-   - [ ] Do charts render without overlap?
-   - [ ] Is text readable (minimum 14px)?
-   - [ ] Are buttons/inputs large enough to tap (44×44px)?
-
-4. **Common mobile issues to watch for:**
-   - ❌ Horizontal scrollbar (content wider than viewport)
-   - ❌ Text overlap on charts
-   - ❌ Filter buttons too close together (hard to tap)
-   - ❌ Chart legend covering data
-
-### Fixing Issues
-
-**Issue: Content too wide (horizontal scroll)**
-```css
-/* In dashboard.html <style> section */
-body { max-width: 100vw; overflow-x: hidden; }
-.container { width: 100%; }
-```
-
-**Issue: Buttons too small**
-```css
-button { min-width: 44px; min-height: 44px; padding: 10px 16px; }
-```
-
-**Issue: Chart overlap on mobile**
-```javascript
-// In generate-data.js, reduce chart data on mobile
-var chartRows = window.innerWidth < 768 ? 5 : 20;  // Fewer lines on mobile
-```
-
-### Acceptance Criteria
-
-- [ ] All test matrix breakpoints tested (4 device types)
-- [ ] No horizontal scrolling needed
-- [ ] All text readable at minimum 14px
-- [ ] All touch targets ≥ 44×44px
-- [ ] Charts render without overlap
 
 ---
 

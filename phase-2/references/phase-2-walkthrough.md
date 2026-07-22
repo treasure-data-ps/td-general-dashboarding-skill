@@ -42,20 +42,18 @@ Stage A/B: Interactive     Phase 2: Workflow           Phase 3: Dashboard
 
 ---
 
-## Phase 2: Quick Reference - 7 Steps
-
-*(Internal step labels kept as 3a-3g for continuity with the underlying reference content — only phase/folder numbers changed.)*
+## Phase 2: Quick Reference - 8 Steps
 
 | Step | Topic | Details |
 |------|-------|---------|
-| 3a | Set up workflow project | **Copy the locally embedded workflow templates** — see `./references/workflow-templates/`. See [`workflow-setup-configure.md`](references/workflow-setup-configure.md) |
-| 3b | Configure parameters | Edit `input_params.yaml` with Stage B metrics, tables, filters, SINK DB. **Multi-source:** use flat `source_db_*` keys (one per database) — never nest. See [`workflow-setup-configure.md`](references/workflow-setup-configure.md) + [`input_params_examples.md`](references/input_params_examples.md) |
-| 3c | Customize SQL queries | Replace template SQL with Stage B queries; optimize with `td_time_range()`. See [`workflow-setup-configure.md`](references/workflow-setup-configure.md) + [`td-time-functions.md`](references/td-time-functions.md) |
-| 3d | Configure datamodel | Only if you're using an SINK-aware analytics layer that requires a schema config file (e.g. a datamodel/join config). Skip if not applicable. See [`workflow-setup-configure.md`](references/workflow-setup-configure.md) |
-| 3e | Review config | **Verify workflow file structure with the user** (AskUserQuestion) + pre-deploy checklist + dry-run validation. See [`workflow-deployment-validate.md`](references/workflow-deployment-validate.md) |
-| 3f | **Deploy workflow + collision check** | Push to Treasure Data + trigger first run. **⚠️ Before locking in `project_prefix`, check for SINK table collisions** (see Step 2f details). See [`workflow-deployment-validate.md`](references/workflow-deployment-validate.md) |
-| 3g | **Validate output + re-verify metrics** | **Verify SINK tables created, row counts correct, re-run Stage B metrics fresh and diff against Stage B spot-checks** (not just verify column names exist). See [`workflow-deployment-validate.md`](references/workflow-deployment-validate.md) |
-| 3h | **Incremental strategy** | **After first run validated: assess data volatility, apply incremental pattern (append/upsert/state), run incremental test run and verify row counts + duration**. See [`workflow-deployment-validate.md`](references/workflow-deployment-validate.md) |
+| 2a | Set up workflow project | **Copy the locally embedded workflow templates** — see `./references/workflow-templates/`. See [`workflow-setup-configure.md`](references/workflow-setup-configure.md) |
+| 2b | Configure parameters | Edit `input_params.yaml` with Stage B metrics, tables, filters, SINK DB. **Multi-source:** use flat `source_db_*` keys (one per database) — never nest. See [`workflow-setup-configure.md`](references/workflow-setup-configure.md) + [`input_params_examples.md`](references/input_params_examples.md) |
+| 2c | Customize SQL queries | Replace template SQL with Stage B queries; optimize with `td_time_range()`. See [`workflow-setup-configure.md`](references/workflow-setup-configure.md) + [`td-time-functions.md`](references/td-time-functions.md) |
+| 2d | Configure datamodel | Only if you're using an SINK-aware analytics layer that requires a schema config file (e.g. a datamodel/join config). Skip if not applicable. See [`workflow-setup-configure.md`](references/workflow-setup-configure.md) |
+| 2e | Review config | **Verify workflow file structure with the user** (AskUserQuestion) + pre-deploy checklist + dry-run validation. See [`workflow-deployment-validate.md`](references/workflow-deployment-validate.md) |
+| 2f | **Deploy workflow + collision check** | Push to Treasure Data + trigger first run. **⚠️ Before locking in `project_prefix`, check for SINK table collisions** (see Step 2f details). See [`workflow-deployment-validate.md`](references/workflow-deployment-validate.md) |
+| 2g | **Validate output + re-verify metrics** | **Verify SINK tables created, row counts correct, re-run Stage B metrics fresh and diff against Stage B spot-checks** (not just verify column names exist). See [`workflow-deployment-validate.md`](references/workflow-deployment-validate.md) |
+| 2h | **Incremental strategy** | **After first run validated: assess data volatility, apply incremental pattern (append/upsert/state), run incremental test run and verify row counts + duration**. See [`workflow-deployment-validate.md`](references/workflow-deployment-validate.md) |
 
 ---
 
@@ -66,28 +64,30 @@ The workflow templates are bundled with this skill — no external repo access n
 ---
 
 
-### ⚠️ Cron `?` Wildcard — Common Mistake
+### ⚠️ Cron `?` Wildcard — When You Need It
 
-The `?` character in cron has special meaning: **"any value that doesn't match on the other field."**
-Avoid in standard workflow scheduling — it causes unexpected behavior.
+Digdag's `cron>:` scheduler uses a Quartz-style cron format with 5 fields: `minute hour day-of-month month day-of-week`. Quartz cron treats `day-of-month` and `day-of-week` as mutually exclusive: when one of them is constrained to a specific value, the other must be set to `?` ("no specific value") rather than `*`.
 
-**❌ DON'T use `?`** (means "any value except weekday")
+**✅ DO use `?`** in whichever of `day-of-month` / `day-of-week` you are NOT constraining:
 ```yaml
-schedule: "0 2 * * ?"
+# Every Monday at 8 AM — day-of-week is constrained (MON), so day-of-month is "?"
+schedule:
+  cron>: "0 8 ? * MON"
+
+# 1st of month at 2 AM — day-of-month is constrained (1), so day-of-week is "?"
+schedule:
+  cron>: "0 2 1 * ?"
 ```
 
-**✅ DO use `*`** (means "any value")
+**✅ DO use `*`** for simple daily schedules where neither day-of-month nor day-of-week is constrained:
 ```yaml
-schedule: "0 2 * * *"   # Run daily at 2 AM UTC
+schedule:
+  cron>: "0 2 * * *"   # Run daily at 2 AM UTC
 ```
 
-**When to use `?`** (rare):
-- Only when you need to exclude specific day-of-month OR day-of-week combinations
-- Example: "Run on weekdays (Mon-Fri) but NOT on the 15th"
+**Common mistake:** Using `*` for BOTH day-of-month and day-of-week when one of them is actually constrained (e.g., `"0 8 * * MON"`) — Quartz cron rejects or misinterprets this because both fields can't be simultaneous wildcards when one of them has meaning tied to the other. When you constrain day-of-week (e.g., `MON`), set day-of-month to `?`, and vice versa.
 
-For standard scheduling (daily, weekly, monthly), always use `*`.
-
-**Common mistake source:** Copying cron from other scheduling tools (Jenkins, Quartz) where `?` is required. Digdag doesn't need it.
+→ **See [`workflow-setup-configure.md`](references/workflow-setup-configure.md) → "Schedule Configuration"** for the full cron cheat sheet and worked examples.
 
 ---
 
@@ -154,7 +154,7 @@ cp -r ./references/workflow-templates/. ./<project_slug>/workflows/
 1. **Pre-aggregate in workflow:** Join at query time in the `.dig` file, output to a SINGLE SINK table
 
 ```sql
--- queries/01-join-across-dbs.sql
+-- sql/01-join-across-dbs.sql
 SELECT 
   a.date,
   a.region,
@@ -179,13 +179,13 @@ If you skip Phase 2, your Phase 3 queries will hit both databases on EVERY dashb
 ---
 
 
-### Step 1: Set Up Project (Step 2a)
+### Step 2a: Set Up Project
 
 **Customize workflow templates with Stage B discoveries:**
 
 ```bash
 # Templates are now in your local working directory
-# Follow Steps 3a-3d below to customize them for this engagement
+# Follow Steps 2a-2d below to customize them for this engagement
 ```
 
 1. **Edit `input_params.yaml`** — primary config: source tables, SINK DB, metrics list, time window, exclusion filters
@@ -194,7 +194,7 @@ If you skip Phase 2, your Phase 3 queries will hit both databases on EVERY dashb
 → **See [`workflow-setup-configure.md`](references/workflow-setup-configure.md)** for detailed per-step guidance
 → **See [`input_params_examples.md`](references/input_params_examples.md)** for `input_params.yaml` worked examples
 
-### Step 2: TD Time Functions (Critical for Step 2b)
+### Step 2b: TD Time Functions
 
 **3 Key Functions:**
 - `td_scheduled_time()` — Fixed reference time for reproducible runs
@@ -208,7 +208,7 @@ If you skip Phase 2, your Phase 3 queries will hit both databases on EVERY dashb
 
 → **See [`td-time-functions.md`](references/td-time-functions.md)** for patterns, examples, and performance impact
 
-### Step 3: Review & Deploy (Steps 3e-3g)
+### Step 2e-2g: Review & Deploy
 
 1. **Review configuration** (checklist in step 2e)
 2. **Deploy workflow** to Treasure Data
@@ -216,7 +216,7 @@ If you skip Phase 2, your Phase 3 queries will hit both databases on EVERY dashb
 
 → **See [`workflow-deployment-validate.md`](references/workflow-deployment-validate.md)** for deployment commands and validation queries
 
-### Step 4: Test & Troubleshoot (if needed)
+### Test & Troubleshoot (if needed)
 
 - Run testing checklist (schema, data quality, workflow, performance)
 - If issues, use troubleshooting guide for common problems
@@ -230,7 +230,7 @@ If you skip Phase 2, your Phase 3 queries will hit both databases on EVERY dashb
 | I want to... | See... |
 |---|---|
 | **Understand the template structure** | `./references/workflow-templates/` — launch, data-prep, cleaner, input_params.yaml |
-| **Get detailed guidance per step** | [`workflow-setup-configure.md`](references/workflow-setup-configure.md) (3a-3d), [`workflow-deployment-validate.md`](references/workflow-deployment-validate.md) (3e-3g) |
+| **Get detailed guidance per step** | [`workflow-setup-configure.md`](references/workflow-setup-configure.md) (2a-2d), [`workflow-deployment-validate.md`](references/workflow-deployment-validate.md) (2e-2h) |
 | **Configure `input_params.yaml`** | [`input_params_examples.md`](references/input_params_examples.md) — worked examples for metrics, filters, time windows |
 | **Understand TD time functions** | [`td-time-functions.md`](references/td-time-functions.md) — patterns, incremental modes, performance testing |
 | **Test & troubleshoot** | [`testing-troubleshooting.md`](references/testing-troubleshooting.md) — checklist, common issues, diagnostics |
@@ -285,20 +285,6 @@ If you skip Phase 2, your Phase 3 queries will hit both databases on EVERY dashb
 
 ---
 
-## Phase 2 Deliverable
-
-At end of Phase 2, you have:
-
-✅ **Deployed Treasure Data Workflow**
-✅ **Scheduled SINK tables** (pre-aggregated daily output)
-✅ **Optimized queries** (using `td_time_range` for partition pruning)
-✅ **Data validated** (metrics match Stage B, no quality issues)
-✅ **Workflow running on schedule** (daily 2 AM UTC)
-
-**→ Ready for Phase 3** — Dashboard renders from fast SINK tables
-
----
-
 ## Troubleshooting & Testing
 
 - **Testing checklist:** See [`testing-troubleshooting.md`](references/testing-troubleshooting.md) (schema, data quality, workflow, performance)
@@ -311,39 +297,7 @@ At end of Phase 2, you have:
 
 **Before proceeding:** Append Phase 2 outputs to `state.md`.
 
-**Document Update Rule: APPEND, never rewrite.** Read the file first, append below the Stage B block, never touch prior content.
-
-```markdown
-## Phase 2: Workflow Deployment ([Today's Date])
-
-### Workflow Project
-- TD project name: [project-name]
-- SINK database: [sink_database]
-- Orchestrator: [dashboard-workflow-launch.dig]
-- Schedule: [daily 2 AM UTC / other]
-- First run mode: full (start_date: [YYYY-MM-DD] → end_date: [YYYY-MM-DD])
-- Incremental strategy: [append-only / 1-day lookback / 7-day lookback]
-
-### SINK Tables
-| Table Name | SQL File | Row Count | Notes |
-|---|---|---|---|
-| [table_1] | [10_*.sql] | [N rows] | [e.g. daily KPI aggregates] |
-| [table_2] | [11_*.sql] | [N rows] | [e.g. dimension breakdown] |
-
-### Metric Cross-Checks (Phase 2 vs Stage B)
-| Metric | Stage B spot-check | Phase 2 SINK value | Match? |
-|---|---|---|---|
-| [Metric 1] | [value] | [value] | ✅ |
-| [Metric 2] | [value] | [value] | ✅ |
-
-### SQL Changes vs Stage B Plan
-- [List any changes to queries, filters, or table names from Stage B approved queries]
-- [None if no changes]
-
-### Performance
-- Historical load (first run): [X min]
-- Daily incremental run: [X sec]
-```
+→ **See "Phase 2 Deliverables (End of Phase)" below** for the single `state.md` append template and end-of-phase checklist.
 
 Phase 3 covers:
 - Build dashboard from SINK tables (queries now < 2 seconds instead of 5-10 seconds), rendered as a single portable HTML Client dashboard
@@ -462,7 +416,7 @@ Readers see the execution order right there, no need for filenames to communicat
 ```
 01_data_prep.sql              ← stage 1
 02_data_validation.sql        ← stage 2
-03_create_time_filter.sql     ← stage 3
+03_create_time_filter.sql     ← stage 3 (optional/reference-only — not wired into any .dig file by default; see workflow-setup-configure.md Step 2a)
 10_create_aggregates.sql      ← stage 10 (main aggregations)
 11_create_path_stats.sql      ← stage 11 (supplementary stats)
 12_create_unique_visitors.sql ← stage 12 (supplementary stats)
@@ -486,7 +440,17 @@ Readers see the execution order right there, no need for filenames to communicat
 
 ## Phase 2 Deliverables (End of Phase)
 
-**Document Update Rule: APPEND, never overwrite.** Read `state.md` first, append new section at bottom.
+At end of Phase 2, you have:
+
+✅ **Deployed Treasure Data Workflow**
+✅ **Scheduled SINK tables** (pre-aggregated daily output)
+✅ **Optimized queries** (using `td_time_range` for partition pruning)
+✅ **Data validated** (metrics match Stage B, no quality issues)
+✅ **Workflow running on schedule** (daily 2 AM UTC)
+
+**→ Ready for Phase 3** — Dashboard renders from fast SINK tables
+
+**Document Update Rule: APPEND, never overwrite.** Read `state.md` first, append below the Stage B block — never touch prior content.
 
 Append to **`state.md`**:
 
@@ -494,18 +458,32 @@ Append to **`state.md`**:
 ## Phase 2: Workflow Deployment Complete (YYYY-MM-DD)
 
 ### Workflow Project
-- workflow_name: [project-name]
-- Orchestrator: [main .dig file]
-- Schedule: [daily/weekly — first run = full history; subsequent = incremental]
+- workflow_name / TD project name: [project-name]
+- Orchestrator: [main .dig file, e.g. dashboard-workflow-launch.dig]
+- Schedule: [daily 2 AM UTC / other — first run = full history; subsequent = incremental]
 - SINK Database: [sink_database]
+- First run mode: full (start_date: [YYYY-MM-DD] → end_date: [YYYY-MM-DD])
+- Incremental strategy: [append-only / 1-day lookback / 7-day lookback]
 
 ### SINK Tables Validated
-- [table_1]: [N] rows ✓
-- [table_2]: [N] rows ✓
+| Table Name | SQL File | Row Count | Notes |
+|---|---|---|---|
+| [table_1] | [10_*.sql] | [N rows] ✓ | [e.g. daily KPI aggregates] |
+| [table_2] | [11_*.sql] | [N rows] ✓ | [e.g. dimension breakdown] |
 
-### Metric Cross-Checks
-- [Metric 1]: SINK [value] = Source [value] ✓
-- [Metric 2]: SINK [value] = Source [value] ✓
+### Metric Cross-Checks (Phase 2 vs Stage B)
+| Metric | Stage B spot-check | Phase 2 SINK value | Match? |
+|---|---|---|---|
+| [Metric 1] | [value] | [value] | ✅ |
+| [Metric 2] | [value] | [value] | ✅ |
+
+### SQL Changes vs Stage B Plan
+- [List any changes to queries, filters, or table names from Stage B approved queries]
+- [None if no changes]
+
+### Performance
+- Historical load (first run): [X min]
+- Daily incremental run: [X sec]
 
 ### SINK Table → Dashboard Section Mapping
 *(Phase 3 reads this to know which table to query for each widget)*

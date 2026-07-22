@@ -6,7 +6,7 @@ Real-world configuration examples for custom dashboard workflows, using the exac
 > 1. **All variables MUST be top-level** — never nest under `globals:` or any parent key. Digdag resolves only root-level keys; nested variables cause `Failed to evaluate variable ${...}` at runtime.
 > 2. **`cleanup_temp_tables: 'no'` unless temp tables are used** — setting `'yes'` when no temp tables exist causes cleanup to fail.
 > 3. **SQL files use plain `SELECT`, not `INSERT INTO`** — the `td>` operator with `create_table:` handles writing. See SQL examples below.
-> 4. **`refresh_mode`** controls the full ↔ incremental execution path. Set `'full'` for first run; switch to `'incremental'` after Step 3g validation passes.
+> 4. **`refresh_mode`** controls the full ↔ incremental execution path. Set `'full'` for first run; switch to `'incremental'` after Step 2g validation passes.
 
 ---
 
@@ -25,8 +25,8 @@ incremental_look_back_days: 2
 ```
 
 **Lifecycle:**
-- **Phase 2 Step 3f (first deploy):** `refresh_mode: 'full'` — runs full historical window
-- **Phase 2 Step 3h (after Step 3g passes):** change to `refresh_mode: 'incremental'` → push → run incremental test
+- **Phase 2 Step 2f (first deploy):** `refresh_mode: 'full'` — runs full historical window
+- **Phase 2 Step 2h (after Step 2g passes):** change to `refresh_mode: 'incremental'` → push → run incremental test
 - **Production (all scheduled runs):** stays `'incremental'`
 - **Force re-process:** flip back to `'full'`, push, run once, flip back to `'incremental'`
 
@@ -399,7 +399,7 @@ refresh_mode: 'full'
 start_date: '2024-01-01'    # earliest available data
 end_date: '2024-12-31'      # latest available data
 
-# After Step 3g validation passes — switch to scheduled incremental runs
+# After Step 2g validation passes — switch to scheduled incremental runs
 refresh_mode: 'incremental'
 # start_date / end_date no longer drive the query; incremental_look_back_days does
 ```

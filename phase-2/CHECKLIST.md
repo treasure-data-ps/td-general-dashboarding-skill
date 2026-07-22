@@ -16,12 +16,12 @@
 
 ---
 
-## Steps 3a–3h: Workflow Deployment
+## Steps 2a–2h: Workflow Deployment
 
-### 3a: Copy Embedded Workflow Template
+### 2a: Copy Embedded Workflow Template
 - [ ] Copy `./references/workflow-templates/` into `./<project_slug>/workflows/`
 
-### 3b: Configure Workflow YAML
+### 2b: Configure Workflow YAML
 - [ ] Update `input_params.yaml`:
   - Source database
   - Source table names
@@ -29,32 +29,32 @@
   - Schedule (frequency + time)
   - Date range config (lookback window, refresh mode)
 
-### 3c: Build Queries from state.md
+### 2c: Build Queries from state.md
 - [ ] Get Stage B validation queries from `state.md`
 - [ ] Copy into workflow SQL files under `sql/`
 - [ ] Verify all queries use confirmed metrics/dimensions (no inferences)
 
-### 3d (optional): Configure Datamodel
+### 2d (optional): Configure Datamodel
 - [ ] Skip unless feeding an analytics layer that needs an explicit schema config
 - [ ] If needed: build `config.json`, validate with `jq '.'`
 
-### 3e: Review Configuration
+### 2e: Review Configuration
 - [ ] Run through `pre-deployment-checklist.md`
 - [ ] Confirm workflow file structure with the user
 - [ ] Run `tdx wf push --dry-run`
 
-### 3f: Deploy Workflow
+### 2f: Deploy Workflow
 - [ ] Deploy with `tdx wf upload` (new) or `tdx wf push` (existing)
 - [ ] Verify SINK tables created with correct schema
 - [ ] Trigger first run — backfill full historical window
 
-### 3g: Validate SINK Output
+### 2g: Validate SINK Output
 - [ ] Run sample queries on SINK tables
 - [ ] Verify metrics match Stage B confirmed values (no unexplained drift)
 - [ ] Check row counts, date ranges
 - [ ] Verify query performance on SINK (target: instant, < 1s)
 
-### 3h: Incremental Strategy (if applicable)
+### 2h: Incremental Strategy (if applicable)
 - [ ] Assess SQL files for incremental eligibility
 - [ ] Set `refresh_mode` and wire branching
 - [ ] Push, run incremental test, confirm row counts don't double

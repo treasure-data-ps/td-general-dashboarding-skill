@@ -113,7 +113,7 @@ SOURCE_DB=your_idu_output_db node generate-data.js
 # ✅ dashboard.html written (142847 bytes)
 ```
 
-If the data exceeds 2MB, switch to Pattern B — write `data.json` separately instead of inlining. See `html-dashboard-patterns.md` for the Pattern B snippet.
+**Payload size budget (tiered):** under 500KB inline is ideal (fast load, easiest to share); up to 2MB inline is acceptable (modern browsers handle it fine); beyond 2MB, switch to Pattern B — write `data.json` separately instead of inlining. See `html-dashboard-patterns.md` → "Data Size Budget & Optimization" for the full tiered guidance and the Pattern B snippet.
 
 ---
 
@@ -133,7 +133,7 @@ preview_document dashboard.html
 □ Charts/KPIs show real numbers (not dashes or zeros)
 □ No console errors (F12 → Console)
 □ Data matches a manual tdx query spot-check
-□ File is < 2MB (email-safe)
+□ File is under 500KB ideally, under 2MB acceptable (email-safe)
 ```
 
 If charts are flat at 0: the most common cause is string numbers — verify `num()` normalization is applied to every numeric field.

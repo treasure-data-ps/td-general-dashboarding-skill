@@ -16,7 +16,7 @@ Self-contained HTML files you can download and share. No backend required - all 
 
 **Best for:** Simple metrics overview, shareable reports  
 **Build time:** 10 minutes  
-**File size:** ~50KB (self-contained)  
+**File size:** ~207KB (self-contained, includes inlined Chart.js)  
 **Features:**
 - 4 KPI cards with values
 - Summary section
@@ -30,7 +30,7 @@ Self-contained HTML files you can download and share. No backend required - all 
 
 **Best for:** Data exploration, sorting, searching  
 **Build time:** 15 minutes  
-**File size:** ~80KB  
+**File size:** ~209KB (includes inlined Chart.js)  
 **Features:**
 - Sortable columns (click to sort)
 - Search/filter rows
@@ -45,7 +45,7 @@ Self-contained HTML files you can download and share. No backend required - all 
 
 **Best for:** Comprehensive analysis with visualizations  
 **Build time:** 20 minutes  
-**File size:** ~120KB  
+**File size:** ~208KB (includes inlined Chart.js)  
 **Features:**
 - Line chart (trends)
 - Bar chart (comparisons)
@@ -53,36 +53,6 @@ Self-contained HTML files you can download and share. No backend required - all 
 - KPI cards
 - Legend and tooltips
 - Responsive charts (resize with window)
-
----
-
-## Template 4: Filtered Dashboard with Drill-Down
-
-**Best for:** Complex analysis, multi-dimensional filtering  
-**Build time:** 25 minutes  
-**File size:** ~150KB  
-**Features:**
-- 4 advanced filters (date, region, segment, status)
-- 6 KPI cards with filtered values
-- Bar charts for drill-down dimensions
-- Line chart for trends
-- Detail table with drill-down data
-- Real-time filter updates
-
----
-
-## Template 5: Mobile-First Responsive Dashboard
-
-**Best for:** Share across devices (phone, tablet, desktop)  
-**Build time:** 20 minutes  
-**File size:** ~110KB  
-**Features:**
-- Mobile-first design (375px → 1920px)
-- Stack layout on mobile
-- Charts resize responsively
-- Touch-friendly filters
-- Mobile-optimized fonts
-- Works offline (all data embedded)
 
 ---
 
@@ -153,6 +123,12 @@ The templates support two architecturally different patterns:
 **Do NOT mix patterns.** Stick to one per dashboard. Pattern A is the default and works for 95% of dashboards.
 
 ---
+
+## Optional Walkthrough: Manual `render.js` + `fetch()` Workflow (Pattern B style — NOT the default)
+
+**⚠️ Reference only.** The 3 checked-in templates (`kpi-dashboard.html`, `table-dashboard.html`, `multi-chart-dashboard.html`) already contain their own inline rendering `<script>` — they do NOT need a separate `render.js` file or `fetch('data.json')` call for the default Pattern A workflow. The steps below only apply if you deliberately opt into Pattern B (payload > 2MB) and need to wire up a standalone `render.js` that fetches a separate `data.json`.
+
+### Step 1: Choose a Template
 Copy the HTML file into your engagement's dashboard directory.
 
 ### Step 2: Start from `generate-data.js`
@@ -176,7 +152,7 @@ Outputs `dashboard.html` (Pattern A) or `data.json` (Pattern B).
 
 ### Step 4: Write `render.js`
 Create a JS file that reads `data.json` via `fetch()` and renders charts/tables.
-See `../skill/html-client/render.js` in any engagement for the full pattern.
+See `render.js` in this same `templates/` folder for the full pattern.
 
 ### Step 5: Link `render.js` in `dashboard.html`
 Add at the bottom of `<body>`:
@@ -197,7 +173,7 @@ zip dashboard.zip dashboard.html render.js data.json
 ```
 Recipients unzip and open in any browser.
 
-### Step 5: Share
+### Step 8: Alternative Sharing Methods
 - Download .html file
 - Email to stakeholders
 - Embed in Confluence
@@ -315,7 +291,7 @@ If HTML file is too large:
 2. **Remove unused charts** — Delete chart divs and code
 3. **Minify CSS/JS** — Use online minifiers
 4. **Compress images** — If adding logos/images
-5. **Use CDN for Chart.js** — Instead of embedding
+5. **Chart.js is inlined directly** — not loaded via CDN, so the file works fully offline; this adds a fixed ~200KB and is not itself reducible without breaking offline support
 
 ---
 
@@ -382,7 +358,7 @@ Access: Open in browser
 
 ## Next Steps
 
-1. Choose a template (1-5)
+1. Choose a template (1-3)
 2. Copy the HTML file
 3. Replace sample data with your real data
 4. Customize colors/title

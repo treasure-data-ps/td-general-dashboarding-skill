@@ -101,7 +101,7 @@ Templates are embedded locally — no external repo needed:
 **Use when:** Simple metrics overview, shareable report  
 **Best for:** Executive summary, email distribution  
 **Build time:** 10 minutes  
-**File size:** ~50KB  
+**File size:** ~207KB (includes inlined Chart.js)  
 **Contains:**
 - 4 KPI cards with trend indicators
 - Summary information section
@@ -115,7 +115,7 @@ Templates are embedded locally — no external repo needed:
 **Use when:** Data exploration with sorting and filtering  
 **Best for:** Customer data, detailed records  
 **Build time:** 15 minutes  
-**File size:** ~80KB  
+**File size:** ~209KB (includes inlined Chart.js)  
 **Contains:**
 - Sortable, searchable data table
 - Status filter dropdown
@@ -131,7 +131,7 @@ Templates are embedded locally — no external repo needed:
 **Use when:** Comprehensive analysis with multiple visualizations  
 **Best for:** Executive reviews, comprehensive reporting  
 **Build time:** 20 minutes  
-**File size:** ~120KB  
+**File size:** ~208KB (includes inlined Chart.js)  
 **Contains:**
 - 4 KPI metric cards
 - Line chart (dual-axis: sales + orders)
@@ -315,7 +315,7 @@ If .html file is too large:
 1. **Remove unused template code** — Delete chart divs you don't need
 2. **Reduce sample data** — Limit rows to essential data
 3. **Minify CSS/JS** — Use online tools
-4. **Use CDN for Chart.js** — Already using CDN (no local copy)
+4. **Chart.js is inlined directly in the HTML** (not loaded via CDN) so the file works fully offline; this adds a fixed ~200 KB but is not itself optimizable without breaking offline support
 5. **Remove comments** — Clean up developer comments
 
 ---

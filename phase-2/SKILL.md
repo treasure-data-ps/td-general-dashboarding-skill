@@ -1,9 +1,6 @@
 ---
 name: td-general-dashboarding-skill-phase-2
-description: |
-  INTERNAL — invoked by td-general-dashboarding-skill root skill only. Do not trigger directly.
-  Phase 2: Deploy Dashboard Workflow (optional). Copy the locally embedded workflow templates, configure with project parameters, deploy to Treasure Data, and validate SINK tables.
-  Use when: Routed here by the root td-general-dashboarding-skill SKILL.md when the Stage B path decision is Workflow (score 4-6, or skip_workflow = false/partial).
+description: INTERNAL — Phase 2 only. Deploy a scheduled workflow that pre-aggregates metrics into SINK tables.
 ---
 
 # Phase 2: Deploy Dashboard Workflow (Custom Dashboard Agent — Lite)
@@ -18,57 +15,19 @@ description: |
 
 ---
 
-## ⚠️ Step 0: Extract Stage A/B Configuration (MANDATORY — 5 min)
+## Pre-Phase-2: Extract Configuration
 
-**Do this FIRST, before any Phase 2 steps:**
-
-Phase 2 needs 5 configuration values from Stage A/B. These were captured in Stage A Steps 1e+1f, 1g, 1q and stored in `state.md`.
-
-**Action:**
-1. Read `./<project_slug>/state.md` (local file)
-2. Locate the "Session Setup" block (Stage A content — DO NOT EDIT)
-3. Extract the fields listed in `./references/workflow-setup-configure.md` → **"Phase 2 Entry Requirements: Read From Stage A"** section
-4. Proceed to Step 3a only after all 5 fields are extracted
-
-**Why:** Phase 2 workflow optimization depends on knowing:
-- **Historical window** — used in `td_time_range()` queries for partition pruning
-- **Refresh schedule** — determines cron schedule in the `.dig` file
-- **SINK database** — target for `create_table:` tasks
-- **Workflow project name** — used in `.dig` file naming + `tdx wf` commands
-- **Data volatility** — determines incremental processing pattern (append-only vs 1-day vs 7-day lookback)
-
-**If any field is missing from Stage A/B:** Go back and complete Stage A/B first — do not proceed with Phase 2 on partial data.
+→ **Before Phase 2:** Read `./<project_slug>/state.md` and extract 5 configuration fields. See `./references/phase-2-entry-requirements.md` for details.
 
 ---
 
-→ **See `./deploy-workflow-guide.md`** for: pre-phase checklist, pre-deployment CRITICAL items, troubleshooting guide, deliverables, and next-phase routing.
+## Phase 2 Steps 2a–2h
 
-**Steps 3a–3g:** See `./deploy-workflow-guide.md` step table. Key resources: `./references/workflow-setup-configure.md`, `workflow-deployment-validate.md`, `td-time-functions.md`, `testing-troubleshooting.md`.
+→ **Full workflow:** See `./references/phase-2-walkthrough.md` for step-by-step overview, checklists, troubleshooting, and next-phase routing.
 
----
+→ **Key resources:** `./references/workflow-setup-configure.md` · `workflow-deployment-validate.md` · `td-time-functions.md` · `testing-troubleshooting.md` · `workflow-templates/`
 
-## Custom Dashboard-Specific Phase 2 Considerations
-
-### Copying the Workflow Template
-
-The workflow template is embedded locally in this skill — no external repo access needed:
-
-```bash
-# Copy the workflow template into ./<project_slug>/workflows/
-mkdir -p ./<project_slug>/workflows
-cp -r ./references/workflow-templates/. ./<project_slug>/workflows/
-```
-
-Edit `./<project_slug>/workflows/input_params.yaml` with the confirmed values from `state.md` (source database/table, SINK database, date range, refresh mode). Then deploy directly:
-
-```bash
-tdx wf push ./<project_slug>/workflows --project <workflow_project_name>
-tdx wf start <workflow_project_name> dashboard-workflow-launch
-```
-
-No branching, no PR review — a single push/start cycle per iteration.
-
-### Step 3c: SINK Schema Design — Avoiding Multi-Dimension Double-Counting
+### Step 2c: SINK Schema Design — Avoiding Multi-Dimension Double-Counting
 
 ⚠️ **When SINK tables grain by BOTH product/vehicle dimensions AND customer dimensions, customers with multiple products appear in multiple rows, causing SUM(customer_count) to over-count.**
 
@@ -125,7 +84,7 @@ GROUP BY DATE(date), vehicle_make, customer_segment;
 
 → **See `./references/workflow-deployment-validate.md`** for full deployment and SINK validation steps.
 
-→ **See `./deploy-workflow-guide.md`** for: deliverables, end-of-phase checklist, quick reference, performance expectations, and next-phase routing.
+→ **See `./references/phase-2-walkthrough.md`** for: deliverables, end-of-phase checklist, quick reference, performance expectations, and next-phase routing.
 
 → **See `./CHECKLIST.md`** for a condensed Phase 2 decision checklist (setup, deploy, SINK validation gates).
 ---

@@ -81,7 +81,7 @@ GROUP BY customer_id, vehicle_model, region, service_type;
 -- Result: 2,240 rows (60% reduction) + 60% smaller payload
 ```
 
-**Integration:** Phase 4 Step 4b (Query Scaffolding) — always audit SINK grain vs filter dimensions before writing queries.
+**Integration:** Phase 3 Step 4b (Query Scaffolding) — always audit SINK grain vs filter dimensions before writing queries.
 
 ---
 

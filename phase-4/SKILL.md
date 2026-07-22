@@ -1,9 +1,6 @@
 ---
 name: td-general-dashboarding-skill-phase-4
-description: |
-  INTERNAL — invoked by td-general-dashboarding-skill root skill only. Do not trigger directly.
-  Phase 4: Automate & Deploy (Track A — reusable skill extraction, Track B — companion Foundry agent). Both tracks optional.
-  Use when: Routed here by the root SKILL.md after Phase 3 (Build Dashboard) is user-approved.
+description: INTERNAL — Phase 4 only. Optional: extract reusable skill (Track A) or deploy Foundry agent (Track B).
 ---
 
 # Phase 4: Automate & Deploy (Custom Dashboard Agent — Lite)
@@ -28,11 +25,12 @@ description: |
 
 ## How to Execute
 
-Ask the user which track(s) to run (see `automate-deploy-guide.md` § "Phase 4 Decision" for the exact AskUserQuestion). Then:
+**Quick start:** See `./CHECKLIST.md` for a fast gate-check before proceeding.
 
-- **Track A only, Track B only, or both** — follow `automate-deploy-guide.md`, which links out to:
-  - [`references/track-a-automation.md`](references/track-a-automation.md) — Steps 4a-0 through 4a-vi
-  - [`references/track-b-ai-agent.md`](references/track-b-ai-agent.md) — Steps 4b-i through 4b-vi
+Ask the user which track(s) to run. Then follow the detailed guides:
+
+- **Track A:** [`references/track-a-automation.md`](references/track-a-automation.md) — Steps 4a-0 through 4a-vii (skill extraction)
+- **Track B:** [`references/track-b-ai-agent.md`](references/track-b-ai-agent.md) — Steps 4b-i through 4b-vi (Foundry agent deployment)
 
 ---
 

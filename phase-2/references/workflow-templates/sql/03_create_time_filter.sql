@@ -1,9 +1,13 @@
--- Create / refresh time dimension table for Treasure Insights dashboard filtering
+-- Create / refresh time dimension table for Treasure Data dashboard filtering
 -- Skill: sql-skills:trino | sql-skills:time-filtering
+--
+-- OPTIONAL / REFERENCE-ONLY: not wired into the default .dig files (see deploy-workflow-guide.md
+-- "Workflow File Naming" section). Wire it in only if your dashboard needs a shared date-dimension
+-- table to join all SINK tables against.
 --
 -- FIRST RUN: Creates the table with the full history window.
 -- INCREMENTAL: INSERT INTO appends only the new date row for yesterday.
--- Treasure Insights joins all SINK tables to this table on event_date.
+-- The dashboard joins all SINK tables to this table on event_date.
 -- Never drop and recreate — always INSERT INTO to preserve history.
 
 INSERT INTO ${sink_database}.${project_prefix}_global_time_filter

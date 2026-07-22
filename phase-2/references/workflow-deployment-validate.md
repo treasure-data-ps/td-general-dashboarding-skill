@@ -1,4 +1,4 @@
-# Phase 2: Steps 3e-3h (Review, Deploy, Validate)
+# Phase 2: Steps 2e-2h (Review, Deploy, Validate)
 
 ## Step 2e: Review Configuration (10-15 min)
 
@@ -177,13 +177,13 @@ If you run `tdx wf push` without a prior `tdx.json`, it fails with "no workflow 
    - If collision is from this same project (workflow re-deployed) → **OK to proceed** (intentional full refresh)
    - Document collision findings in `state.md` (Phase 2 section) for reference
 
-3. **Create SINK database (if it doesn't exist):**
+4. **Create SINK database (if it doesn't exist):**
 
    ```bash
    tdx query "CREATE SCHEMA IF NOT EXISTS <sink_database>"
    ```
 
-4. **⚠️ CONFIRMATION GATE — Show deployment preview before pushing:**
+5. **⚠️ CONFIRMATION GATE — Show deployment preview before pushing:**
 
    Display the proposed deployment configuration and wait for explicit user confirmation:
 
@@ -220,7 +220,7 @@ If you run `tdx wf push` without a prior `tdx.json`, it fails with "no workflow 
    ```
    Display output, then re-ask the confirmation above. **Do NOT push until user explicitly selects "Yes, deploy now"**.
 
-5. **First deployment: Create project with `tdx wf upload`** (only after confirmation above)
+6. **First deployment: Create project with `tdx wf upload`** (only after confirmation above)
 
    ```bash
    cd ./<project_slug>/workflows
@@ -236,7 +236,7 @@ If you run `tdx wf push` without a prior `tdx.json`, it fails with "no workflow 
    # {"workflow_project": "<PROJECT_NAME>"}
    ```
 
-6. **Subsequent deployments: Update with `tdx wf push`** (same confirmation pattern — ask before pushing)
+7. **Subsequent deployments: Update with `tdx wf push`** (same confirmation pattern — ask before pushing)
 
    ```bash
    cd ./<project_slug>/workflows
@@ -256,7 +256,7 @@ If you run `tdx wf push` without a prior `tdx.json`, it fails with "no workflow 
    # Revision: <timestamp>
    ```
 
-7. **⚠️ CONFIRMATION GATE — Confirm before triggering first run:**
+8. **⚠️ CONFIRMATION GATE — Confirm before triggering first run:**
 
    The workflow is now deployed, but hasn't run yet. Show the user what will happen and get explicit approval:
 
@@ -288,7 +288,7 @@ If you run `tdx wf push` without a prior `tdx.json`, it fails with "no workflow 
 
    **Only run `tdx wf run` after user explicitly selects "Yes, trigger now".**
 
-8. **Trigger first historical run manually:**
+9. **Trigger first historical run manually:**
 
    ```bash
    tdx wf run ${PROJECT_NAME}.dashboard-workflow-launch
@@ -299,7 +299,7 @@ If you run `tdx wf push` without a prior `tdx.json`, it fails with "no workflow 
    # Session ID: <id>
    ```
 
-9. **Monitor the run in real-time:**
+10. **Monitor the run in real-time:**
 
    ```bash
    # Visual timeline (updates live)
@@ -830,7 +830,7 @@ If **revert**: switch all `insert_into:` back to `create_table:`, remove delete 
 
 **Recovery steps:**
 
-1. **Fix the workflow SQL** in `./<project-slug>/workflows/queries/`:
+1. **Fix the workflow SQL** in `./<project_slug>/workflows/sql/`:
    ```sql
    -- Before (wrong)
    SELECT SUM(revenue) as total FROM sales
@@ -841,7 +841,7 @@ If **revert**: switch all `insert_into:` back to `create_table:`, remove delete 
 
 2. **Re-deploy workflow:**
    ```bash
-   cd ./<project-slug>/workflows
+   cd ./<project_slug>/workflows
    tdx wf push
    tdx wf run <workflow-name>
    ```
@@ -898,7 +898,7 @@ If **revert**: switch all `insert_into:` back to `create_table:`, remove delete 
    - Timezone mismatch in time filter (e.g., UTC vs PST)
 
 4. **Fix & re-run:**
-   - Correct the SQL in workflow queries/
+   - Correct the SQL in workflow sql/
    - Re-deploy: `tdx wf push && tdx wf run <workflow-name>`
    - OR force re-run: `tdx wf run <workflow-name> --retry`
 

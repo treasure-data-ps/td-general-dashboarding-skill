@@ -13,11 +13,12 @@
 Before finalizing, check:
 
 - ✅ **`guardrails-lite.md` read** — (`../../references/guardrails-lite.md`) — must have been read at session start
-- ✅ All 4 Setup steps answered (Setup-A through Setup-D)
+- ✅ All Setup steps answered (Setup-A through Setup-E)
   - `project_slug` captured (determines `./<project_slug>/` working directory)
   - `business_goal` captured
   - `target_platform` captured (informative only — does not change rendering)
   - `data_source_type` captured and `skip_workflow` flag set
+  - `reference_resource_provided` + `resource_type` captured (Setup-E) — if `resource_type = .dash`, this checklist does not apply; see the `.dash` Special Case in `steps-1pre.md` for its own finalization/validation gate instead
 - ✅ All core steps completed (1a–1o, 1p, plus conditionals)
 - ✅ Metrics are user-defined with formulas (not generic labels)
   - Good: "Revenue = SUM of order amounts excluding refunds"
@@ -197,8 +198,8 @@ Include all fields from the Session Setup block in `steps-1pre.md` plus the busi
 
 ## Final Output (Stage A Complete)
 
-- ✅ All 4 Setup steps answered (Setup-A through Setup-D)
-- ✅ All Stage A business requirements gathered and documented
+- ✅ All Setup steps answered (Setup-A through Setup-E)
+- ✅ All Stage A business requirements gathered and documented (or derived from a `.dash` resource, per the Special Case)
 - ✅ Reference resources read and findings extracted
 - ✅ Rendering engine recorded as HTML Client (no choice needed)
 - ✅ Promotion score calculated (0-6) with path recommendation (Workflow vs Non-Workflow)

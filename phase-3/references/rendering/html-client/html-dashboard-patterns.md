@@ -2,6 +2,8 @@
 
 **Reusable patterns for building interactive HTML dashboards.**
 
+> **Theme Reference:** See `../../../../references/treasure-data-theme.md` for the complete Treasure Data theme specification (CSS variables, chart palette, component styling, custom brand color override). This document references that theme.
+
 **Chart colors:** Use the TD palette for any Chart.js series — `["#B4E3E3", "#ABB3DB", "#D9BFDF", "#F8E1B0", "#8FD6D4", "#828DCA", "#C69ED0", "#F5D389", "#6AC8C6", "#5867B8"]` — unless the user specified brand colors during Phase 1 (check "Visual Preferences" in `state.md`).
 
 ---
@@ -1007,7 +1009,7 @@ Neutral:
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1"></script>
+  <!-- Chart.js is inlined directly (no CDN, works fully offline) — see templates/*.html for the actual inlined <script> block -->
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto; background: #f8f9fa; }

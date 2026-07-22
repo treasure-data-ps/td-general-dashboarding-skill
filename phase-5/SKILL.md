@@ -1,9 +1,6 @@
 ---
 name: td-general-dashboarding-skill-phase-5
-description: |
-  INTERNAL — invoked by td-general-dashboarding-skill root skill only. Do not trigger directly.
-  Phase 5: Handoff Documentation (Lite). Optional final phase — create 4 local markdown files (Architecture, Usage Guide, Runbook, Access & Ownership), update state.md, and share with the user. No Confluence, no git.
-  Use when: Routed here by the root td-general-dashboarding-skill SKILL.md after Phase 3 (and optional Phase 4).
+description: INTERNAL — Phase 5 only. Optional: create 4 local handoff documentation files.
 ---
 
 # Phase 5: Handoff Documentation (Custom Dashboard Agent — Lite)
@@ -16,7 +13,7 @@ description: |
 
 ---
 
-→ **See `./handoff-documentation-guide.md`** for: Pre-Phase extraction checklist, approval gate, file templates for all 4 docs, `state.md` append block, sharing step, and engagement complete.
+→ **See `./references/phase-5-walkthrough.md`** for: Pre-Phase extraction checklist, approval gate, file templates for all 4 docs, `state.md` append block, sharing step, and engagement complete.
 
 ---
 

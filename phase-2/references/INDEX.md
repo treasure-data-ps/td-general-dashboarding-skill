@@ -2,7 +2,7 @@
 
 Detailed, reusable patterns for Phase 2: Deploy Dashboard Workflow.
 
-**Entry point:** `../deploy-workflow-guide.md` — start here for the 7-step overview and starting-point (locally embedded templates).
+**Entry point:** `../deploy-workflow-guide.md` — start here for the 8-step overview and starting-point (locally embedded templates).
 
 ---
 
@@ -10,14 +10,15 @@ Detailed, reusable patterns for Phase 2: Deploy Dashboard Workflow.
 
 | File | Purpose |
 |---|---|
-| **[workflow-setup-configure.md](workflow-setup-configure.md)** | Steps 3a–3d: set up project, configure `input_params.yaml`, customize SQL. Includes SQL aggregation patterns, schedule configuration, datamodel design principles, and cardinality audit checklist |
-| **[workflow-deployment-validate.md](workflow-deployment-validate.md)** | Steps 3e–3h: pre-deploy review, deploy with `tdx wf push`, validate SINK tables, incremental strategy. Includes SINK table documentation template and fan-out reference |
-| **[td-time-functions.md](td-time-functions.md)** | `td_time_range()`, `TD_SCHEDULED_TIME()`, `TD_TIME_ADD()` patterns; incremental mode decision (append-only / 1-day / 7-day); performance impact |
-| **[incremental_update_patterns.md](incremental_update_patterns.md)** | Full `INSERT INTO` examples per incremental mode; upsert and state-managed patterns |
-| **[input_params_examples.md](input_params_examples.md)** | `input_params.yaml` worked examples for 5 verticals (e-commerce, SaaS, marketing, retail, content/media) |
-| **[pre-deployment-checklist.md](pre-deployment-checklist.md)** | Go/no-go checklist before `tdx wf push` — catches schema, cardinality, and config issues |
-| **[testing-troubleshooting.md](testing-troubleshooting.md)** | Testing checklist (schema, data quality, metrics accuracy, workflow execution), troubleshooting guide for common issues, and performance tuning |
-| **[workflow-templates/](workflow-templates/)** | The embedded workflow template: `.dig` files, parameterized SQL, `input_params.yaml` — copy this into `./<project_slug>/workflows/` in Step 3a |
+| **[phase-2-entry-requirements.md](phase-2-entry-requirements.md)** | Extract 5 configuration fields from `state.md` before Phase 2 begins |
+| **[workflow-setup-configure.md](workflow-setup-configure.md)** | Steps 2a–2d: set up, configure `input_params.yaml`, SQL patterns, schedule, datamodel |
+| **[workflow-deployment-validate.md](workflow-deployment-validate.md)** | Steps 2e–2h: pre-deploy review, deployment, SINK validation, incremental strategy |
+| **[td-time-functions.md](td-time-functions.md)** | `td_time_range()`, `TD_SCHEDULED_TIME()`, `TD_TIME_ADD()` and incremental mode decisions |
+| **[incremental_update_patterns.md](incremental_update_patterns.md)** | `INSERT INTO` examples per incremental mode; upsert patterns |
+| **[input_params_examples.md](input_params_examples.md)** | Worked `input_params.yaml` examples for 5 verticals |
+| **[pre-deployment-checklist.md](pre-deployment-checklist.md)** | Go/no-go checklist before `tdx wf push` |
+| **[testing-troubleshooting.md](testing-troubleshooting.md)** | Testing, troubleshooting, and performance tuning guide |
+| **[workflow-templates/](workflow-templates/)** | Embedded workflow template: `.dig` files, SQL, `input_params.yaml` |
 
 ---
 
@@ -25,18 +26,18 @@ Detailed, reusable patterns for Phase 2: Deploy Dashboard Workflow.
 
 | Step | File |
 |---|---|
-| Phase 2 entry requirements (read Stage A/B config) | `workflow-setup-configure.md` (Phase 2 Entry Requirements section) |
-| 3a. Set up project (copy embedded template) | `workflow-setup-configure.md` + `workflow-templates/` |
-| 3b. Configure `input_params.yaml` | `workflow-setup-configure.md` + `input_params_examples.md` |
-| 3c. Customize SQL (aggregation patterns) | `workflow-setup-configure.md` (SQL Aggregation Patterns section) |
-| 3c. Configure schedule | `workflow-setup-configure.md` (Schedule Configuration section) |
-| 3c. TD time functions | `td-time-functions.md` |
-| 3c. Incremental INSERT INTO patterns | `incremental_update_patterns.md` |
-| 3d. Configure `config.json` datamodel (optional) | `workflow-setup-configure.md` (Datamodel Design Principles section) |
-| 3e. Review configuration | `workflow-deployment-validate.md` + `pre-deployment-checklist.md` |
-| 3f. Deploy workflow | `workflow-deployment-validate.md` |
-| 3g. Validate SINK tables | `workflow-deployment-validate.md` (SINK Table Documentation Template section) |
-| 3h. Incremental strategy + test | `workflow-deployment-validate.md` (Step 3h section) |
+| Phase 2 entry requirements (read Stage A/B config) | `phase-2-entry-requirements.md` |
+| 2a. Set up project (copy embedded template) | `workflow-setup-configure.md` + `workflow-templates/` |
+| 2b. Configure `input_params.yaml` | `workflow-setup-configure.md` + `input_params_examples.md` |
+| 2c. Customize SQL (aggregation patterns) | `workflow-setup-configure.md` (SQL Aggregation Patterns section) |
+| 2c. Configure schedule | `workflow-setup-configure.md` (Schedule Configuration section) |
+| 2c. TD time functions | `td-time-functions.md` |
+| 2c. Incremental INSERT INTO patterns | `incremental_update_patterns.md` |
+| 2d. Configure `config.json` datamodel (optional) | `workflow-setup-configure.md` (Datamodel Design Principles section) |
+| 2e. Review configuration | `workflow-deployment-validate.md` + `pre-deployment-checklist.md` |
+| 2f. Deploy workflow | `workflow-deployment-validate.md` |
+| 2g. Validate SINK tables | `workflow-deployment-validate.md` (SINK Table Documentation Template section) |
+| 2h. Incremental strategy + test | `workflow-deployment-validate.md` (Step 2h section) |
 | Troubleshooting | `testing-troubleshooting.md` |
 | Performance tuning | `testing-troubleshooting.md` (Performance Tuning section) |
 

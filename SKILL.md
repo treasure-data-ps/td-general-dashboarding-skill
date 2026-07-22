@@ -1,6 +1,6 @@
 ---
 name: td-general-dashboarding-skill
-description: Build or resume custom dashboards from Treasure Data databases using a self-serve 5-phase pipeline (requirements + data discovery, workflow deployment, interactive build, automation, handoff). Lite version — no Confluence, no git branching, HTML Client rendering only. Use for one-off or scheduled custom dashboards. Also use when continuing a previously started dashboard engagement -- e.g. after reviewing a plan or approving a build. Trigger on: custom dashboard, build dashboard, analytics dashboard, data dashboard, KPI dashboard, metrics dashboard, dashboard agent, visualization, custom reporting, create dashboard, interactive dashboard, resume dashboard, continue dashboard, resume dashboard engagement, approved dashboard plan, proceed to phase 2/3/4/5, resume phase 1/2/3/4.
+description: Build or resume custom HTML dashboards from Treasure Data using a 5-phase self-serve pipeline (local, no Confluence/git).
 ---
 
 # Custom Dashboard Agent (Lite)
@@ -26,7 +26,7 @@ Build custom dashboards from Treasure Data databases using a **self-serve 5-phas
 
 #### New Engagement Path
 
-Once you confirm this is a **new engagement**, follow these 2 steps:
+Once you confirm this is a **new engagement**, **re-read `./references/guardrails-lite.md` immediately**, then follow these 2 steps:
 
 1. **Say to the user:** "For this project, here are the 5 phases we'll work through step by step."
 
@@ -58,9 +58,11 @@ Once you confirm this is a **new engagement**, follow these 2 steps:
 
 3. **Route to Phase 1:** Read `./phase-1/SKILL.md` — it handles session setup (project slug, business goal, scoring, path decision) for both Stage A (requirements) and Stage B (data discovery). After Phase 1 completes, **route to Phase 2 or Phase 3 per the path decision** (no additional prompt needed).
 
+**Special case — providing a `.dash` file:** If, during session setup, the user provides a Sisense/Treasure Insights `.dash` export (or JSON with a `"widgets"` array + `"datasource"` key), Phase 1 detects it and switches to a fast-track migration path — it converts the file with `./references/dash_to_html.py`, prefills requirements and data discovery directly from the export, and skips straight to building/validating the dashboard instead of asking every Stage A/B question from scratch. See `./phase-1/references/steps-1pre.md` ("`.dash` / Sisense Special Case") for the full flow.
+
 #### Existing Engagement Path
 
-Once you confirm this is **resuming an existing project**, follow these 3 steps:
+Once you confirm this is **resuming an existing project**, **re-read `./references/guardrails-lite.md` immediately**, then follow these 3 steps:
 
 1. **Ask for the project slug:**
    - "What's the project slug or folder name you're resuming? (e.g. `./<project-slug>/`)"
@@ -93,11 +95,11 @@ Once you confirm this is **resuming an existing project**, follow these 3 steps:
 
 | Phase | Read | Key Output | Condition |
 |-------|------|-----------|-----------|
-| **1: Requirements + Data Discovery** | `./phase-1/requirements-gathering-guide.md` | Promotion Score (0-6) + path decision + **state.md created** | Always |
-| **2: Workflow** | `./phase-2/deploy-workflow-guide.md` | Workflow output tables (SINK tables) deployed + validated + **state.md appended** | Optional, recommended Score 4-6 only, user can override |
-| **3: Build Dashboard** | `./phase-3/build-interactive-dashboard-guide.md` | User-approved interactive `dashboard.html` + **state.md appended** | Always (after Phase 1 or Phase 2) |
-| **4: Automate + Agent** | `./phase-4/automate-deploy-guide.md` | Reusable skill (Track A) + Foundry agent (Track B) | Optional, either/both/neither |
-| **5: Handoff Docs** | `./phase-5/handoff-documentation-guide.md` | 4 local markdown files (Architecture, Usage Guide, Runbook, Access & Ownership) | Optional |
+| **1: Requirements + Data Discovery** | `./phase-1/SKILL.md` | Promotion Score (0-6) + path decision + **state.md created** | Always |
+| **2: Workflow** | `./phase-2/SKILL.md` | Workflow output tables (SINK tables) deployed + validated + **state.md appended** | Optional, recommended Score 4-6 only, user can override |
+| **3: Build Dashboard** | `./phase-3/SKILL.md` | User-approved interactive `dashboard.html` + **state.md appended** | Always (after Phase 1 or Phase 2) |
+| **4: Automate + Agent** | `./phase-4/SKILL.md` | Reusable skill (Track A) + Foundry agent (Track B) | Optional, either/both/neither |
+| **5: Handoff Docs** | `./phase-5/SKILL.md` | 4 local markdown files (Architecture, Usage Guide, Runbook, Access & Ownership) | Optional |
 
 **Path decision at end of Phase 1, Stage B:** (user can override the recommendation)
 - **Score 0-2 (Non-Workflow):** Phase 1 → Phase 3 — skip Phase 2
@@ -106,85 +108,40 @@ Once you confirm this is **resuming an existing project**, follow these 3 steps:
 
 ---
 
+---
+
+## Core Concepts
+
+**→ Read `./references/architecture-and-state.md` for:**
+- Full 5-phase pipeline flow diagram
+- `state.md` append-only pattern explanation (how context flows between phases)
+- When to skip each phase
+- Single-session vs multi-session workflows
+- Resuming at a specific phase
+
+---
+
 ## Phase Routing
 
-**Quick routing rules:**
-- New engagement → Phase 1 → [Phase 2 if score 4-6] → Phase 3 → [Phase 4 optional] → [Phase 5 optional]
-- Resume → read `state.md` → jump to "Next Action"
-- Score 3 at end of Phase 1 → ask user: "Quick build or production workflow?"
-
-Five linear phases is small enough to route inline — no separate decision-tree file to load.
+**Quick rules:**
+- New engagement → Phase 1 → [Phase 2 optional] → Phase 3 → [Phase 4/5 optional]
+- Resume → read `./<project-slug>/state.md` → jump to "Next Action" at bottom
+- Phase 1 score = 3 → user decides: Phase 2 (workflow) or Phase 3 (direct build)
 
 ---
 
-## Rendering
+## Quick Navigation
 
-Rendering is always **HTML Client** — a single portable `dashboard.html` with data inlined at build time. No engine-choice question is ever asked. This works anywhere (no server, no special platform) and is the only rendering pattern supported in the lite skill.
-
----
-
-## Workflow Creation (Phase 2)
-
-**What is a workflow?** A scheduled job that pre-aggregates metrics into SINK tables once per day, making Phase 3 dashboard queries instant instead of scanning and querying big live/source data.
-
-**When to create a workflow:**
-- You access the dashboard multiple times per day
-- Need historical trend tracking
-- Dashboard is mission-critical
-- Phase 1 score is 4-6
-- Source tables are too large
-
-**Skip if:** Score 0-2, data queried infrequently or already on a pre-aggregated smaller data source, or you prefer the lightweight non-workflow path.
-
-→ See `./phase-2/deploy-workflow-guide.md` for full steps
-
----
-
-## Quick Reference
-
-```
-I want to...                                          → Go to...
-Requirements + data discovery                         ./phase-1/SKILL.md
-Build a lightweight dashboard (score 0-2)              ./phase-3/build-interactive-dashboard-guide.md
-Deploy a production workflow (score 4-6)               ./phase-2/deploy-workflow-guide.md (then Phase 3)
-Validate dashboard data accuracy                       ./phase-3/references/steps.md (Step 4f: Validate Data Accuracy)
-Test dashboard comprehensively                         ./phase-3/references/testing-troubleshooting.md
-Automate dashboard for future builds                   ./phase-4/automate-deploy-guide.md (Track A)
-Deploy an AI agent for conversational access            ./phase-4/automate-deploy-guide.md (Track B)
-Create handoff docs                                     ./phase-5/handoff-documentation-guide.md
-```
-
----
-
-## File & Reference Guide
-
-### Phase Workflow Files
-
-| Phase | File | Key Output |
-|-------|------|-----------|
-| **1** | `./phase-1/requirements-gathering-guide.md` | Promotion Score + path decision + **state.md created** |
-| **2** | `./phase-2/deploy-workflow-guide.md` | Workflow deployed + SINK tables validated |
-| **3** | `./phase-3/build-interactive-dashboard-guide.md` | User-approved interactive `dashboard.html` |
-| **4** | `./phase-4/automate-deploy-guide.md` | Reusable dashboard skill (Track A) + Foundry AI agent (Track B) |
-| **5** | `./phase-5/handoff-documentation-guide.md` | 4 local markdown files (Architecture, Usage Guide, Runbook, Access & Ownership) |
-
-### Key Decision References
-
-| Reference | Purpose |
-|-----------|---------|
-| `./phase-1/references/stage-b-database-discovery.md` | 0-6 scoring rubric: 0-2 = Non-Workflow, 3 = Optional, 4-6 = Workflow |
-| `./phase-3/references/steps.md` | Step 4f: Data accuracy validation gate (required for all dashboards) |
-| `./phase-3/references/testing-troubleshooting.md` | Comprehensive dashboard testing (tests across dimensions) |
-| `./phase-4/references/track-a-automation.md` | Save dashboards as reusable skills (Track A automation) |
-| `./phase-4/references/track-b-ai-agent.md` | Deploy a companion Foundry agent (Track B) |
-
-### Reference Libraries
-
-| Folder | Contents |
-|--------|----------|
-| `./phase-3/references/rendering/html-client/` | HTML Client rendering engine, templates & guides |
-| `./phase-4/references/templates/` | Knowledge-base and agent-prompt templates for Track A/B |
-| `./references/guardrails-lite.md` | Cross-phase guardrails: data integrity, database & queries, rendering, agent prompts |
+| I want to... | Go to... |
+|---|---|
+| Start a new dashboard | `./phase-1/SKILL.md` |
+| Resume an existing project | Read `./<project-slug>/state.md`, then jump to next phase |
+| Convert a Sisense .dash export | `./phase-1/SKILL.md` (provide the file during Setup-E) |
+| Deploy a production workflow | `./phase-2/SKILL.md` (after Phase 1 scores 4-6) |
+| Build and test the dashboard | `./phase-3/SKILL.md` |
+| Automate for future builds | `./phase-4/SKILL.md` (Track A) |
+| Deploy a conversational agent | `./phase-4/SKILL.md` (Track B) |
+| Create handoff documentation | `./phase-5/SKILL.md` |
 
 ---
 

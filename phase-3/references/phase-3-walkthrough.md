@@ -44,12 +44,12 @@ The key architectural difference is that Workflow path dashboards never touch so
   |
 4j-4l: Document, Mobile (if required), Load UX (if needed)
   |
-Final: User Approval (Step 3i)
+Final: User Approval (Step 4i)
   -> Approved -> Phase 4 (Automate & Deploy) or Phase 5 (Handoff Documentation), both optional
   -> Changes -> loop back
 ```
 
-(Step 3a from the original build loop is a no-op in the lite skill — the rendering engine is always HTML Client, nothing to confirm.)
+(Step 4a from the original build loop is a no-op in the lite skill — the rendering engine is always HTML Client, nothing to confirm.)
 
 ---
 
@@ -314,11 +314,11 @@ function filterTab1ByProduct(rows, productFilter) {
 | Full row-level | 10,000 | 120 bytes | 1,200 KB | ❌ No (too large!) |
 | Pre-agg per-tab | 150 | 80 bytes | 12 KB | ✅ Yes (on dashboard change) |
 
-**Sweet spot:** Pre-aggregate by all dimensions = instant filtering + reasonable payload (200-300 KB)
+**Sweet spot:** Pre-aggregate by all dimensions = instant filtering + a payload comfortably within the ideal tier (see "Payload Size Budget" below)
 
 ### Numeric Coercion
 
-To keep payload under 300 KB, use IDs instead of strings:
+To keep payload within the ideal (< 500KB) tier, use IDs instead of strings:
 
 ```javascript
 // ❌ Strings (120 bytes per row)
@@ -395,7 +395,7 @@ async function refreshData() {
 
 ✅ **Zero re-queries** — all data embedded once  
 ✅ **Instant filtering** — all operations in-memory  
-✅ **Optimal payload** — 200-300 KB (pre-agg by dims, numeric IDs)  
+✅ **Optimal payload** — within the ideal < 500KB tier (pre-agg by dims, numeric IDs)  
 ✅ **Simple client logic** — just filter + aggregate  
 ✅ **Works offline** — once loaded, no server needed  
 
@@ -481,21 +481,28 @@ SINK_DB.fact_deduped (rows without duplicates)
 ---
 
 
-## Query Optimization for Embedded Data (Minimal Payload)
+## Performance & Payload Optimization (Phase 3)
 
-**Goal:** Produce the smallest possible embedded HTML file (< 300 KB uncompressed, < 70 KB gzip).
+**Payload size budget (tiered — canonical policy, see `references/rendering/html-client/html-dashboard-patterns.md` → "Data Size Budget & Optimization"):**
+
+```
+< 500KB total   → inline directly (fast load, shareable) — IDEAL
+500KB – 2MB     → acceptable (modern browsers handle)
+> 2MB           → consider alternatives (Pattern B: separate data.json, server-side)
+```
+
+**Most dashboards are already optimized.** If your dashboard is slow or the HTML file is outside the ideal tier, work through the checklist below.
 
 ### Optimization Checklist
 
 | Step | What | Impact |
 |------|------|--------|
-| **1. Pre-aggregate** | GROUP BY filter dimensions only (not raw data) | 10K rows → 100-200 rows (95% reduction) |
-| **2. Choose date granularity** | Use the granularity your dashboard needs (don't truncate by default) | Day = 10 bytes/row; Month = 7 bytes/row; Trade precision for size only if needed |
+| **1. Pre-aggregate** | GROUP BY filter dimensions only (not raw data) | 10K rows → 100-200 rows (95% reduction); biggest win, ~90% payload reduction |
+| **2. Choose date granularity** | Use the granularity your dashboard needs (don't truncate by default) | Day = 10 bytes/row; Month = 7 bytes/row; trade precision for size only if needed |
 | **3. Numeric coercion** | Parse `"1234.56"` → `1234.56` in generate-data.js | -3 bytes per numeric × 10K values = -30 KB |
 | **4. SELECT only used columns** | No unused fields in final JSON | -50 bytes per unused column × 1K rows = -50 KB |
 | **5. LIMIT enforcement** | All queries include `LIMIT 10000` (user can override) | Prevents OOM; user controls truncation |
-
-**Combined impact:** 10,000 raw rows (500+ KB) → 200 pre-aggregated rows (20 KB) + 50 KB gzip = **70 KB total**
+| **6. Enable gzip when serving** | `npx serve --compress` or nginx gzip | HTML compresses ~500+ KB → 60-70 KB (87% reduction) — only applies if serving over network, not needed for double-click/email delivery |
 
 ### Example: Optimized Query Pattern
 
@@ -544,15 +551,9 @@ var data = query(
 - Dashboard embedded in app
 - Real-time updates acceptable
 
----
-
----
-
-## ⚠️ Data Truncation Warning: 10,000 Row Hard Limit
+### Data Truncation Warning: 10,000 Row Hard Limit
 
 **Critical:** `generate-data.js` has a **hard limit of 10,000 rows per query** to prevent memory overload in large dashboards.
-
-### What This Means
 
 ```javascript
 // In generate-data.js
@@ -563,21 +564,11 @@ var limit = (limitRows === undefined) ? 10000 : limitRows;
 - **For 100K+ row queries:** Data silently truncates — dashboard shows incomplete data
 - **For pre-aggregated queries:** Usually fine (Phase 3 pre-aggregation often < 200 rows)
 
-### When This Matters (Production Validation)
+**Affects queries like:** non-aggregated fact tables (1M+ rows), customer transaction history without time boundaries, raw event streams.
 
-**Affects queries like:**
-- Non-aggregated fact tables (1M+ rows)
-- Customer transaction history without time boundaries
-- Raw event streams
+**Does NOT affect (safe):** pre-aggregated rollups (100-500 rows), time-bounded queries (daily/weekly windows), filtered datasets.
 
-**Does NOT affect (safe):**
-- Pre-aggregated rollups (100-500 rows)
-- Time-bounded queries (daily/weekly windows)
-- Filtered datasets
-
-### Override the Limit
-
-Per-query customization:
+**Override the limit per-query:**
 
 ```javascript
 // ✅ Increase limit for this query only
@@ -593,8 +584,6 @@ var hugeResult = query(
 );
 ```
 
-### Production Checklist
-
 **Before deployment, verify:**
 - [ ] All queries tested with real customer data volume
 - [ ] Row counts confirmed < 10,000 (or limit overridden deliberately)
@@ -602,19 +591,9 @@ var hugeResult = query(
 - [ ] Memory usage monitored on target machine
 - [ ] Pre-aggregation applied where possible (recommended: 100-500 rows)
 
-### Recommendation
+**Recommendation:** Always pre-aggregate by filter dimensions (see "Pattern: Pre-Aggregate by Filter Dimensions" earlier in this guide). This naturally keeps row counts in the 100-500 range, eliminating truncation risk entirely.
 
-**Always pre-aggregate by filter dimensions** (see "Pattern: Pre-Aggregate by Filter Dimensions" earlier in this guide). This naturally keeps row counts in the 100-500 range, eliminating truncation risk entirely.
-
----
-
----
-
-## Performance Optimization Tips (Phase 3)
-
-**Most dashboards are already optimized.** But if your dashboard is slow or the HTML file is large (> 500 KB), try these:
-
-### 1. Pre-aggregate queries by filter dimensions (biggest win — 90% payload reduction)
+### Pre-Aggregate by Filter Dimensions (Biggest Win)
 
 If your dashboard shows **overview filters** (e.g., channel, type, status, date) but you're returning thousands of individual detail rows:
 
@@ -623,13 +602,13 @@ If your dashboard shows **overview filters** (e.g., channel, type, status, date)
 
 See [`references/query-patterns-for-dashboards.md`](references/query-patterns-for-dashboards.md) → "Pattern: Pre-Aggregate by Filter Dimensions" for exact SQL.
 
-### 2. Chart.js script tag already has `defer` (built-in)
+### Chart.js Is Inlined, Not Loaded via CDN
 
-Our templates already include `<script defer>` on the Chart.js CDN link. This prevents the external script from blocking HTML parsing. No action needed.
+Chart.js is inlined directly inside each template's HTML (no `<script src="...cdn...">` tag, no external network request). This keeps the dashboard fully self-contained and working offline. It adds a fixed ~200 KB to every dashboard.html — this is expected and not itself reducible without breaking offline support. There is no CDN script to `defer`; no action is needed here.
 
-### 3. Enable gzip when serving the dashboard
+### Enable Gzip When Serving the Dashboard
 
-If serving via network (npx serve, nginx):
+If serving via network (npx serve, nginx) rather than double-clicking or emailing the file directly:
 
 ```bash
 # With serve
@@ -638,9 +617,45 @@ npx serve --compress ./<project-slug>/dashboards/
 # Result: HTML compresses from 500+ KB → 60-70 KB (87% reduction)
 ```
 
-See [`references/rendering/html-client/html-deployment-guide.md`](references/rendering/html-client/html-deployment-guide.md) → "Performance Optimization: Enable Gzip Compression" for full setup.
+See [`references/rendering/html-client/html-deployment-guide.md`](references/rendering/html-client/html-deployment-guide.md) → "Performance Optimization: Enable Gzip Compression" for full setup. This step is optional — it only applies to the fallback server-hosting path, not the default double-click/email delivery.
+
+### Profiling Tools
+
+**Scenario:** Dashboard loads slowly on first render.
+
+| Tool | What it shows | How to use |
+|---|---|---|
+| **Browser DevTools → Performance tab** | Page load timeline, JavaScript execution | Chrome/Firefox: F12 → Performance → Record → Reload → Analyze |
+| **Browser DevTools → Network tab** | File sizes, load times per asset | F12 → Network → Reload; sort by size/time |
+| **generate-data.js timing** | Query execution time + data size | Add `console.time()` / `console.timeEnd()` around query() call |
+
+**Optimization checklist:**
+
+- [ ] **Query time:** Is `generate-data.js` query slow (> 5s)? Optimize SQL with pre-aggregation
+- [ ] **Data size:** Is embedded JSON outside the ideal tier (> 500 KB)? Apply numeric coercion (IDs instead of strings)
+- [ ] **Chart rendering:** Does Chart.js take > 2s to render? Reduce rows per dataset (LIMIT 100)
+- [ ] **Filter updates:** Does dashboard hang when user changes filters? Profile in DevTools; likely need client-side optimization
+- [ ] **Bundle size:** Is dashboard.html > 1 MB? Inlined Chart.js adds ~200 KB; acceptable if queries are fast and total stays within the 2MB acceptable tier
+
+**Quick wins:**
+
+1. **Before:** Full string data (product: "Premium Laptop")
+   **After:** Numeric IDs (product_id: 5) → 50% smaller payload
+
+2. **Before:** Raw 10K rows
+   **After:** Pre-agg to 100-500 rows → 20x faster rendering
+
+**Typical performance profile (good):**
+
+- Query time: 2-3s
+- Data size: 100-200 KB (after coercion)
+- Chart render: < 1s
+- **Total page load: < 5s** ✅
+
+**If > 10s total load time:** Debug using profiling tools above; likely culprit is query time or data size.
 
 ---
+
 
 ## Quality Gates (ALL must pass before exiting)
 
@@ -650,12 +665,12 @@ See [`references/rendering/html-client/html-deployment-guide.md`](references/ren
 ✅ Renders with real data — no blank components
 ✅ Data range banner present (static dashboards)
 ✅ Every widget has an info tooltip with definition + calculation
-✅ **Data accuracy validated** — all KPIs match Phase 1/2 spot-checks (Step 3f)
-✅ All filters tested — independence, combinations, edge cases (Step 3g)
-✅ Performance baseline recorded — queries < 5 sec (Step 3h)
-✅ **User approved** — feedback resolved (Step 3i)
-✅ Parameters documented in `state.md` (Step 3j)
-✅ Mobile tested if Phase 1 required (Step 3k)
+✅ **Data accuracy validated** — all KPIs match Phase 1/2 spot-checks (Step 4f)
+✅ All filters tested — independence, combinations, edge cases (Step 4g)
+✅ Performance baseline recorded — queries < 5 sec (Step 4h)
+✅ **User approved** — feedback resolved (Step 4i)
+✅ Parameters documented in `state.md` (Step 4j)
+✅ Mobile tested if Phase 1 required (Step 4k)
 ✅ `state.md` updated (append only)
 
 ---
@@ -738,58 +753,3 @@ Mark engagement complete, share the final `dashboard.html`.
 **Version:** 1.0.0 (Lite)
 **Last Updated:** 15 July 2026
 **Author:** FDE Team
-
-### Performance Tuning: Profiling & Optimization Checklist
-
-**Scenario:** Dashboard loads slowly on first render.
-
-**Profiling tools:**
-
-| Tool | What it shows | How to use |
-|---|---|---|
-| **Browser DevTools → Performance tab** | Page load timeline, JavaScript execution | Chrome/Firefox: F12 → Performance → Record → Reload → Analyze |
-| **Browser DevTools → Network tab** | File sizes, load times per asset | F12 → Network → Reload; sort by size/time |
-| **generate-data.js timing** | Query execution time + data size | Add `console.time()` / `console.timeEnd()` around query() call |
-
-**Optimization checklist:**
-
-- [ ] **Query time:** Is `generate-data.js` query slow (> 5s)? Optimize SQL with pre-aggregation
-- [ ] **Data size:** Is embedded JSON > 500 KB? Apply numeric coercion (IDs instead of strings)
-- [ ] **Chart rendering:** Does Chart.js take > 2s to render? Reduce rows per dataset (LIMIT 100)
-- [ ] **Filter updates:** Does dashboard hang when user changes filters? Profile in DevTools; likely need client-side optimization
-- [ ] **Bundle size:** Is dashboard.html > 1 MB? Chart.js inline adds ~200 KB; acceptable if queries are fast
-
-**Quick wins:**
-
-1. **Before:** Full string data (product: "Premium Laptop")
-   **After:** Numeric IDs (product_id: 5) → 50% smaller payload
-   
-2. **Before:** Raw 10K rows
-   **After:** Pre-agg to 100-500 rows → 20x faster rendering
-   
-3. **Before:** Chart.js from CDN
-   **After:** Inlined Chart.js → No network round-trip, one larger file (acceptable tradeoff)
-
-**Typical performance profile (good):**
-
-- Query time: 2-3s
-- Data size: 100-200 KB (after coercion)
-- Chart render: < 1s
-- **Total page load: < 5s** ✅
-
-**If > 10s total load time:** Debug using profiling tools above; likely culprit is query time or data size.
-
----
-
----
-
-## ℹ️ Phase 3 Step Numbering Reference
-
-| Step | Topic |
-|---|---|
-| 3a | Assemble knowledge package (optional) |
-| 3b | Extract dashboard skill (Track A only) |
-| 3c-3k | Build, validate, test dashboard |
-| 3l | Load performance tuning (optional) |
-
----

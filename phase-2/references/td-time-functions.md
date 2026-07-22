@@ -121,7 +121,7 @@ GROUP BY td_time_string(order_time, 'd!', 'UTC')
 
 ```yaml
 +kpi_daily_1day:
-  td>: queries/kpi_daily_1day.sql
+  td>: sql/kpi_daily_1day.sql
   insert_into: kpi_daily  # Upsert existing rows, insert new ones
 ```
 
@@ -153,7 +153,7 @@ GROUP BY td_time_string(order_time, 'd!', 'UTC')
 
 ```yaml
 +kpi_daily_7day:
-  td>: queries/kpi_daily_7day.sql
+  td>: sql/kpi_daily_7day.sql
   create_table: kpi_daily  # Replace full 7-day window daily
 ```
 
@@ -202,7 +202,7 @@ For dynamic date handling in .dig files:
 
 ```bash
 # Test query performance
-tdx query -d sales_db < queries/kpi_daily_optimized.sql
+tdx query -d sales_db < sql/kpi_daily_optimized.sql
 
 # Expected: < 5 seconds
 

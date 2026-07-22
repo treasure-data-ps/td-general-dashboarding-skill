@@ -197,17 +197,17 @@ KBs are assembled in **two stages**. Don't wait for fully-populated KBs before t
 ```bash
 mkdir -p ./<project-slug>/agents/knowledge_bases
 
-cp phase-4/references/templates/agent-prompt-template.md \
+cp references/templates/agent-prompt-template.md \
    ./<project-slug>/agents/knowledge_bases/system_prompt.md
 ```
 
 Then fill `[DOMAIN]`, `[DATABASE]`, `[SINK_TABLES]`, `[CRITICAL_RULES]`, `[KEY_FACTS]`.
 
-**⚠️ Format Alert: Individual .yml files per KB, NOT a single dashboard_tables.yml**
+**File format: individual `.yml` files per table, one KB per table**
 
-The guide shows a single `dashboard_tables.yml`, but `tdx agent push` actually scans `knowledge_bases/` for **individual `.yml` files per table**, one file per knowledge base (KB). Each file is a separate KB that gets registered.
+`tdx agent push` scans `knowledge_bases/` for **individual `.yml` files per table**, one file per knowledge base (KB). Each file is a separate KB that gets registered.
 
-**CORRECT format — create one .yml file per SINK table:**
+**Format — one `.yml` file per SINK table, named after the table:**
 
 ```bash
 # File structure
@@ -259,12 +259,12 @@ enable_data_index: false
 
 ### First Push — Schema + Behavioral Rules Only
 
-Populate `system_prompt.md` and `dashboard_tables.yml` fully. Stub the other three.
+Populate `system_prompt.md` and the per-table `.yml` files (e.g. `sink_sales_revenue.yml`) fully. Stub the other three.
 
 | File | First-push action | Source |
 |------|-------------------|--------|
-| `system_prompt.md` | ✅ **Populate fully** — CRITICAL RULES at the top | Copied from `phase-4/references/templates/agent-prompt-template.md`; fill `[DOMAIN]`, `[DATABASE]`, `[SINK_TABLES]`, `[CRITICAL_RULES]`, `[KEY_FACTS]` |
-| `dashboard_tables.yml` | ✅ **Populate fully** — schema is confirmed | Phase 3 schema + Phase 2 confirmed totals (if run); include `confirmed_totals:` and `grain:` for every table; **use ONLY `{name, td_query}` format (not plain table names)** — see format example below |
+| `system_prompt.md` | ✅ **Populate fully** — CRITICAL RULES at the top | Copied from `references/templates/agent-prompt-template.md`; fill `[DOMAIN]`, `[DATABASE]`, `[SINK_TABLES]`, `[CRITICAL_RULES]`, `[KEY_FACTS]` |
+| `<table>.yml` (one per SINK table) | ✅ **Populate fully** — schema is confirmed | Phase 3 schema + Phase 2 confirmed totals (if run); include `confirmed_totals:` and `grain:` for every table; **use ONLY `{name, td_query}` format (not plain table names)** — see format example above |
 | `business_context.md` | ⚡ **Stub** — 3-5 bullets max | Phase 1 requirements (company, industry, dashboard purpose); full distillation happens post-validation |
 | `metrics_dictionary.md` | ⚡ **Stub** — name + SQL formula only | Phase 3 validated queries; NL phrasings added post-validation |
 | `sql_templates.md` | ⚡ **Stub for agent KB** — one KPI-summary template + one trend template only; **omit workflow SQL section** | Phase 3 core queries; agent doesn't need source→SINK transformation SQL |
@@ -303,9 +303,9 @@ LIMIT 30;
 
 Don't include workflow SQL (WF-Q1, WF-Q2, etc.) — remove that section entirely for agent KBs.
 
-**Why:** the agent needs `dashboard_tables.yml` (schema) and `system_prompt.md` (behavioral rules) to pass Test 1 (connectivity). The other KBs can be stubs — Round 1 test failures reveal exactly what's missing before you spend time writing them.
+**Why:** the agent needs the per-table `.yml` files (schema) and `system_prompt.md` (behavioral rules) to pass Test 1 (connectivity). The other KBs can be stubs — Round 1 test failures reveal exactly what's missing before you spend time writing them.
 
-> **Track A → Track B reuse (avoid re-authoring):** If Track A ran, `./<project-slug>/skills/knowledge/` already has `business_context.md`, `metrics_catalog.md`, and `sql_templates.md`. Copy these directly into `agents/knowledge_bases/` as the starting point — do NOT re-write from scratch. Track B adds `dashboard_tables.yml` and `system_prompt.md` on top.
+> **Track A → Track B reuse (avoid re-authoring):** If Track A ran, `./<project-slug>/skills/knowledge/` already has `business_context.md`, `metrics_catalog.md`, and `sql_templates.md`. Copy these directly into `agents/knowledge_bases/` as the starting point — do NOT re-write from scratch. Track B adds the per-table `.yml` files and `system_prompt.md` on top.
 >
 > ⚠️ **CRITICAL before copying `sql_templates.md` to agents/:** Remove the entire "## Workflow SQL" section (WF-Q1 through WF-Q8 blocks). The agent queries SINK tables directly and does NOT need source→SINK transformation SQL. Workflow SQL blocks inflate the file to 18,000+ characters, exceeding the Foundry KB text limit (~18K chars). Strip these blocks before copying to `agents/knowledge_bases/`.
 
@@ -358,11 +358,12 @@ WRONG:
 
 ```
 ./<project-slug>/agents/knowledge_bases/
-├── system_prompt.md         ← behavioral rules first
-├── dashboard_tables.yml     ← schema + confirmed totals
-├── business_context.md      ← stub on first push; full distillation post-validation
-├── metrics_dictionary.md    ← stub on first push; full definitions post-validation
-└── sql_templates.md         ← 2 templates on first push; full set post-validation
+├── system_prompt.md            ← behavioral rules first
+├── sink_sales_revenue.yml      ← one .yml per SINK table — schema + confirmed totals
+├── sink_customer_segments.yml  ← one .yml per SINK table
+├── business_context.md         ← stub on first push; full distillation post-validation
+├── metrics_dictionary.md       ← stub on first push; full definitions post-validation
+└── sql_templates.md            ← 2 templates on first push; full set post-validation
 ```
 
 ### Re-push After Validation
@@ -375,17 +376,22 @@ After the dashboard is validated and Round 1 test failures are analyzed:
 | `metrics_dictionary.md` | Full definitions — all NL phrasings + confirmed SQL; match **Excludes:** to the actual WHERE clauses | Phase 3 final queries, Phase 1 formulas |
 | `sql_templates.md` | All templates + customer-specific NL patterns | Phase 3 validated queries + Round 1 test failure patterns |
 | `system_prompt.md` | Add a CRITICAL RULE for each exclusion found during validation | Test failure analysis |
-| `dashboard_tables.yml` | Update column descriptions if the schema changed | Phase 3 final schema |
+| `<table>.yml` (each per-table file) | Update column descriptions if the schema changed | Phase 3 final schema |
 
-**Example `dashboard_tables.yml` with `confirmed_totals` and `grain`:**
+**Example `sink_sales_revenue.yml` with `confirmed_totals` and `grain`:**
 
 ```yaml
+name: sink_sales_revenue
+type: database
+database: td_reporting_agents
 tables:
   - name: sink_sales_revenue
     td_query: "SELECT * FROM <sink_db>.sink_sales_revenue LIMIT 1000"
     grain: "one row per order_date x region x channel"
     confirmed_totals:
       total_revenue: 1284302.55   # from Phase 1/3 spot-check — agent should match this within 1%
+enable_data: false
+enable_data_index: false
 ```
 
 **Example `metrics_dictionary.md` entry format:**
@@ -433,8 +439,8 @@ AskUserQuestion:
 **Only run `tdx llm project create` after user explicitly selects "Yes, create now".**
 
 **Step 3 — Confirm knowledge bases are ready for the push round:**
-- Round 1: `system_prompt.md` + `dashboard_tables.yml` fully populated, other 3 files stubbed
-- Round 2: all 5 files fully populated
+- Round 1: `system_prompt.md` + per-table `.yml` files fully populated, other 3 files stubbed
+- Round 2: all KB files fully populated
 
 **Step 4 — CONFIRMATION GATE — Show the deployment preview before pushing:**
 
@@ -460,7 +466,7 @@ AskUserQuestion:
 - Agent name: <agent-name>
 - Knowledge bases ready:
   - system_prompt.md: [file size] chars
-  - dashboard_tables.yml: [N tables listed]
+  - <table>.yml (one per SINK table): [N table .yml files listed]
   - business_context.md: [stub|full]
   - metrics_dictionary.md: [stub|full]
   - sql_templates.md: [stub|full]
@@ -502,8 +508,8 @@ Append to `state.md`:
 
 **⛔ Gate before running:** confirm KBs are ready for the round you're running.
 
-- **Round 1 (first push):** `system_prompt.md` fully populated + `dashboard_tables.yml` fully populated. Stubs for the other 3 files are acceptable — Round 1 failures tell you what to add before Round 2.
-- **Round 2 (post-validation re-push):** all 5 KB files fully populated (not stubs). `business_context.md` has a `## Exclusion Rules` section.
+- **Round 1 (first push):** `system_prompt.md` fully populated + all per-table `.yml` files fully populated. Stubs for the other 3 files are acceptable — Round 1 failures tell you what to add before Round 2.
+- **Round 2 (post-validation re-push):** all KB files fully populated (not stubs). `business_context.md` has a `## Exclusion Rules` section.
 
 Ask before running: *"KBs ready for Round [1/2]? Reply **run** to execute `tdx agent test --run all`."* Wait for explicit confirmation before executing.
 
@@ -541,7 +547,7 @@ tdx agent test --run all
 | Symptom | Fix |
 |---------|-----|
 | Agent describes instead of executes (any test) | `system_prompt.md` → CRITICAL RULE 1 must be line 1 |
-| Test 1 returns wrong total | `dashboard_tables.yml` → `confirmed_totals`; check `sql_templates.md` KPI-summary template's GROUP BY |
+| Test 1 returns wrong total | Per-table `.yml` → `confirmed_totals`; check `sql_templates.md` KPI-summary template's GROUP BY |
 | Test 3 dimension totals don't match | `sql_templates.md` breakdown template → add all grain columns to GROUP BY |
 | Test 5 metric value wrong | `metrics_dictionary.md` → **Excludes:** field must match the actual WHERE clause |
 | Agent ignores an exclusion | `system_prompt.md` → add a numbered CRITICAL RULE for that exclusion |
@@ -567,7 +573,7 @@ tdx agent test --reeval --name "dimension-breakdown"
 
 ## Track B Output
 
-✅ `agents/knowledge_bases/` — all 5 KB files, fully populated after Round 2
+✅ `agents/knowledge_bases/` — `system_prompt.md`, one `.yml` file per SINK table, `business_context.md`, `metrics_dictionary.md`, `sql_templates.md` — all fully populated after Round 2
 ✅ `agents/capabilities.md` — chosen capabilities + intent-routing logic
 ✅ `agents/compliance-gate.md` — compliance check result (if a flag was raised in Phase 1)
 ✅ Deployed, verified Foundry agent passing the 5-test validation suite
