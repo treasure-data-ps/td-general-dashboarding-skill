@@ -48,6 +48,7 @@ Gather business requirements (Stage A), validate them against real data (Stage B
 - [ ] Metrics inferred/validated against live queries
 - [ ] Dimensions validated (cardinality, join fan-out checked)
 - [ ] Data Quality Gate run (all checks passed)
+- [ ] **HTML Client data size validated** (total rows, estimated file size, feasibility check)
 
 **Scoring & Path Decision**
 - [ ] Promotion score calculated (Q1 + Q2 + Q3 = ___ / 6)
@@ -263,6 +264,73 @@ For each dimension user requests:
 
 ---
 
+### Rule P1-7b: HTML Client Data Size Validation (ENFORCEMENT)
+
+**⚠️ CRITICAL: Phase 1 must validate that dashboard design is feasible for HTML Client limits.**
+
+HTML Client stores data INLINE in the HTML file (not fetched from API). This creates hard limits:
+
+| Metric | Safe | Warning | Breaking |
+|--------|------|---------|----------|
+| HTML File Size | < 10 MB | 10-50 MB | > 50 MB |
+| Data Rows (total) | < 100K | 100K-500K | > 500K |
+| Load Time | < 2s | 2-5s | > 5s |
+
+**During Stage B (data discovery), for EACH widget:**
+
+1. **Estimate rows:**
+   ```
+   If aggregated (GROUP BY region, date, status):
+     90 days × 6 regions × 4 statuses = 2,160 rows ✅
+   
+   If raw events (no aggregation):
+     2.1M rows ❌ TOO LARGE
+   ```
+
+2. **Run actual query to test:**
+   ```bash
+   tdx query --output json < query.sql > data.json
+   ls -lh data.json
+   # If < 5 MB: ✅ Safe
+   # If 5-20 MB: ⚠️ Warning
+   # If > 20 MB: ❌ Likely breaks
+   ```
+
+3. **Identify problems:**
+   - Too many dimensions (combinations explode)?
+   - Raw events instead of aggregated?
+   - Too much history (3+ years daily data)?
+   - Too many dimensions in GROUP BY?
+
+4. **Solutions:**
+   - ✅ Aggregate more (weekly instead of daily, top 10 categories)
+   - ✅ Filter scope (last 90 days instead of 3 years)
+   - ✅ Reduce dimensions (remove least-used slicing dimension)
+   - ✅ Paginate tables (show top 1,000 rows only)
+   - ❌ If none work: Recommend Phase 4 (backend API) instead
+
+**Capture in state.md:**
+```yaml
+### HTML Client Data Validation
+
+Widget | Type | Estimated Rows | Estimated Size | Status
+--------|------|--------|--------|--------
+[Widget Name] | [Type] | [N rows] | [X KB/MB] | [✅/⚠️/❌]
+
+Total Estimated Size: [X MB]
+Feasibility: [✅ Safe / ⚠️ Warning / ❌ Not Feasible]
+
+If warning/failing, action taken:
+  - [Solution applied: e.g., "Reduced to weekly instead of daily"]
+  - [User approved: Yes/No]
+```
+
+**See:** `./references/html-client-data-limits.md` for detailed estimation and solutions
+
+**Why:** Discovering data size issues in Phase 1 prevents Phase 3 build failures or slow dashboards.
+
+---
+
 ### Rule P1-8: Metrics Validation
 
 For each metric user requests:
@@ -378,6 +446,18 @@ At end of Phase 1, create `state.md` with this structure:
 - Date Range: [range]
 - Data Freshness: [last updated]
 - Rendering: HTML Client (standalone, portable)
+
+**HTML Client Data Size Validation:**
+| Widget | Type | Rows | Size | Status |
+|--------|------|------|------|--------|
+| [Widget 1] | [Type] | [N] | [X KB] | ✅ |
+| [Widget 2] | [Type] | [N] | [X KB] | ✅ |
+
+- **Total Data Size:** [X MB]
+- **Final HTML File:** [X MB]
+- **Load Time (estimated):** [X seconds]
+- **Feasibility:** ✅ Safe for HTML Client OR ⚠️ Warning OR ❌ Not feasible
+- **Actions Taken (if any):** [e.g., "Reduced to weekly aggregation", "Filtered to last 90 days"]
 
 ### Path Decision
 
@@ -572,6 +652,33 @@ Date Range:        Last 90 days
 Data Freshness:    Updated 2 hours ago
 Rendering:         HTML Client (standalone, portable)
 
+=== HTML CLIENT DATA VALIDATION ===
+
+Data Size Estimates (Phase 1 Stage B):
+
+| Widget | Type | Estimated Rows | Size | Status |
+|--------|------|---------|--------|--------|
+| Total Revenue (KPI) | KPI | 1 | < 1 KB | ✅ Safe |
+| Revenue by Region (Bar) | Bar | 6 | < 5 KB | ✅ Safe |
+| Revenue Trend (Line) | Line | 90 | < 30 KB | ✅ Safe |
+| Revenue by Status (Pie) | Pie | 4 | < 2 KB | ✅ Safe |
+| Order Count (KPI) | KPI | 1 | < 1 KB | ✅ Safe |
+| Active Customers (KPI) | KPI | 1 | < 1 KB | ✅ Safe |
+| Orders by Status (Table) | Table | 4 | < 5 KB | ✅ Safe |
+| Orders per Day (Line) | Line | 90 | < 30 KB | ✅ Safe |
+| Customer Acq (Cumulative) | Area | 90 | < 30 KB | ✅ Safe |
+
+**Total Data:** ~107 KB
+**HTML/JS/CSS:** ~50 KB
+**Final HTML File:** ~250 KB
+
+**Feasibility:** ✅ SAFE FOR HTML CLIENT
+- Load time (estimated): < 1 second
+- Browser compatibility: All modern browsers
+- Performance: Smooth interactions
+
+**Actions Taken:** None needed — data is well within limits
+
 Conflicts Detected: None
 ```
 
@@ -670,9 +777,10 @@ END Phase 1
 
 - [ ] All Stage A questions answered (1a-1o)
 - [ ] All Stage B data validations complete (tables confirmed, columns verified, joins tested)
+- [ ] **HTML Client data size validated** (all widgets checked, feasibility confirmed)
 - [ ] Promotion Score calculated (0-6, with breakdown)
-- [ ] Dashboard Plan Summary displayed to user (Rule P1-11)
-- [ ] User reviewed and approved the plan
+- [ ] Dashboard Plan Summary displayed to user (Rule P1-11) — includes data validation
+- [ ] User reviewed and approved the plan (including data feasibility)
 - [ ] Path Confirmation obtained (Rule P1-10)
 - [ ] state.md created with ALL Phase 1 results:
   - Business requirements documented

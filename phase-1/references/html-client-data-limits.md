@@ -51,44 +51,11 @@ Sample Calculation:
 
 ---
 
-## Step 2: Calculate Filter Data Size
-
-**Filter options also add to data.json! For EACH filter, calculate:**
-
-```
-Global Filters:
-  • Date Range Filter: No data (just min/max dates)
-  • Region Filter: 6 values × ~30 bytes = ~180 bytes
-  • Order Status Filter: 4 values × ~30 bytes = ~120 bytes
-  • Subtotal: ~300 bytes
-
-Tab-Specific Filters (if any):
-  • Category Filter (Tab 2): 42 values × ~30 bytes = ~1,260 bytes
-  • Channel Filter (Tab 3): 5 values × ~30 bytes = ~150 bytes
-  • Subtotal: ~1,410 bytes
-
-Total Filter Data: ~1,710 bytes ≈ ~2 KB
-```
-
-**⚠️ WARNING CASE: High-cardinality filters**
-```
-If you have a filter with 100K+ unique values (e.g., customer_id):
-  • 100,000 values × 30 bytes = ~3 MB just for filter options
-  • This alone breaks HTML Client
-  
-SOLUTION:
-  • Use search/autocomplete instead of dropdown (don't load all options)
-  • Filter by aggregated dimension (region, category) not raw IDs
-  • Don't include high-cardinality filters in data.json
-```
-
----
-
-## Step 3: Calculate Total HTML File Size
+## Step 2: Calculate Total HTML File Size
 
 **Formula:**
 ```
-Total Size ≈ (Widget Data) + (Filter Data) + (JavaScript + HTML markup)
+Total Size ≈ (Sum of all data rows) × (Avg bytes per row) + JavaScript + HTML markup
 
 Avg bytes per row:
   • Numeric columns (int, float): 8 bytes
@@ -101,12 +68,11 @@ Example:
   Widget 2 (Bar Chart): 2,160 rows × 8 columns (6 numeric, 2 text) ≈ 2,160 × 120 = 259 KB
   Widget 3 (Trend Line): 90 rows × 3 columns (2 numeric, 1 date) ≈ 90 × 50 = 4.5 KB
   
-  Subtotal (widget data): ~264 KB
-  Filter data: ~2 KB
+  Subtotal (data): ~264 KB
   JS/HTML/CSS: ~50 KB
-  JSON wrapper: +20% = ~53 KB
+  JSON wrapper: +20% = +53 KB
   
-  ➜ Total: ~369 KB ✅ SAFE
+  ➜ Total: ~367 KB ✅ SAFE
 ```
 
 **Better way: Test with real data:**
@@ -124,50 +90,6 @@ ls -lh data.json
 ---
 
 ## Step 3: Identify Data Size Issues & Solutions
-
-### Issue 0: High-Cardinality Filters
-
-**Problem:** Filter with too many unique values (e.g., customer_id with 100K+ values).
-
-**Why it breaks:**
-```
-If you show all options in a dropdown:
-  100,000 customer IDs × 30 bytes = ~3 MB just for filter options ❌
-
-Plus all the widget data:
-  Total: > 50 MB ❌ BREAKS
-```
-
-**Solution:**
-- ❌ Don't include high-cardinality filters in dashboard
-- ✅ Options:
-  1. **Use search/autocomplete:** Let users TYPE customer ID (don't load all options)
-  2. **Filter by aggregated dimension:** Filter by Region (6 values) not Customer ID (100K)
-  3. **Pre-filter:** Show only "top 100 customers by revenue" instead of all
-  4. **Split across dashboards:** Customer-level dashboard is separate from region/status dashboard
-
-**Example:**
-```yaml
-❌ BAD Filter Design:
-  Filters:
-    - Date Range
-    - Region (6 values)
-    - Order Status (4 values)
-    - Customer ID (100,000 values) ❌ TOO MANY
-    - Product ID (50,000 values) ❌ TOO MANY
-
-✅ GOOD Filter Design:
-  Global Filters:
-    - Date Range
-    - Region (6 values) — dropdown
-    - Order Status (4 values) — dropdown
-  
-  Search (not filter):
-    - Customer search box (autocomplete, don't load all)
-    - Product search box (autocomplete, don't load all)
-```
-
----
 
 ### Issue 1: Too Many Rows (Raw Events)
 
@@ -198,68 +120,7 @@ Plus all the widget data:
   3. Aggregate by month instead of day
   4. Split into multiple dashboards (one per region)
 
-### Issue 3: Too Many Filters (Multiplier Effect)
-
-**Problem:** Dashboard has 5 global filters + 3 tab-specific filters = lots of filter data.
-
-**Why it matters:**
-```
-If each filter needs to show all unique values:
-  • Region: 6 values
-  • Status: 4 values  
-  • Category: 42 values
-  • Channel: 8 values
-  • Customer Segment: 12 values
-  
-  Filter data = 6 + 4 + 42 + 8 + 12 = 72 dropdown options
-  72 × ~30 bytes = ~2 KB (acceptable)
-  
-BUT if you add:
-  • Product ID: 5,000 values ❌
-  • Customer ID: 100,000 values ❌
-  
-  Then: 5,000 + 100,000 = 105,000 options × 30 = ~3 MB just filters
-```
-
-**Solution:**
-- Limit dropdown filters to < 50 options each
-- Use search/autocomplete for high-cardinality dimensions
-- Per-tab filters are OK (only load when tab is active, but still in data.json)
-- Recommended max:
-  - Global filters: 3-5 (all visible, always loaded)
-  - Tab-specific filters: 1-2 per tab
-
----
-
-### Issue 4: Too Many Tabs (Multiplier Effect)
-
-**Problem:** Dashboard has 10+ tabs with different data.
-
-**Why it matters:**
-```
-Each tab can have different metric combinations.
-If tabs are:
-  1. Revenue Overview (2 KB data)
-  2. Orders Detail (3 KB data)
-  3. Customer Analysis (4 KB data)
-  4. Trends (5 KB data)
-  5. Geographic (3 KB data)
-  
-  Total: 17 KB ✅ Safe
-
-BUT if you have:
-  1-10: Regional dashboards (one per region)
-        Each with 2.1M rows = 10 × 2.1M = 21M rows ❌ BREAKS
-```
-
-**Solution:**
-- Limit to 3-5 tabs per dashboard
-- If you need per-region views, split into multiple dashboards (one per region)
-- All tab data is loaded upfront (even if user doesn't visit tab)
-
----
-
-### Issue 5: High Time Resolution
+### Issue 3: High Time Resolution
 
 **Problem:** Widget shows daily data for 3 years = 1,095 rows per series.
 
@@ -351,13 +212,12 @@ AskUserQuestion:
 **During Stage B, run this check:**
 
 ```python
-# Pseudo-code for estimating HTML file size (including filters)
+# Pseudo-code for estimating HTML file size
 
-def estimate_html_size(widgets, filters):
+def estimate_html_size(widgets):
     total_rows = 0
     total_bytes = 0
     
-    # Widget data
     for widget in widgets:
         query_result = run_query(widget['query'])
         rows = len(query_result)
@@ -370,45 +230,20 @@ def estimate_html_size(widgets, filters):
         
         print(f"{widget['name']}: {rows} rows, {widget_bytes/1024:.0f} KB")
     
-    # Filter data
-    filter_bytes = 0
-    print("\n=== FILTER DATA ===")
-    for filter_obj in filters:
-        cardinality = run_query(f"SELECT COUNT(DISTINCT {filter_obj['column']}) FROM {filter_obj['table']}")
-        
-        if cardinality > 10_000:
-            print(f"❌ {filter_obj['name']}: {cardinality:,} values - TOO MANY (use search)")
-            return None  # Not feasible
-        elif cardinality > 100:
-            print(f"⚠️  {filter_obj['name']}: {cardinality:,} values - Consider search autocomplete")
-        else:
-            print(f"✅ {filter_obj['name']}: {cardinality:,} values")
-        
-        filter_bytes += cardinality * 30  # ~30 bytes per value
-    
-    total_bytes += filter_bytes
-    print(f"\nFilter data: {filter_bytes/1024:.1f} KB")
-    
     # Add overhead
     js_html_css = 50_000  # ~50 KB
     json_overhead = total_bytes * 0.2
     
     final_size = total_bytes + js_html_css + json_overhead
     
-    print(f"\n=== TOTAL SIZE ===")
-    print(f"Total rows: {total_rows:,}")
-    print(f"Widget data: {(total_bytes - filter_bytes)/1024/1024:.1f} MB")
-    print(f"Filter data: {filter_bytes/1024:.1f} KB")
-    print(f"HTML/JS/CSS: 50 KB")
-    print(f"JSON overhead: {json_overhead/1024:.1f} KB")
-    print(f"Final HTML file: {final_size/1024/1024:.1f} MB")
+    print(f"\nTotal: {total_rows} rows, {final_size/1024/1024:.1f} MB")
     
     if final_size < 10_000_000:  # 10 MB
-        print("\n✅ SAFE for HTML Client")
+        print("✅ SAFE for HTML Client")
     elif final_size < 50_000_000:  # 50 MB
-        print("\n⚠️  WARNING - Monitor performance")
+        print("⚠️  WARNING - Monitor performance")
     else:
-        print("\n❌ NOT FEASIBLE - Reduce scope")
+        print("❌ NOT FEASIBLE - Reduce scope")
     
     return final_size
 ```
@@ -425,49 +260,6 @@ def estimate_html_size(widgets, filters):
 | Daily trend 2 years (730 rows per chart) | ⚠️ OK if < 5 charts | Aggregate to weekly or use 1 year history |
 | Raw transaction table (1M+ rows) | ❌ Never OK | Aggregate, paginate, or use backend API |
 | Real-time dashboard (updates every minute) | ❌ Never OK for HTML | Use backend + API in Phase 4 (out of scope) |
-
----
-
-## Recommended Filter Architecture for HTML Client
-
-| Filter Type | Safe Range | Example | Notes |
-|------------|-----------|---------|-------|
-| **Global filters** (apply to all tabs) | 3-5 | Date, Region, Status | All loaded upfront |
-| **Low-cardinality** (< 50 values) | Any | Region (6), Status (4), Category (42) | Dropdown safe |
-| **Medium-cardinality** (50-500) | Use with caution | Product (100), Segment (50) | Monitor file size |
-| **High-cardinality** (> 500) | ❌ Don't use | Customer ID (100K), User ID (1M) | Use search/autocomplete |
-| **Tab-specific filters** | 1-2 per tab | Only on Tab 2: Category | Reduces global complexity |
-| **Drill-down** | Reasonable | Click region → see detail | Avoid if already have many filters |
-
-**Best Practice Configuration:**
-
-```yaml
-Dashboard: Sales Performance
-
-Global Filters (always visible):
-  - Date Range: [date picker]
-  - Region: [dropdown, 6 values]
-  - Order Status: [dropdown, 4 values]
-
-Tab 1: Revenue Overview
-  - No additional filters
-  - Uses global filters only
-
-Tab 2: Orders Detail
-  - Tab filter: Category [dropdown, 42 values]
-  - Uses global filters + category
-
-Tab 3: Customer Analysis
-  - Tab filter: Segment [dropdown, 12 values]
-  - Uses global filters + segment
-
-NOT included (would break):
-  - Customer ID filter (100K values) ❌
-  - Product ID filter (50K values) ❌
-  - Full order table (2.1M rows) ❌
-
-If needed: Use search box (autocomplete, don't load all values)
-```
 
 ---
 
