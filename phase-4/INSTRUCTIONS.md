@@ -1,0 +1,425 @@
+---
+name: phase-4-instructions
+description: Phase 4 specific instructions for automation and agent deployment
+priority: MEDIUM
+load_order: 1.4
+---
+
+# Phase 4 Instructions — Automate & Deploy Agents
+
+**Read this BEFORE `./SKILL.md`.**
+
+**Phase 4 is OPTIONAL (after Phase 3 approved).**
+
+---
+
+## Phase 4 Goal
+
+Extend the dashboard with two optional automation tracks:
+
+**Track A: Extract Reusable Skill**
+- Convert Phase 3 dashboard to a reusable Claude Code skill
+- Enables faster builds of similar dashboards in the future
+
+**Track B: Deploy Conversational Agent**
+- Create a Foundry agent with access to dashboard data
+- Users can ask questions in natural language
+- Agent queries data on-the-fly or uses precomputed tables
+
+**Deliverable:**
+- Track A: A reusable skill (SKILL.md + references/)
+- Track B: A Foundry agent project (agent.yml + knowledge base)
+- state.md appended with Phase 4 results
+
+---
+
+## Phase 4 Specific Rules (In Addition to Universal Rules)
+
+### Rule P4-1: Track A Approval Gate — Skill Creation
+
+Before extracting a reusable skill, get user approval:
+
+```
+📋 Ready to create reusable skill:
+
+Skill Name: [name]
+Description: [1-2 sentences]
+
+Skill will:
+  • Accept similar data structures (same source tables/columns)
+  • Generate dashboard.html in <30 minutes (typical)
+  • Be shareable with other teams
+
+Skill components:
+  • SKILL.md (instructions)
+  • references/ (query templates, theme)
+  • Tests (verify skill works end-to-end)
+
+Do you approve? (YES / NO)
+```
+
+**If NO:** Stop. Track A not needed.
+**If YES:** Proceed with skill extraction.
+
+---
+
+### Rule P4-2: Track B Approval Gate — Agent Creation
+
+Before creating Foundry agent, get user approval:
+
+```
+📋 Ready to deploy Foundry agent:
+
+Agent Name: [name]
+Description: [1-2 sentences]
+
+Agent capabilities:
+  • Answer questions about dashboard metrics
+  • Query live or precomputed tables
+  • Support natural language queries
+  • Audit trail (all queries logged)
+
+Cost impact:
+  • Agent queries cost: ~$X per query
+  • Monthly estimate: ~$X (depending on usage)
+
+Who can access: [internal / shared / public]
+
+Do you approve? (YES / NO)
+```
+
+**If NO:** Stop. Track B not needed.
+**If YES:** Proceed with agent deployment.
+
+---
+
+### Rule P4-3: Track A — Skill Structure
+
+Extracted skill must follow standard structure:
+
+```
+skill-name/
+├── SKILL.md (orchestrator + instructions)
+├── INSTRUCTIONS.md (skill-specific rules)
+├── references/
+│   ├── queries/
+│   │   ├── kpi_1.sql
+│   │   ├── kpi_2.sql
+│   │   └── ...
+│   ├── templates/
+│   │   └── dashboard.html.template
+│   ├── treasure-data-theme.md
+│   └── [other references]
+├── tests/
+│   ├── test-query-execution.js
+│   ├── test-html-rendering.js
+│   └── test-spot-check.js
+└── .claude-plugin/
+    └── marketplace.json (if shareable)
+```
+
+---
+
+### Rule P4-4: Track A — Query Templates Must Be Parameterized
+
+All extracted queries must accept parameters:
+
+```sql
+-- ✅ RIGHT: parameterized for reuse
+SELECT 
+  DATE(event_time) AS date,
+  region,
+  SUM(amount) AS revenue
+FROM {{SOURCE_TABLE}}
+WHERE event_time >= '{{START_DATE}}'
+  AND event_time < '{{END_DATE}}'
+GROUP BY DATE(event_time), region
+ORDER BY date DESC, region
+```
+
+**Not:**
+```sql
+-- ❌ WRONG: hardcoded to this project
+SELECT ... FROM sales_events WHERE event_time >= '2026-07-01'
+```
+
+**Why:** Reusable skill accepts different source tables + date ranges.
+
+---
+
+### Rule P4-5: Track B — Agent Knowledge Base
+
+Foundry agent knowledge base MUST include:
+
+1. **Schema documentation** (table names, column names, types)
+2. **Spot-checked values** (e.g., "Total customers: 1,200,000")
+3. **Dimension options** (e.g., "Regions: US, EU, APAC")
+4. **Query patterns** (how to filter, aggregate, join)
+
+**Example KB section:**
+```yaml
+tables:
+  - name: sales_revenue
+    description: "Daily revenue by region"
+    columns:
+      - date: "Date (YYYY-MM-DD)"
+      - region: "Region code (US, EU, APAC)"
+      - revenue: "Revenue amount (USD)"
+    verified_values:
+      - "Total revenue (all time): $45.2M"
+      - "Average daily: $125K"
+    sample_query: |
+      SELECT SUM(revenue) FROM sales_revenue 
+      WHERE date >= '2026-01-01'
+
+dimensions:
+  - region: ["US", "EU", "APAC"]
+  - date_range: ["Last 7 days", "Last 30 days", "YTD"]
+```
+
+---
+
+### Rule P4-6: Track B — Agent Approval Before Tools Access
+
+Foundry agent MUST NOT access production systems without explicit approval:
+
+- [ ] Agent queries are read-only (SELECT only, no INSERT/UPDATE/DELETE)
+- [ ] Agent has access to SINK tables (Phase 2) or limited source tables
+- [ ] Agent queries are audited (all user queries logged)
+- [ ] User can disable agent at any time (revoke permissions)
+
+---
+
+### Rule P4-7: Track A — Skill Must Be Tested End-to-End
+
+Before finalizing extracted skill:
+
+- [ ] Test 1: Use skill to build a dashboard from scratch
+- [ ] Test 2: Verify output matches Phase 3 dashboard structure
+- [ ] Test 3: Spot-check numbers from Test 1 dashboard against DB
+
+```javascript
+// test-skill-end-to-end.js
+async function testSkill() {
+  // 1. Load skill
+  const skill = loadSkill('skill-name');
+  
+  // 2. Run with test inputs
+  const result = await skill.build({
+    source_table: 'test_events',
+    start_date: '2026-07-01',
+    metrics: ['revenue', 'customers']
+  });
+  
+  // 3. Verify output
+  assert(result.html_file_exists, 'dashboard.html created');
+  assert(result.contains('Total Revenue'), 'KPI present');
+  
+  // 4. Spot-check
+  const dashValue = extractFromHTML(result, 'Total Revenue');
+  const dbValue = await queryDB('SELECT SUM(amount) FROM test_events');
+  assert(dashValue === dbValue, 'numbers match');
+}
+```
+
+---
+
+### Rule P4-8: Track B — Agent Knowledge Base Must Be Accurate
+
+Before deploying agent:
+
+- [ ] All table names verified (match actual DB schema)
+- [ ] All column names verified (exact spelling, case-sensitive)
+- [ ] Spot-checked values confirmed current (not stale)
+- [ ] Query patterns tested (run sample queries, verify results)
+
+**Validation checklist:**
+```bash
+# Verify table exists
+tdx describe <db>.sales_revenue
+
+# Verify columns
+tdx query "SELECT * FROM sales_revenue LIMIT 1"
+
+# Verify sample aggregate
+tdx query "SELECT COUNT(*), SUM(revenue) FROM sales_revenue"
+# Compare against KB documented values
+```
+
+---
+
+### Rule P4-9: State.md Append (Phase 4)
+
+Append Phase 4 results to state.md:
+
+```yaml
+---
+
+## Phase 4 — Automate & Deploy Agents
+**Date:** [date]
+**Status:** ✅ Complete
+
+### Track A: Reusable Skill
+
+- **Skill Name:** [name]
+- **Repository:** [path or URL]
+- **Status:** ✓ Extracted and tested
+- **Tests:** [N] end-to-end tests passing
+
+**Queryable Parameters:**
+  - source_table: [default or options]
+  - start_date: [format]
+  - end_date: [format]
+  - metrics: [list]
+  - dimensions: [list]
+
+---
+
+### Track B: Foundry Agent
+
+- **Agent Name:** [name]
+- **Visibility:** [internal / shared / public]
+- **Status:** ✓ Deployed and tested
+- **Knowledge Base:** [tables], [dimensions], [verified values]
+
+**Agent Capabilities:**
+  - Query 1: [description]
+  - Query 2: [description]
+  - Query 3: [description]
+
+**Access Control:**
+  - Read-only access: ✓
+  - Audit logging: ✓
+  - Can be disabled: ✓
+
+---
+
+### Validation Results
+
+- [ ] Track A: End-to-end skill test passed
+- [ ] Track A: Output matches Phase 3 structure
+- [ ] Track B: KB tables verified against DB schema
+- [ ] Track B: KB spot-checked values confirmed current
+- [ ] Track B: Sample agent queries return expected results
+
+---
+
+## Next Action
+
+1. ✓ Phase 4 complete (optional automation done)
+2. Optional: Phase 5 (handoff documentation)
+3. Or: Project complete and ready for production
+```
+
+---
+
+## Phase 4 Pre-Flight Checklist
+
+**Before starting Phase 4, verify:**
+
+### Prerequisites
+- [ ] Phase 3 dashboard is approved and working
+- [ ] state.md exists and up-to-date
+- [ ] Decision made: Track A (skill), Track B (agent), or both?
+
+### Track A Setup (if chosen)
+- [ ] Phase 3 dashboard queries are parameterized
+- [ ] Reusable skill structure designed
+- [ ] Template variables identified
+- [ ] Test plan created
+
+### Track B Setup (if chosen)
+- [ ] Foundry agent is new or existing project available
+- [ ] Knowledge base schema documented
+- [ ] Query patterns identified
+- [ ] Access control planned (read-only verified)
+
+---
+
+## Phase 4 Decision Tree
+
+```
+START Phase 4: Automate & Deploy Agents
+    ↓
+Is Phase 3 dashboard approved?
+    NO  ↓ → ERROR: Cannot proceed without Phase 3 complete
+    YES ↓ → Continue
+    ↓
+Decide: Track A (skill), Track B (agent), or both?
+    ↓
+TRACK A FLOW (if chosen):
+    ├─ Get user approval (Rule P4-1)
+    ├─ Extract queries to templates
+    ├─ Create SKILL.md + INSTRUCTIONS.md
+    ├─ Create test suite
+    ├─ Run end-to-end tests
+    ├─ Verify output matches Phase 3
+    └─ Finalize + document
+    ↓
+TRACK B FLOW (if chosen):
+    ├─ Get user approval (Rule P4-2)
+    ├─ Create/load Foundry agent project
+    ├─ Document knowledge base (tables + schema)
+    ├─ Add spot-checked values
+    ├─ Verify KB against actual DB schema
+    ├─ Test sample queries
+    ├─ Configure access control (read-only)
+    └─ Deploy agent
+    ↓
+Append Phase 4 results to state.md
+    ↓
+END Phase 4
+```
+
+---
+
+## Common Phase 4 Blocks
+
+### Track A: "How do I make this reusable?"
+**Response:**
+> "Parameterize the queries: replace hardcoded values with {{PLACEHOLDER}}. For example, {{SOURCE_TABLE}}, {{START_DATE}}, {{METRICS}}. Then the skill can accept these as inputs for any similar project."
+
+### Track B: "My agent is giving wrong numbers"
+**Response:**
+> "Common causes: (1) KB has stale spot-checked values, (2) KB has wrong table/column names, (3) Sample queries in KB aren't matching actual data. Let me verify KB against current schema and update it."
+
+### Track A: "What if the next project has different columns?"
+**Response:**
+> "Good question. The skill accepts column names as parameters. So for Project 2 with different columns, you provide a mapping: {original_column} → {project_2_column}. The SKILL.md documents how to do this."
+
+### Track B: "Can the agent write to the database?"
+**Response:**
+> "No — agent has read-only access (SELECT only). This is a security gate to prevent accidental modifications. If you need write access, that would require separate approval + audit logging."
+
+---
+
+## After Phase 4 Completes
+
+**If Track A created:**
+```
+✓ Reusable skill ready
+  - Can be shared with other teams
+  - Speeds up future similar dashboards
+  - Documented with parameters
+```
+
+**If Track B created:**
+```
+✓ Foundry agent deployed
+  - Users can ask questions in natural language
+  - Agent queries live or precomputed data
+  - All queries logged for audit
+```
+
+**Both or neither:**
+```
+✓ Phase 4 complete (or skipped)
+  Optional: Phase 5 (handoff documentation)
+  Or: Project complete and production-ready
+```
+
+---
+
+**Version:** 1.0.0
+**Last Updated:** 22 July 2026
+**Load Order:** 1.4 (read after Phase 1-3 INSTRUCTIONS.md)
