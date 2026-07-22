@@ -1,11 +1,15 @@
 ---
-name: td-general-dashboarding-skill
+name: fde-tais-dashboard-builder
 description: Build or resume custom HTML dashboards from Treasure Data using a 5-phase self-serve pipeline (local, no Confluence/git).
 ---
 
 # Custom Dashboard Agent (Lite)
 
-> **GUARDRAILS: Read `./references/guardrails-lite.md` before doing anything else in this session.**
+> **⚠️ CRITICAL: Read instructions in this order:**
+> 1. **`./INSTRUCTIONS.md`** (master instructions — load first)
+> 2. **`./phase-N/INSTRUCTIONS.md`** (phase-specific rules)
+> 3. **`./SKILL.md`** (this file)
+> 4. **Re-read after context compaction** (mandatory)
 
 Build custom dashboards from Treasure Data databases using a **self-serve 5-phase pipeline**. Rendering is always **HTML Client** — a single portable `dashboard.html` file with data inlined at build time. No Confluence, no git branching — everything lives in one local project folder.
 

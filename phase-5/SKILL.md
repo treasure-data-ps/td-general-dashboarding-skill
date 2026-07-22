@@ -1,11 +1,17 @@
 ---
-name: td-general-dashboarding-skill-phase-5
+name: fde-tais-dashboard-builder-phase-5
 description: INTERNAL — Phase 5 only. Optional: create 4 local handoff documentation files.
 ---
 
 # Phase 5: Handoff Documentation (Custom Dashboard Agent — Lite)
 
-> **GUARDRAILS: Read `../references/guardrails-lite.md` before doing anything else in this session.**
+> **Read in this order:**
+> 1. `../INSTRUCTIONS.md` (master rules, load_order: 0)
+> 2. `./INSTRUCTIONS.md` (Phase 5 rules, load_order: 1.5)
+> 3. `./CHECKLIST.md` (quick decision guide)
+> 4. `./SKILL.md` (this file — full details)
+> 5. `./references/phase-5-walkthrough.md` (step-by-step walkthrough)
+> 6. `../references/INSTRUCTIONS.md` (cross-phase guardrails)
 
 **Phase Goal:** Create 4 local markdown documentation files that enable the user's team to use, maintain, and support the dashboard independently — then formally close the engagement.
 

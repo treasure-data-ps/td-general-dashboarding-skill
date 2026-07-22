@@ -1,11 +1,17 @@
 ---
-name: td-general-dashboarding-skill-phase-2
+name: fde-tais-dashboard-builder-phase-2
 description: INTERNAL — Phase 2 only. Deploy a scheduled workflow that pre-aggregates metrics into SINK tables.
 ---
 
 # Phase 2: Deploy Dashboard Workflow (Custom Dashboard Agent — Lite)
 
-> **GUARDRAILS: Read `../references/guardrails-lite.md` before doing anything else in this session.**
+> **Read in this order:**
+> 1. `../INSTRUCTIONS.md` (master rules, load_order: 0)
+> 2. `./INSTRUCTIONS.md` (Phase 2 rules, load_order: 1.2)
+> 3. `./CHECKLIST.md` (quick decision guide)
+> 4. `./SKILL.md` (this file — full details)
+> 5. `./references/phase-2-walkthrough.md` (step-by-step walkthrough)
+> 6. `../references/INSTRUCTIONS.md` (cross-phase guardrails)
 
 **Phase Goal:** Convert approved Stage B queries into a scheduled Treasure Data Workflow that pre-aggregates metrics into workflow output tables (SINK tables) — making Phase 3 dashboard queries fast, fresh, and production-grade.
 

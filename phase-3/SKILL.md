@@ -1,12 +1,18 @@
 ---
-name: td-general-dashboarding-skill-phase-3
+name: fde-tais-dashboard-builder-phase-3
 description: |
   INTERNAL — Phase 3 only. Build and validate an interactive HTML Client dashboard.
 ---
 
 # Phase 3: Build + Validate Interactive Dashboard (Custom Dashboard Agent — Lite)
 
-> **GUARDRAILS: Read `../references/guardrails-lite.md` before doing anything else in this session.**
+> **Read in this order:**
+> 1. `../INSTRUCTIONS.md` (master rules, load_order: 0)
+> 2. `./INSTRUCTIONS.md` (Phase 3 rules, load_order: 1.3)
+> 3. `./CHECKLIST.md` (quick decision guide)
+> 4. `./SKILL.md` (this file — full details)
+> 5. `./references/phase-3-walkthrough.md` (step-by-step walkthrough)
+> 6. `../references/INSTRUCTIONS.md` (cross-phase guardrails)
 
 **Phase Goal:** See `../references/architecture-and-state.md` for phase overview.
 
