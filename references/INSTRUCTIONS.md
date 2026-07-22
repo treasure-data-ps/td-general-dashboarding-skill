@@ -137,7 +137,46 @@ Before writing any query, map what the template displays, then fetch only those 
 
 ---
 
-## 3. Rendering (HTML Client only)
+## 3. state.md Preservation & Validation (All Phases Critical)
+
+**RULE: state.md integrity must be verified before starting or resuming any phase.**
+
+### Validation Checklist (CANNOT BYPASS)
+
+Before starting any phase, run this validation:
+
+```
+✓ state.md file exists (not deleted/lost)?
+✓ Previous phases are APPENDED (not overwritten)?
+✓ Each phase section has a date and status?
+✓ "Next Action" pointer is present at bottom?
+✓ If re-read after compaction: checkpoint proof present?
+
+If ANY fails:
+  → STOP immediately
+  → CANNOT proceed to next phase
+  → Ask user to recover or confirm restart
+```
+
+### What Happens if state.md Fails Validation
+
+```
+CANNOT proceed. State is corrupted or lost.
+
+Options:
+1. User provides state.md contents (paste it back)
+2. User confirms recovery is possible (contact support)
+3. User wants to restart phase from beginning
+4. User wants to restart entire project (Phase 1)
+
+I will not guess or proceed without confirmed state.
+```
+
+**Why:** state.md is the single source of truth across phases. Without it, context is lost, decisions can't be traced, and phase continuity breaks.
+
+---
+
+## 4. Rendering (HTML Client only)
 
 This skill produces a single portable `dashboard.html` file with data inlined at build time — no server, no separate API calls at runtime. This is the only rendering pattern in scope.
 

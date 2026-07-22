@@ -35,9 +35,11 @@ Extend the dashboard with two optional automation tracks:
 
 ## Phase 4 Specific Rules (In Addition to Universal Rules)
 
-### Rule P4-1: Track A Approval Gate — Skill Creation
+### Rule P4-1: Track A Approval Gate — Skill Creation (ENFORCEMENT)
 
-Before extracting a reusable skill, get user approval:
+**⚠️ CRITICAL: CANNOT extract skill without explicit user approval.**
+
+**Step 1: Present approval template (COPY/PASTE exactly):**
 
 ```
 📋 Ready to create reusable skill:
@@ -49,23 +51,39 @@ Skill will:
   • Accept similar data structures (same source tables/columns)
   • Generate dashboard.html in <30 minutes (typical)
   • Be shareable with other teams
+  • Be stored at: [path]
 
 Skill components:
   • SKILL.md (instructions)
+  • INSTRUCTIONS.md (rules)
+  • CHECKLIST.md (quick reference)
   • references/ (query templates, theme)
-  • Tests (verify skill works end-to-end)
+  • tests/ (end-to-end verification)
 
-Do you approve? (YES / NO)
+To approve, please type exactly: YES, APPROVE SKILL EXTRACTION FOR [SKILL_NAME]
 ```
 
-**If NO:** Stop. Track A not needed.
-**If YES:** Proceed with skill extraction.
+**Step 2: Wait for response**
+- If user types: "YES, APPROVE SKILL EXTRACTION FOR [SKILL_NAME]" → Proceed ✓
+- If user types: "NO" or anything else → **STOP** ✗
+
+**Step 3: If NO**
+- Do not create skill
+- Ask: "Would you like to skip Track A?"
+- If yes: Move to Track B or Phase 5
+
+**If user says "just extract it":**
+> "I cannot proceed without explicit approval. Skill extraction creates a new asset that will be reused across projects. I need your confirmation.
+>
+> Please type exactly: YES, APPROVE SKILL EXTRACTION FOR [SKILL_NAME]"
 
 ---
 
-### Rule P4-2: Track B Approval Gate — Agent Creation
+### Rule P4-2: Track B Approval Gate — Agent Creation (ENFORCEMENT)
 
-Before creating Foundry agent, get user approval:
+**⚠️ CRITICAL: CANNOT deploy agent without explicit user approval.**
+
+**Step 1: Present approval template (COPY/PASTE exactly):**
 
 ```
 📋 Ready to deploy Foundry agent:
@@ -74,22 +92,37 @@ Agent Name: [name]
 Description: [1-2 sentences]
 
 Agent capabilities:
-  • Answer questions about dashboard metrics
+  • Answer natural language questions about dashboard metrics
   • Query live or precomputed tables
-  • Support natural language queries
-  • Audit trail (all queries logged)
+  • Support conversational analysis
+  • Audit trail (all queries logged, read-only access)
 
 Cost impact:
   • Agent queries cost: ~$X per query
   • Monthly estimate: ~$X (depending on usage)
+  • Monthly budget alert: [set if applicable]
 
-Who can access: [internal / shared / public]
+Access control:
+  • Who can access: [internal / shared / public]
+  • Permissions: Read-only (SELECT only, no INSERT/UPDATE/DELETE)
+  • Can be disabled: Yes (by revoking permissions)
 
-Do you approve? (YES / NO)
+To approve, please type exactly: YES, APPROVE AGENT DEPLOYMENT FOR [AGENT_NAME]
 ```
 
-**If NO:** Stop. Track B not needed.
-**If YES:** Proceed with agent deployment.
+**Step 2: Wait for response**
+- If user types: "YES, APPROVE AGENT DEPLOYMENT FOR [AGENT_NAME]" → Proceed ✓
+- If user types: "NO" or anything else → **STOP** ✗
+
+**Step 3: If NO**
+- Do not deploy agent
+- Ask: "Would you like to skip Track B?"
+- If yes: Move to Phase 5
+
+**If user says "just deploy it":**
+> "I cannot proceed without explicit approval. Agent deployment creates a new conversational interface to your data. I need your confirmation.
+>
+> Please type exactly: YES, APPROVE AGENT DEPLOYMENT FOR [AGENT_NAME]"
 
 ---
 

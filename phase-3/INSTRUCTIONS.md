@@ -107,28 +107,67 @@ tdx query --output json --limit 1000 < query.sql | node render.js
 
 ---
 
-### Rule P3-4: Spot-Check at Least 3 KPIs After Rendering
+### Rule P3-4: Spot-Check at Least 3 KPIs After Rendering (ENFORCEMENT)
 
-After the dashboard.html is built, verify the numbers:
+**⚠️ CRITICAL: CANNOT approve dashboard without 3+ KPI spot-checks passing.**
+
+**Step 1: Render dashboard.html**
+
+**Step 2: Spot-check exactly 3 KPIs**
+
+For each KPI, run database query and compare:
 
 ```
-Dashboard shows:
-  • Total Revenue: $4.5M
-  • Unique Customers: 15,240
-  • Conversion Rate: 3.2%
+KPI #1: Total Revenue
+  Dashboard shows: $4.5M
+  Query: SELECT SUM(amount) FROM revenue_table WHERE date >= '2026-07-01'
+  DB result: $4,500,000
+  Match? ✓ PASS (exactly equal)
 
-Spot-check each:
-  SELECT SUM(amount) FROM revenue_table WHERE date >= '2026-07-01'
-  → Result: $4,500,000 ✓ (matches dashboard)
-  
-  SELECT COUNT(DISTINCT customer_id) FROM customers WHERE active = true
-  → Result: 15,240 ✓ (matches dashboard)
-  
-  SELECT COUNT(converted) / COUNT(*) FROM events WHERE date >= '2026-07-01'
-  → Result: 0.032 (3.2%) ✓ (matches dashboard)
+KPI #2: Unique Customers
+  Dashboard shows: 15,240
+  Query: SELECT COUNT(DISTINCT customer_id) FROM customers WHERE active = true
+  DB result: 15,240
+  Match? ✓ PASS (exactly equal)
+
+KPI #3: Conversion Rate
+  Dashboard shows: 3.2%
+  Query: SELECT COUNT(converted) / COUNT(*) FROM events WHERE date >= '2026-07-01'
+  DB result: 0.032 (3.2%)
+  Match? ✓ PASS (exactly equal)
 ```
 
-**If any KPI is 1% off → STOP. Debug before approving.**
+**Step 3: Check results**
+- All 3 KPIs match (exactly, not approximately)? → Proceed ✓
+- Any KPI is 1% off or more? → **STOP immediately** ✗
+
+**Step 4: If any spot-check fails**
+- **Do not proceed** to user approval
+- Debug immediately:
+  - Query: Is the WHERE clause correct?
+  - Aggregation: Is GROUP BY logic correct?
+  - Join: Is there fan-out inflation?
+  - Time column: Is the date filter right?
+- Fix the issue
+- Re-render dashboard
+- Re-run all 3 spot-checks
+- Repeat until all pass
+
+**Step 5: Only after all 3 pass**
+- Present dashboard for user approval
+- Document spot-check results in state.md
+
+**If user says "the numbers are close enough":**
+> "I cannot approve dashboard with any KPI off by 1% or more. Even small errors compound and destroy trust when customers use it.
+>
+> Found mismatch:
+> - Dashboard: [value]
+> - Database: [value]
+> - Difference: [%]
+>
+> I will debug and fix this before presenting for approval."
+
+**Why:** Small data errors destroy trust. If customers spot-check and find mismatches, the entire dashboard loses credibility. Phase 3 requires exact matching.
 
 ---
 

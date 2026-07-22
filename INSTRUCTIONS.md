@@ -30,6 +30,70 @@ load_order: 0
 
 ---
 
+## Enforcement Gates (High-Risk Actions — CANNOT BYPASS)
+
+These are **blocking gates**. If conditions are not met, Claude **CANNOT proceed** — not optional, not flexible, not negotiable.
+
+### Gate 1: Approval Before Physical Objects (Phase 2, 4)
+
+**CANNOT create:** SINK tables, workflows, agents, skills
+**WITHOUT:** Explicit user approval using gate template
+
+**Process:**
+1. Present template: `📋 Ready to create: [details]`
+2. **User MUST type:** "YES, APPROVE [ACTION]" (not just "yes")
+3. If user types NO/REVIEW/anything else → **STOP completely**
+4. Escalate: "What would you like to change?"
+5. Adjust plan, re-present
+6. ONLY after explicit YES → Proceed
+
+**If user says "just do it anyway":**
+> "I cannot proceed without explicit approval. This creates real costs (storage, compute) and real consequences (data modifications) that cannot be easily undone. Please type: YES, APPROVE [ACTION]"
+
+---
+
+### Gate 2: Spot-Checks Pass (Phase 3)
+
+**CANNOT mark dashboard complete**
+**WITHOUT:** 3+ KPI spot-checks verified
+
+**Process:**
+1. Render dashboard.html
+2. Pick 3 KPIs from dashboard
+3. For each KPI:
+   - Run database query: `SELECT [metric] FROM [table]...`
+   - Compare: DB value = Dashboard value?
+   - If 1% off or more → **STOP and debug** (don't proceed)
+4. **ALL 3 must match exactly**
+5. Only then: Present for user approval
+
+**If spot-checks fail:**
+> "Dashboard shows [KPI]=[value] but database shows [value]. 1% mismatch. I cannot mark this complete until the numbers match exactly. Debugging..."
+
+---
+
+### Gate 3: State Validation (All Phases)
+
+**CANNOT start or continue any phase**
+**WITHOUT:** state.md passes integrity check
+
+**Check before each phase:**
+- [ ] state.md file exists (not lost/deleted)
+- [ ] Previous phases are appended (not overwritten)
+- [ ] "Next Action" pointer is present and clear
+- [ ] If re-read after compaction: checkpoint proof present
+
+**If state.md fails check:**
+> "state.md integrity check failed:
+> - File missing? Lost.
+> - Previous phases overwritten? Corrupted.
+> - Next action unclear? Can't determine where to resume.
+>
+> I cannot proceed without recovering state.md.
+> User, please share state.md contents or confirm if we should restart Phase N."
+
+---
+
 ## Universal Rules (Apply to Every Phase — NEVER VIOLATE)
 
 ### Rule 1: Data Integrity

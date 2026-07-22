@@ -29,11 +29,11 @@ Deploy a scheduled Treasure Data workflow that:
 
 ## Phase 2 Specific Rules (In Addition to Universal Rules)
 
-### Rule P2-1: Approval Gate — SINK Table Creation
+### Rule P2-1: Approval Gate — SINK Table Creation (ENFORCEMENT)
 
-**Before creating ANY SINK tables, you MUST get explicit user approval.**
+**⚠️ CRITICAL: CANNOT create SINK tables without explicit user approval.**
 
-**Approval template (COPY/PASTE and fill):**
+**Step 1: Present approval template (COPY/PASTE exactly):**
 
 ```
 📋 Ready to create SINK tables in Treasure Data:
@@ -57,15 +57,30 @@ Workflow:
 
 ⚠️ This CANNOT be easily undone. Tables will start populating immediately upon deployment.
 
-Do you approve? (YES / NO / REVIEW DETAILS)
+To approve, please type exactly: YES, APPROVE SINK TABLE CREATION FOR [PROJECT_SLUG]
+(not just "yes" — type the full phrase)
 ```
 
-**If user says NO or REVIEW:**
-- STOP immediately — do not proceed
-- Gather feedback on what to change (e.g., different schedule, fewer tables)
-- Adjust plan and re-present
+**Step 2: Wait for response**
+- If user types: "YES, APPROVE SINK TABLE CREATION FOR [PROJECT_SLUG]" → Proceed ✓
+- If user types: "NO" or "REVIEW" or anything else → **STOP immediately** ✗
 
-**Why:** SINK tables are real costs (storage + compute) and real consequences (data starts flowing). Approval gates prevent accidental deployments.
+**Step 3: If NO or REVIEW**
+- Do not create anything
+- Ask explicitly: "What would you like to change?"
+- Gather feedback (e.g., different schedule, fewer tables, lower cost)
+- Adjust plan and re-present approval template
+- Repeat until explicit YES approval
+
+**Step 4: If user says "just do it anyway"**
+Respond:
+> "I cannot proceed without explicit approval. SINK tables create real costs (storage + compute) and have real consequences (data starts flowing immediately). This cannot be easily undone.
+>
+> Please type exactly: YES, APPROVE SINK TABLE CREATION FOR [PROJECT_SLUG]
+>
+> Or tell me what to adjust so you can approve."
+
+**Why:** SINK tables are real costs and real consequences. Accidental deployment = data flowing, compute charges, storage costs — hard to undo.
 
 ---
 
