@@ -76,8 +76,18 @@ SELECT COUNT(*) FROM <SOURCE_DB>.<source_table>  # Verify data exists
 
 **Quality Gate (Before Approval)**
 - [ ] **Dashboard completeness validated** (all tabs/filters/widgets from Phase 1 plan present) ← GATE 1
-- [ ] **Filter granularity validated** (filter options match Phase 1 plan: month not day, 6 regions not 50...) ← GATE 2a (NEW)
-- [ ] **Filter scope & binding tested** (tab filters apply to ALL widgets on tab + global filters work in combination) ← GATE 2b (NEW)
+- [ ] **Filter architecture correct** (two-tier pattern: global date + per-tab dimensions) 
+  - [ ] Date filter wired to all KPI cards + trend chart
+  - [ ] Dimension filters wired to active tab widgets only
+  - [ ] Cross-filter rule applied (breakdown charts exclude own dimension)
+- [ ] **Filter granularity validated** (filter options match Phase 1 plan) ← GATE 2a
+- [ ] **Filter scope & binding tested** (filters work independently + in combination) ← GATE 2b
+- [ ] **All three data shapes generated** (daily-nodim, all-time-dim, monthly-dim) ← NEW
+  - [ ] Breakdown charts respond to BOTH date + dimension filters
+- [ ] **Monthly cardinality validated** (no silent truncation; LIMITs set to 2× expected rows)
+- [ ] **Non-additive metrics handled** (COUNT DISTINCT columns documented + properly sourced)
+- [ ] **Payload budget pre-calculated** (documented in state.md; < 2 MB total)
+- [ ] **Known limitations annotated** (all limited widgets have .widget-note)
 - [ ] **Spot-checks passed** (3+ KPIs verified ±0.1% accuracy) ← GATE 3
 - [ ] All metrics match Phase 1/2 confirmed values
 - [ ] Performance acceptable (queries < 5s, load < 5s)

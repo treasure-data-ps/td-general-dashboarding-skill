@@ -23,6 +23,10 @@ description: |
 
 → **See `./references/phase-3-walkthrough.md`** for: pre-phase checklist, step table (4a–4l), build+validate loop, quality gates, deliverables, quick reference, and next phase routing.
 
+→ **See `./references/phase-3-query-and-filter-design.md`** for: **12 production patterns** from retail-dashboard implementation — filter architecture, data shapes, cardinality, cross-filtering, payload budgeting, limitations, state.md updates. **Read this before building**.
+
+→ **See `./references/phase-3-implementation-checklist.md`** for: **10 code-specific pitfalls** — spot-check validation, hidden tab rendering, schema validation, render optimization, and other production bugs. **Review before code review**.
+
 → **See `./references/phase-3-data-patterns.md`** for: Non-Workflow vs Workflow path SQL patterns and data accuracy handling.
 
 → **See Quick Checklist in `./INSTRUCTIONS.md`** for a condensed Phase 3 decision checklist (build, validate, filter/performance gates).
