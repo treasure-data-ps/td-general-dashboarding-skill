@@ -68,6 +68,34 @@ Build a single portable `dashboard.html` file that:
 
 ---
 
+---
+
+## ✅ Before You Proceed: Required Reads
+
+**Before executing Phase 3 dashboard build (step 3a), read these reference files IN THIS ORDER:**
+1. **`../references/treasure-data-theme.md`** — Brand colors, fonts, component styles (if not already read in root SKILL.md)
+2. **`./phase-3/references/filter-architecture.md`** — Complete filter design patterns, cross-tab filter logic, dimension interaction rules (763 lines) — **READ BEFORE building filters**
+3. **`./phase-3/references/rendering/html-client/html-dashboard-patterns.md`** — Standard HTML dashboard patterns and component structure (22K)
+4. **`./phase-3/references/rendering/html-client/templates/generate-data.js`** — Reference data generation script template (243 lines) — **READ BEFORE writing your generate-data.js**
+
+**Why these reads matter:**
+- `filter-architecture.md` prevents filter granularity mismatches (month vs daily), tab-scope binding issues, and COUNT DISTINCT edge cases
+- `html-dashboard-patterns.md` prevents re-inventing HTML structure; templates already encode responsive design, error handling, and performance optimization
+- `generate-data.js` template prevents custom fan-out guards, querySrc patterns, and size-detection logic already built into the reference
+
+---
+
+## ⚠️ Conditional Reads (Only if applicable)
+
+**If adapting existing pre-built HTML templates (instead of unified-dashboard.html):**
+- **`./phase-3/references/rendering/html-client/templates/kpi-dashboard.html`** — KPI-focused template (203K)
+- **`./phase-3/references/rendering/html-client/templates/table-dashboard.html`** — Data table template (203K)
+- **`./phase-3/references/rendering/html-client/templates/multi-chart-dashboard.html`** — Multi-chart template (203K)
+  - Only read if user explicitly requests a specific template variant
+  - Otherwise use unified-dashboard.html (covers all three)
+
+---
+
 ## Phase 3 Specific Rules (In Addition to Universal Rules)
 
 ### Rule P3-1: Query Source Decision

@@ -61,6 +61,38 @@ Gather business requirements (Stage A), validate them against real data (Stage B
 
 ---
 
+---
+
+## ✅ Before You Proceed: Required Reads
+
+**Before executing Phase 1 Stage A, read these reference files:**
+1. **`../references/guardrails-lite.md`** — Cross-phase guardrails (re-read on every engagement)
+2. **`./phase-1/references/dashboard-design-questions.md`** — Stage A question patterns and taxonomy
+3. **`./phase-1/references/steps-1a-1o.md`** — Detailed requirement gathering steps (KPIs, dimensions, filters, freshness)
+
+These files establish the baseline for all Stage A questions and ensure consistent scoping across all engagements.
+
+---
+
+## ⚠️ Conditional Reads (Only if applicable)
+
+**If user provides a `.dash` file (Sisense/Treasure Insights export):**
+- **`./phase-1/references/steps-1pre.md`** — Sisense `.dash` migration fast-track (34K)
+  - Converts `.dash` export to dashboard spec
+  - Prefills Stage A/B from widget metadata
+  - Skips manual requirement questions
+- **`../references/dash_to_html.py`** — Conversion script (74K)
+
+**If using Treasure Insights API (real-time query access):**
+- **`./phase-1/references/treasure-insights-api-integration.md`** — Treasure Insights API integration patterns
+- **`../references/insights-api-helper.py`** — API helper script
+
+**If requesting optional Phase 1 exploratory steps:**
+- **`./phase-1/references/steps-1k-1n-optional.md`** — Optional Phase 1 steps (competitive analysis, benchmarks, drill-down design)
+  - Only read if user asks for "advanced requirements" or industry benchmarking
+
+---
+
 ## Phase 1 Specific Rules (In Addition to Universal Rules)
 
 ### Rule P1-1: Requirements Must Be Validated Against Real Data
@@ -373,7 +405,59 @@ SELECT SUM(revenue) FROM sales_table WHERE DATE(created_at) = '2026-07-22';
 
 ---
 
-### Rule P1-9: Filter Interaction Rules (REQUIRED BEFORE PHASE 3)
+### Rule P1-9: Filter Edge Case Question (REQUIRED IN STAGE A)
+
+**⚠️ CRITICAL: Ask explicitly: "What should KPIs show when a filter makes accurate computation impossible?"**
+
+**Add this question to Stage A Step 1c (Filters & Layout):**
+
+```
+For each metric, decide edge case behavior:
+
+Q: "Total Customers" filtered by "Product Category" 
+   = Can't compute accurately (same customer buys multiple categories)
+   Options:
+     a) Show COUNT(DISTINCT customer) per category (separate count per category)
+     b) Show "—" (dash, not available)
+     c) Show estimate with "*" (estimate, confidence note)
+   User decides: (a/b/c)
+
+Q: "Revenue" filtered by "Date" 
+   = Can compute accurately (revenue IS date-filterable)
+   Options:
+     a) Show filtered revenue (correct answer)
+   User decides: (a)
+
+Q: "Unique Visitors" filtered by "Page"
+   = Can't compute accurately (same visitor visits multiple pages)
+   Options:
+     a) Show visitors per page (separate count per page, not unique across)
+     b) Show "—"
+     c) Show all-time visitors (unfiltered, maybe with warning)
+   User decides: (a/b/c)
+```
+
+**Capture in state.md:**
+```yaml
+### Filter Edge Case Behaviors (if filter makes computation impossible)
+
+Metric: Total Customers
+- If filtered by Category: Show "—" (can't count distinct across categories)
+- If filtered by Region: Show COUNT(DISTINCT customer_id) per region ✓
+
+Metric: Unique Sessions
+- If filtered by Page: Show sessions per page OR show "—"
+- If filtered by Date: Show COUNT(DISTINCT session_id) per date ✓
+
+Metric: Revenue
+- All filters: Show filtered revenue (always computable)
+```
+
+**Why:** Prevents Phase 3 discovery of incomputable metrics. Better to decide in Phase 1.
+
+---
+
+### Rule P1-9a: Filter Interaction Rules (REQUIRED BEFORE PHASE 3)
 
 **⚠️ CRITICAL: Specify what happens to metrics when filters are applied. Ask explicitly in Stage A Step 1c.**
 
