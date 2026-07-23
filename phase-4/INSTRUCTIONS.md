@@ -290,6 +290,159 @@ If you need to adapt this skill for a different project:
 
 ---
 
+### Rule P4-1c: One-Command Skill Execution (ENFORCEMENT — NON-NEGOTIABLE)
+
+**⚠️ CRITICAL: Extracted skill MUST run with ONE command. No questions, no config, no prompts.**
+
+**The goal of skill extraction:**
+```
+User runs: npm run build
+           ↓
+Skill uses pre-hardcoded values
+           ↓
+Dashboard.html created + data injected
+           ↓
+Done (< 5 minutes)
+```
+
+**NOT this (defeats skill purpose):**
+```
+User runs: node generate-data.js
+           ↓
+Skill asks: "Which database contains your SINK tables?" ❌
+Skill asks: "Which queries do you want to run?" ❌
+Skill asks: "Which template should we use?" ❌
+           ↓
+User configures (defeats reusability)
+```
+
+**Hardcoding checklist (BEFORE skill is extracted):**
+
+❌ **FAIL: Skill will ask questions if any of these are missing:**
+
+```
+Hardcoded Database:
+  - [ ] SINK_DB hardcoded in generate-data.js: SINK_DB = 'warehouse_sink'
+  - [ ] SRC_DB hardcoded in generate-data.js: SRC_DB = 'raw_events'
+  - If MISSING: Skill will ask "Which database?" ❌
+
+Hardcoded Queries:
+  - [ ] Metrics query hardcoded: SELECT SUM(amount) FROM ${SINK_DB}...
+  - [ ] Chart data query hardcoded: SELECT DATE, region, SUM(amount) FROM ${SINK_DB}...
+  - [ ] Rows query hardcoded: SELECT * FROM ${SINK_DB}.orders...
+  - If MISSING: Skill will ask "Which queries?" ❌
+
+Hardcoded Paths:
+  - [ ] Dashboard template path: ./references/unified-dashboard.html
+  - [ ] Output path: ./output/dashboard.html
+  - If MISSING: Skill will ask "Where should I put the output?" ❌
+
+Hardcoded Schedule (if workflow):
+  - [ ] Workflow schedule: daily at 02:00 UTC
+  - [ ] Retention: 365 days
+  - If MISSING: Skill will ask "How often should it run?" ❌
+
+SKILL.MD Template (no placeholders, no ???? values):
+  - [ ] SKILL.md lists exact DB names
+  - [ ] SKILL.md lists exact query file paths
+  - [ ] SKILL.md lists exact template paths
+  - [ ] Zero "edit this value" instructions (should say "already configured")
+  - If any placeholder remains: Skill will ask ❌
+```
+
+✅ **PASS: Skill runs one-command if ALL are hardcoded:**
+
+```bash
+# User does this ONLY:
+npm install
+npm run build
+
+# Skill does the rest automatically:
+#   - Connects to warehouse_sink (hardcoded)
+#   - Runs existing queries (hardcoded paths)
+#   - Uses unified-dashboard.html (hardcoded path)
+#   - Injects data
+#   - Outputs dashboard.html
+#   - Done
+```
+
+**Validation before extraction:**
+
+```yaml
+### Pre-Extraction Hardcoding Audit
+
+SINK Database:
+  - SINK_DB = 'warehouse_sink' ✓ (hardcoded in line 5 of generate-data.js)
+  - SRC_DB = 'raw_events' ✓ (hardcoded in line 6)
+
+Queries:
+  - queries/metrics.sql ✓ (path hardcoded, SELECT ... FROM warehouse_sink)
+  - queries/chart-data.sql ✓ (path hardcoded, SELECT ... FROM warehouse_sink)
+  - queries/rows.sql ✓ (path hardcoded, SELECT ... FROM warehouse_sink)
+
+Paths:
+  - Dashboard template: ./references/unified-dashboard.html ✓
+  - Output: ./output/dashboard.html ✓
+
+Schedule (if Phase 2 SINK):
+  - Workflow frequency: daily at 02:00 UTC ✓
+
+SKILL.md Content:
+  ```
+  ## Quick Start
+  npm install
+  npm run build
+  # Output: ./output/dashboard.html
+  
+  Pre-Configured:
+  - Database: warehouse_sink
+  - Queries: ./queries/*.sql (metrics, chart-data, rows)
+  - Template: ./references/unified-dashboard.html
+  - Schedule: Daily 02:00 UTC
+  
+  No configuration needed. All values are hardcoded.
+  ```
+
+Result: ✅ PASS (ready for extraction)
+```
+
+**If ANY value is not hardcoded:**
+- ❌ STOP extraction
+- List what's missing (e.g., "SINK_DB is still a placeholder")
+- Have user confirm the values
+- Hardcode them
+- Then extract skill
+
+**Example of what NOT to do (❌ WILL FAIL):**
+
+```javascript
+// generate-data.js (before extraction)
+const SINK_DB = process.env.SINK_DB || '????';  // ❌ NOT HARDCODED
+const SRC_DB = process.env.SRC_DB || '????';    // ❌ NOT HARDCODED
+
+// User runs: node generate-data.js
+// Skill asks: "Which database contains your SINK tables?"
+// Defeats skill purpose ❌
+```
+
+**Example of what TO do (✅ WILL WORK):**
+
+```javascript
+// generate-data.js (before extraction)
+const SINK_DB = 'warehouse_sink';  // ✅ HARDCODED
+const SRC_DB = 'raw_events';        // ✅ HARDCODED
+
+// User runs: npm run build
+// Skill uses hardcoded values
+// Dashboard created in 2 minutes ✅
+```
+
+**Why:** Extracted skill's entire value is "build fast without repeating setup". If skill asks the same questions as Phase 1-4, it's not a skill, it's just the same process again. Defeats the purpose.
+
+**Past incident:** Extracted skill asked "Which database contains your SINK tables?" User had to look up the answer from the original project. Extraction was useless — user could have just run the original dashboard again. Defeated 10x speedup promise.
+
+---
+
 ### Rule P4-2: Track B Approval Gate — Agent Creation (ENFORCEMENT)
 
 **⚠️ CRITICAL: CANNOT deploy agent without explicit user approval.**
