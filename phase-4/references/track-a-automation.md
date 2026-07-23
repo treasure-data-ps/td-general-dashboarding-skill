@@ -171,10 +171,49 @@ If the user asks anything beyond "show me the dashboard" — metric definitions,
 
 **What to do:**
 - Extract the Phase 3 queries as a reusable script (`generate-data.js`, already copied in Step 4a-i)
+- **[NEW] Refactor for caching: external `data.json` + CLI flags** (see below)
 - Validate column names against the actual schema
 - Ensure all queries run in parallel
 - Select only the columns the template actually reads
 - Assess table grain vs. filter dimensions
+
+---
+
+### 🚀 NEW: Adopt the Caching Strategy (Reference Implementation)
+
+**Goal:** Enable local caching, instant re-renders, and visible data freshness.
+
+**What changes:**
+- ✅ External `data.json` file (instead of inlining data into HTML)
+- ✅ `_meta` object with `generated_at` timestamp
+- ✅ CLI flags: `--refresh`, `--html-only`, `--data-only`
+- ✅ Cache check logic (skip queries if recent)
+- ✅ Display data age in dashboard UI
+
+**Benefits:**
+| Scenario | Time | Impact |
+|---|---|---|
+| First build | ~60s | Standard |
+| Re-open dashboard | ~0.1s | **600× faster** (read JSON) |
+| Iterate HTML | ~0.1s | **No queries** (--html-only) |
+| Refresh data | ~60s + 0.1s | Atomic, no stale state |
+
+**Reference implementation:**
+→ See `../references/data-caching-strategy.md` for full details
+
+**Checklist:**
+- [ ] Copy updated `generate-data.js` from `data-caching-strategy.md` (or use the template as-is if already caching-enabled)
+- [ ] `generate-data.js` includes cache-check logic at startup
+- [ ] `data.json` is written with `_meta: { generated_at, source_db, sink_db, skill, version }`
+- [ ] CLI flags work: `--refresh`, `--html-only`, `--data-only`
+- [ ] Dashboard template reads `data.json` (not inline data)
+- [ ] Dashboard displays "Data as of: [timestamp] ([age] ago)" via `_meta.generated_at`
+- [ ] First run: ~60s (queries); second run: ~0.1s (cache)
+
+**Why adopt this:**
+The dashboard skill becomes **instantly reusable** — no re-query overhead. Share `skills/` folder; recipients unzip and run; instant dashboard loads.
+
+---
 
 **FIRST STEP — Column Name Audit (2 minutes, prevents 2+ hours debugging):**
 
@@ -503,11 +542,16 @@ SOURCE_DB=<another_or_same_db> SINK_DB=<sink_db> node generate-data.js
 
 **Pass criteria (all must be green before Step 4a-vi):**
 - ✅ `generate-data.js` runs without errors against the target database
+- ✅ `data.json` written with `_meta` fields: `generated_at`, `source_db`, `sink_db`, `skill`, `version`
 - ✅ `data.json` keys and values match confirmed samples (±5%)
 - ✅ `dashboard.html` renders and visually matches the Phase 3 approval
 - ✅ No hardcoded database names in `generate-data.js` — only env vars
 - ✅ Dashboard reproduces correctly after a clean re-run
 - ✅ Reuse test passes — changing the database env var re-renders cleanly without editing any file
+- ✅ Cache test passes — run twice: first time ~60s (queries), second time ~0.1s (cache hit)
+- ✅ Refresh test passes — `node generate-data.js --refresh` re-queries and updates `data.json`
+- ✅ HTML-only test passes — `node generate-data.js --html-only` rebuilds HTML from existing `data.json` without queries
+- ✅ Dashboard displays data freshness — "Data as of: [timestamp] ([age] ago)"
 - ✅ No browser console errors (F12 → Console)
 
 ---

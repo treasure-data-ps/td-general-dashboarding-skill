@@ -10,15 +10,19 @@ This directory contains detailed, reusable patterns for Phase 4: Automate & Depl
 
 ```
 phase-4/references/
-├── track-a-automation.md          ← Track A step-by-step instructions (entry point)
-├── track-b-ai-agent.md            ← Track B step-by-step instructions (entry point)
-└── templates/                     ← Embedded local templates (no external repo access needed)
+├── track-a-automation.md                    ← Track A step-by-step instructions (entry point)
+├── track-b-ai-agent.md                      ← Track B step-by-step instructions (entry point)
+├── data-caching-strategy.md                 ← [NEW] Data caching reference implementation
+├── CACHING-CHECKLIST.md                     ← [NEW] Step-by-step checklist for implementing caching
+└── templates/                               ← Embedded local templates (no external repo access needed)
     ├── knowledge-base-business-context-template.md
     ├── knowledge-base-data-dictionary-template.md
     ├── knowledge-base-metrics-dictionary-template.md
     ├── knowledge-base-sql-templates-template.md
     └── agent-prompt-template.md
 ```
+
+**Caching reference (NEW):** Both Track A files now document the data caching strategy. See `data-caching-strategy.md` for conceptual overview and `CACHING-CHECKLIST.md` for step-by-step implementation.
 
 All templates this phase needs are embedded locally in `templates/` — nothing is fetched from an external repository at runtime.
 
@@ -47,6 +51,30 @@ All templates this phase needs are embedded locally in `templates/` — nothing 
 | Users ask frequent questions about metrics | **Track B** (AI Agent) |
 | Strategic dashboard, will be reused + NL access needed | **Both** |
 | One-off dashboard, no reuse plans | **Neither** (skip to Phase 5 or close) |
+
+---
+
+## Caching Strategy (NEW — Phase 4 Track A)
+
+**All Track A dashboards should implement the data caching strategy.**
+
+| Feature | Benefit |
+|---|---|
+| External `data.json` | Portable, shareable, versionable |
+| `_meta.generated_at` | Shows data freshness in dashboard UI |
+| `--refresh` flag | On-demand refresh without rebuild cycle |
+| `--html-only` flag | Iterate HTML/CSS without re-querying |
+| Cache TTL | Re-open dashboard ~600× faster (0.1s vs 60s) |
+
+**When to implement:**
+- ✅ Always in Track A (dashboard reusable skills)
+- ✅ Step 4a-ii (Extract & Parameterize Queries)
+- ✅ No performance cost; only benefits
+
+**Resources:**
+- `data-caching-strategy.md` — Conceptual overview + architecture
+- `CACHING-CHECKLIST.md` — Step-by-step implementation (copy/paste ready)
+- `../phase-3/.../generate-data-with-caching.js` — Reference template with caching enabled
 
 ---
 
