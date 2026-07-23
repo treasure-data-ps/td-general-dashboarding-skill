@@ -640,6 +640,61 @@ AskUserQuestion:
 
 Branch to the appropriate section below based on the user's choice.
 
+---
+
+## ➜ If Selected: PROJECT-LOCAL (Recommended)
+
+**Action: Copy skill to project folder**
+
+After Step 4a-v passes (generate-data.js validated), run these commands from `./<project-slug>/`:
+
+```bash
+cd ./<project-slug>
+
+# 1. Create skills directory if it doesn't exist
+mkdir -p skills
+
+# 2. Copy extracted skill to project skills folder
+cp -r ../phase-4/skill-extraction/<skill-name> ./skills/<skill-name>
+
+# 3. Verify the skill is in place
+ls -la ./skills/<skill-name>/
+
+# 4. Verify no data.json (data should be inlined in dashboard.html)
+ls -la ./skills/<skill-name>/ | grep data.json || echo "✅ No data.json found (correct)"
+```
+
+**Result:** Skill now lives at `./<project-slug>/skills/<skill-name>/` and is **immediately available in TAIS Develop tab**.
+
+**Next step:** Update `state.md` with skill location and proceed to Step 4a-vii (INSTALL.md).
+
+---
+
+## ➜ If Selected: PERSONAL WORKSPACE
+
+**Action: Copy skill to personal workspace**
+
+```bash
+# 1. Create personal skills directory if needed
+mkdir -p ~/.claude/skills
+
+# 2. Copy extracted skill to personal workspace
+cp -r ../phase-4/skill-extraction/<skill-name> ~/.claude/skills/<skill-name>
+
+# 3. Verify installation
+ls -la ~/.claude/skills/<skill-name>/
+```
+
+**Result:** Skill now available in all TAIS sessions and Treasure Work via `/plugin install <skill-name>`.
+
+**Next step:** Update `state.md` with skill location and proceed to Step 4a-vii (INSTALL.md).
+
+---
+
+## ➜ If Selected: ZIP DISTRIBUTION
+
+**Action: Package skill as distributable zip**
+
 **⚠️ Always show the full packaging instructions below after `generate-data.js` validation (Step 4a-v) passes — even if a zip was already created earlier in the session. Never skip or summarize this section.**
 
 ---
@@ -679,7 +734,7 @@ The dashboard skill (SKILL.md + dashboard.html + knowledge/) is completely porta
 ---
 
 
-### Packaging commands
+### Step 2a: Packaging commands (ZIP DISTRIBUTION ONLY)
 
 After Step 4a-v passes, display the following to the user verbatim (fill in `<skill-name>`):
 
