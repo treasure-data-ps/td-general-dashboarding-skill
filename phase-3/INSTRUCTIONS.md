@@ -46,7 +46,8 @@ Build a single portable `dashboard.html` file that:
 
 **Quality Gate (Before Approval)**
 - [ ] **Dashboard completeness validated** (all tabs/filters/widgets from Phase 1 plan present) ← GATE 1
-- [ ] **Spot-checks passed** (3+ KPIs verified ±0.1% accuracy) ← GATE 2
+- [ ] **Filter scope & binding tested** (ALL affected widgets update when each filter applied) ← GATE 2 (NEW)
+- [ ] **Spot-checks passed** (3+ KPIs verified ±0.1% accuracy) ← GATE 3
 - [ ] All metrics match Phase 1/2 confirmed values
 - [ ] Filters applied at SQL layer, tested independently
 - [ ] Performance acceptable (queries < 5s, load < 5s)
@@ -474,6 +475,150 @@ WHERE region = ? -- user-selected filter
 ```
 
 **Why:** Prevents "No data" errors confusing users. Better to specify behavior upfront.
+
+---
+
+### Rule P3-6c: Filter Scope & Binding — ALL Affected Widgets Must Update (ENFORCEMENT)
+
+**⚠️ CRITICAL: When a filter is applied, ALL widgets that should be affected MUST update. Filters that don't change data = broken dashboard.**
+
+**Step 1: Define filter scope in Phase 1 plan (from state.md)**
+
+For EACH filter, document which widgets it affects:
+
+```yaml
+### Filter Scope Definition
+
+**Global Filter: Date Range**
+- Affects: [list all widgets that use this filter]
+  * KPI: Total Revenue (recalculate for date range)
+  * Chart: Revenue Trend (filter data to date range)
+  * Chart: Revenue by Region (filter data to date range)
+  * Table: Orders (show only orders in date range)
+- Does NOT affect: [widgets independent of date]
+  * KPI: All-Time Customer Count (not filtered by date)
+
+**Global Filter: Region**
+- Affects:
+  * KPI: Revenue (filter to region)
+  * Chart: Revenue Trend (show only selected region)
+  * Chart: Revenue by Region (show only selected region)
+  * Chart: Churn by Segment (show only selected region)
+  * Table: Orders (show only orders from region)
+- Does NOT affect:
+  * Chart: Revenue by Region (but NOW shows only selected region)
+
+**Tab 2 Filter: Category** (tab-specific)
+- Affects: Only widgets on Tab 2
+  * Chart: Revenue Trend (filter to category)
+  * Table: Products (show only category products)
+- Does NOT affect: Tab 1 or Tab 3
+```
+
+**Step 2: Test each filter (MANUAL IN BROWSER)**
+
+For EACH filter, test that it updates ALL affected widgets:
+
+```
+Filter: Date Range = "Last 7 Days"
+  
+Before filter:
+  - Revenue card shows: $4.5M (all-time)
+  - Revenue Trend chart shows: 365 days of data
+  - Table shows: 1.2M orders (all-time)
+
+After applying filter:
+  - Revenue card shows: $500K ✓ (updated to 7 days)
+  - Revenue Trend chart shows: 7 days only ✓ (x-axis changed)
+  - Table shows: 15K orders ✓ (updated to 7 days)
+
+✓ PASS: All affected widgets updated
+✗ FAIL: If any widget didn't update (e.g., Revenue card still shows $4.5M)
+```
+
+**Test sequence (REQUIRED):**
+
+```
+1. Open dashboard in browser
+2. Note all widget values: [KPI cards, chart data, table row count]
+3. Apply Filter 1 (e.g., Region = "US")
+   → Manually inspect each widget
+   → Does it reflect the filter? (Numbers changed? Data filtered?)
+   → Check EVERY affected widget listed in Phase 1 plan
+4. If ANY widget didn't update → ✗ FAIL (stop, debug)
+5. If ALL affected widgets updated → ✓ PASS
+6. Clear filter (reset to all data)
+7. Apply Filter 2 (e.g., Date Range = "Last 30 days")
+   → Repeat inspection
+8. Repeat for ALL filters
+9. Test filter combinations (e.g., Region=US + Date=Last 7 days)
+   → All affected widgets should show intersection
+```
+
+**Step 3: If filter doesn't update a widget (✗ FAIL)**
+
+Common causes + fixes:
+
+| Problem | Cause | Fix |
+|---------|-------|-----|
+| KPI card not updating | Query doesn't have WHERE clause for filter | Add `WHERE region = ${selected_region}` to SQL |
+| Chart not updating | Filter not passed to chart data query | Pass filter value to chart data array query |
+| Table not updating | Search/filter JS not wired to filter select | Add event listener: `filterSelect.addEventListener('change', refilterTable)` |
+| Filter works on one tab, not another | Filter is global, but one tab has separate query | Ensure both tab queries include the filter |
+| Data changes but numbers are wrong | Filter is applied, but calculation is wrong | Check aggregation logic: is it SUM(all filtered) or SUM(per-filter-value)? |
+
+**Debug checklist (if filter doesn't work):**
+
+```bash
+# 1. Check browser console (F12 → Console)
+#    - Any JavaScript errors? (red ✗ in console?)
+#    - Log filter value: console.log('Filter value:', filterValue)
+
+# 2. Check HTML
+#    - Is the filter element present? (inspect element)
+#    - Is there an onChange handler? (check <select> tag)
+
+# 3. Check JavaScript
+#    - Does the filter-change function exist?
+#    - Does it re-query data or re-filter existing data?
+#    - Does it call the render/update function?
+
+# 4. Check SQL queries
+#    - Does the query have WHERE clause for filter?
+#    - Example: SELECT SUM(revenue) FROM orders WHERE region = ?
+#    - Or is it SELECT SUM(revenue) FROM orders (no filter)?
+```
+
+**Step 4: Document in state.md**
+
+```yaml
+### Interactive Filter Testing
+
+**Filter: Region (Global)**
+- Test: Click Region = "US"
+  * Revenue card: $2.1M → ✓ Updated
+  * Revenue Trend: Data filtered to US → ✓ Updated
+  * Revenue by Region: Shows only US → ✓ Updated
+  * Orders table: Shows 45K orders (US only) → ✓ Updated
+  * Status: ✅ PASS (all affected widgets updated)
+
+**Filter: Date Range (Global)**
+- Test: Click Date Range = "Last 30 days"
+  * Revenue card: $500K → ✓ Updated
+  * Revenue Trend: Shows 30 days only → ✓ Updated
+  * Orders table: Shows 12K orders (30 days) → ✓ Updated
+  * Status: ✅ PASS (all affected widgets updated)
+
+**Combined: Region=US + Date Range=Last 30 days**
+- Revenue card: $125K → ✓ Updated (intersection of both filters)
+- Revenue Trend: US data, 30 days only → ✓ Updated
+- Orders table: 2K orders (US + 30 days) → ✓ Updated
+- Status: ✅ PASS (all filters work together)
+```
+
+**Why:** Filters that don't update data destroy dashboard trust. User applies Region filter, sees old numbers, assumes dashboard is broken. Catch this BEFORE user approval.
+
+**Past incident:** Region filter present but didn't update Revenue trend chart. Chart showed global revenue regardless of filter selection. User discovered during first use. Dashboard credibility lost.
 
 ---
 
