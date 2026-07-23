@@ -74,25 +74,6 @@ These files establish the baseline for all Stage A questions and ensure consiste
 
 ---
 
-## ⚠️ Conditional Reads (Only if applicable)
-
-**If user provides a `.dash` file (Sisense/Treasure Insights export):**
-- **`./phase-1/references/steps-1pre.md`** — Sisense `.dash` migration fast-track (34K)
-  - Converts `.dash` export to dashboard spec
-  - Prefills Stage A/B from widget metadata
-  - Skips manual requirement questions
-- **`../references/dash_to_html.py`** — Conversion script (74K)
-
-**If using Treasure Insights API (real-time query access):**
-- **`./phase-1/references/treasure-insights-api-integration.md`** — Treasure Insights API integration patterns
-- **`../references/insights-api-helper.py`** — API helper script
-
-**If requesting optional Phase 1 exploratory steps:**
-- **`./phase-1/references/steps-1k-1n-optional.md`** — Optional Phase 1 steps (competitive analysis, benchmarks, drill-down design)
-  - Only read if user asks for "advanced requirements" or industry benchmarking
-
----
-
 ## Phase 1 Specific Rules (In Addition to Universal Rules)
 
 ### Rule P1-1: Requirements Must Be Validated Against Real Data
