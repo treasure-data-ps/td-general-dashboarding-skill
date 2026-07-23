@@ -41,9 +41,12 @@ Build a single portable `dashboard.html` file that:
 - [ ] 4c: Build HTML structure (filters, widgets, tabs)
 - [ ] 4d: Write generate-data.js, customize queries
 - [ ] 4e: Render, validate (open in browser, check for data)
+- [ ] 4e-VALIDATE: **Completeness check** (all tabs/filters/widgets from Phase 1 plan present?) ← NEW GATE
 - [ ] 4f-4l: Validate data accuracy, test filters, check performance
 
 **Quality Gate (Before Approval)**
+- [ ] **Dashboard completeness validated** (all tabs/filters/widgets from Phase 1 plan present) ← GATE 1
+- [ ] **Spot-checks passed** (3+ KPIs verified ±0.1% accuracy) ← GATE 2
 - [ ] All metrics match Phase 1/2 confirmed values
 - [ ] Filters applied at SQL layer, tested independently
 - [ ] Performance acceptable (queries < 5s, load < 5s)
@@ -141,6 +144,134 @@ tdx query --output json --limit 1000 < query.sql | node render.js
 ```
 
 **Why:** Query results contain customer data (emails, IDs, financial info). Data must never pass through AI context. The rendering script processes it safely.
+
+---
+
+### Rule P3-3a: Dashboard Completeness Validation (BEFORE SPOT-CHECK)
+
+**⚠️ CRITICAL: After rendering, validate dashboard matches Phase 1 plan. CANNOT spot-check until structure is complete.**
+
+**Step 1: Extract dashboard plan from state.md (Phase 1)**
+
+From `state.md` → "Dashboard Plan Summary" section, list:
+- Tabs planned
+- Filters planned (global + tab-specific)
+- Widgets planned (chart types, metrics, dimensions)
+
+**Example from Phase 1 plan:**
+```yaml
+### Dashboard Plan Summary
+
+Tabs: 3
+  - Tab 1: KPI Overview (4 cards: Revenue, Customers, AOV, Churn)
+  - Tab 2: Analysis (3 charts: Revenue trend, Customer by region, Churn by segment)
+  - Tab 3: Data Explorer (Orders table with search)
+
+Global Filters: Date Range, Region (6 values), Status (2 values)
+
+Tab 1 Filters: None (just global)
+Tab 2 Filters: Category (8 values) - tab-specific only
+Tab 3 Filters: Search box + Sort
+
+Widgets:
+  - KPI Card: Total Revenue (SUM(amount))
+  - KPI Card: Customer Count (COUNT(DISTINCT customer_id))
+  - KPI Card: AOV (AVG(amount))
+  - KPI Card: Churn Rate (COUNT(churned) / COUNT(*))
+  - Line Chart: Revenue by date (SUM(amount) trend)
+  - Bar Chart: Revenue by region (SUM(amount) grouped)
+  - Pie Chart: Churn by segment (COUNT(churned) grouped)
+  - Table: Orders (all columns, searchable)
+```
+
+**Step 2: Open rendered dashboard.html in browser**
+
+Manually check (do NOT run code, just look):
+- [ ] All tabs present? (Count them: Tab 1, Tab 2, Tab 3...)
+- [ ] All filters visible? (Click each filter: does it exist? Does it have options?)
+- [ ] All widgets rendered? (Do you see 4 KPI cards? 3 charts? 1 table?)
+- [ ] All chart types correct? (Line chart is line, not bar? Pie chart is pie, not line?)
+- [ ] Filter options populated? (Region filter shows 6 options? Category shows 8?)
+
+**Step 3: Create validation checklist**
+
+```yaml
+### Dashboard Completeness Check
+
+**Tabs:**
+- [ ] Tab 1: KPI Overview — present, clickable, shows 4 cards ✓
+- [ ] Tab 2: Analysis — present, clickable, shows 3 charts ✓
+- [ ] Tab 3: Data Explorer — present, clickable, shows table ✓
+
+**Global Filters:**
+- [ ] Date Range — present, functional ✓
+- [ ] Region — present, shows 6 options (US, EU, APAC, LATAM, EMEA, Internal) ✓
+- [ ] Status — present, shows 2 options (Active, Inactive) ✓
+
+**Tab 1 Widgets (KPI Overview):**
+- [ ] Revenue card — visible, title correct, value displays ✓
+- [ ] Customer card — visible, title correct, value displays ✓
+- [ ] AOV card — visible, title correct, value displays ✓
+- [ ] Churn Rate card — visible, title correct, value displays ✓
+
+**Tab 2 Widgets (Analysis):**
+- [ ] Revenue Trend (Line chart) — visible, lines render, x-axis shows dates ✓
+- [ ] Revenue by Region (Bar chart) — visible, bars render, 6 regions shown ✓
+- [ ] Churn by Segment (Pie chart) — visible, pie slices render, 3 segments shown ✓
+
+**Tab 2 Filters (Category):**
+- [ ] Category filter — present, shows 8 options (Electronics, Clothing, ...) ✓
+
+**Tab 3 Widgets (Data Explorer):**
+- [ ] Orders table — visible, headers present, data rows visible ✓
+- [ ] Search box — present, functional (type, see rows filter) ✓
+- [ ] Sorting — column headers clickable (test one: click "Date", rows reorder) ✓
+
+**Status:** ✅ All items present / ⚠️ [missing items] / ❌ [blocker items]
+```
+
+**Step 4: Compare to plan**
+
+**If ALL items ✓:**
+- Document in state.md: "Dashboard completeness check: PASSED"
+- Proceed to Rule P3-4 (spot-check KPIs)
+
+**If ANY item ⚠️ or ❌:**
+- **STOP** — do not proceed to spot-check
+- Identify missing filter/widget/tab
+- Return to phase-3/SKILL.md and add the missing element
+- Re-render dashboard.html
+- Re-run completeness check
+- Repeat until all items ✓
+
+**Examples of failures (STOP and fix):**
+```
+❌ FAIL: Region filter missing
+  → User planned "Region filter (6 values)"
+  → Dashboard has no region filter
+  → Must add to generate-data.js before re-rendering
+
+❌ FAIL: Tab 2 "Category filter" not present
+  → Plan said "Tab-specific Category filter"
+  → Only global filters visible
+  → Must add tab-scoped filter to dashboard.html
+
+❌ FAIL: Pie chart shows only 2 segments instead of 3
+  → Plan said "Churn by segment (3 segments)"
+  → Dashboard shows only 2 segments
+  → Data issue? Missing segment in query
+  → Debug query, re-render
+
+❌ FAIL: Search box not working
+  → Plan said "Data Explorer tab with search"
+  → Table loads but search box inactive
+  → JavaScript error? Check browser console
+  → Fix render.js, re-render
+```
+
+**Why:** Users identify missing filters and widgets AFTER approval, forcing rework. Catch this BEFORE spot-checking saves 1-2 rework cycles.
+
+**Past incident:** Dashboard rendered without the "Region" filter that was in the plan. User asked for it as a change request. Entire dashboard iteration wasted.
 
 ---
 
