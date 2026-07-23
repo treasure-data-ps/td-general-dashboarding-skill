@@ -41,15 +41,17 @@ Extend the dashboard with two optional automation tracks:
 - [ ] state.md updated through Phase 3
 - [ ] User decided: Track A, Track B, both, or neither?
 
-**Track A: Extract Reusable Skill**
-- [ ] 4a-0: Assemble knowledge package
+**Track A: Extract Reusable Skill (CORRECT ORDER)**
+- [ ] 4a-0: Ask scope questions FIRST (name, install scope, known values) ← GATE 1
+- [ ] 4a-0b: Hardcode all known values in SKILL.md (replace <PLACEHOLDER> with actual values)
+- [ ] 4a-0c: Get approval before packaging
 - [ ] 4a-i: Extract dashboard skill definition
-- [ ] 4a-ii: Extract & parameterize query scripts
-- [ ] 4a-iii: Create configuration templates
-- [ ] 4a-iv: Document deployment checklist
+- [ ] 4a-ii: Extract & parameterize query scripts (verify hardcoded DBs used)
+- [ ] 4a-iii: Create configuration templates (zero placeholders)
+- [ ] 4a-iv: Document deployment checklist (one-command: npm run build)
 - [ ] 4a-v: Validate skill end-to-end (spot-check ±5%)
-- [ ] 4a-vi: Final packaging (show full zip instructions)
-- [ ] 4a-vii: Generate Installation Guide
+- [ ] 4a-vi: Final packaging (Python zipfile, not zip CLI)
+- [ ] 4a-vii: Generate Installation Guide (hardcoded values visible)
 
 **Track B: Deploy Foundry Agent**
 - [ ] 4b-i/ii: Decide agent + capability
@@ -778,6 +780,99 @@ tdx query "SELECT * FROM sales_revenue LIMIT 1"
 tdx query "SELECT COUNT(*), SUM(revenue) FROM sales_revenue"
 # Compare against KB documented values
 ```
+
+---
+
+### Rule P4-8a: Track B — Standard 5-Test Validation Template (ENFORCEMENT)
+
+**⚠️ REQUIRED: Test agents with standard 5-test validation BEFORE deployment. Ensures consistent coverage.**
+
+**The 5 tests (run in order):**
+
+```
+Test 1: Connectivity
+  Query: "How many customers do we have?"
+  Expected: Agent connects to KB, queries customer table, returns count
+  Status: ✅ (connectivity works) or ❌ (query failed/timeout)
+
+Test 2: Trend/Time-Series
+  Query: "What's the revenue trend over the last 30 days?"
+  Expected: Agent aggregates by date, shows increasing/decreasing trend
+  Status: ✅ (trend query works) or ❌ (dates wrong/nulls/invalid data)
+
+Test 3: Dimension/Grouping
+  Query: "Show me revenue by region"
+  Expected: Agent groups by region, shows all 6 regions with values
+  Status: ✅ (all regions present, values correct) or ❌ (missing regions/wrong names)
+
+Test 4: Error Handling
+  Query: "Show me revenue for year 3000" (impossible data)
+  Expected: Agent says "no data found" or "outside available range"
+  Status: ✅ (graceful error) or ❌ (returns NULL/crashes/wrong value)
+
+Test 5: Business Question
+  Query: "Which region had the highest revenue in the last 7 days?"
+  Expected: Agent returns correct region + amount, explains reasoning
+  Status: ✅ (correct answer + explanation) or ❌ (wrong region/no explanation)
+```
+
+**Validation matrix:**
+
+```yaml
+### Agent 5-Test Validation
+
+Test 1: Connectivity
+  Input: "How many customers do we have?"
+  KB says: "Customer table = sales.customers, count field = customer_id"
+  Agent response: "1,234,567 customers"
+  DB verification: SELECT COUNT(DISTINCT customer_id) FROM sales.customers = 1,234,567
+  Status: ✅ PASS
+
+Test 2: Trend
+  Input: "Revenue trend last 30 days"
+  KB says: "Revenue table = sales.daily_revenue, partition by date"
+  Agent response: [Line chart showing 30 days, increasing from $100K to $150K]
+  DB verification: SELECT SUM(revenue) BY DATE, verify dates are correct
+  Status: ✅ PASS
+
+Test 3: Dimension
+  Input: "Revenue by region"
+  KB says: "Regions: US, EU, APAC, LATAM, EMEA, Internal"
+  Agent response: Shows all 6 regions with values
+  DB verification: SELECT DISTINCT region FROM sales.revenue = 6 values
+  Status: ✅ PASS
+
+Test 4: Error Handling
+  Input: "Revenue for year 3000"
+  Expected: "No data available for year 3000"
+  Agent response: "Year 3000 is outside available range (2020-2026)"
+  Status: ✅ PASS (graceful error)
+
+Test 5: Business Question
+  Input: "Top region last 7 days?"
+  KB says: "Daily revenue by region available"
+  Agent response: "US had highest revenue at $500K in last 7 days"
+  DB verification: SELECT region, SUM(revenue) ... ORDER BY revenue DESC = US $500K
+  Status: ✅ PASS (correct + explanation)
+
+Overall: ✅ Agent ready for deployment
+```
+
+**If any test fails (❌):**
+- STOP deployment
+- Debug the failure
+  - Test 1 failure: KB table name wrong or connectivity issue
+  - Test 2 failure: Date aggregation logic broken
+  - Test 3 failure: Dimension values not in KB or wrong column names
+  - Test 4 failure: Error handling not implemented in KB
+  - Test 5 failure: Agent reasoning broken or KB incomplete
+- Fix KB or agent prompt
+- Re-run all 5 tests
+- Only deploy when all 5 pass
+
+**Why:** Inconsistent test coverage leads to unvalidated agents. Standard template ensures every agent tested the same way.
+
+**Past incident:** Agent tested with one custom question, deployed with different KB. Discovered gaps during first user interaction (time-series question broke).
 
 ---
 
