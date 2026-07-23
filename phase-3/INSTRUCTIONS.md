@@ -85,17 +85,6 @@ Build a single portable `dashboard.html` file that:
 
 ---
 
-## ⚠️ Conditional Reads (Only if applicable)
-
-**If adapting existing pre-built HTML templates (instead of unified-dashboard.html):**
-- **`./phase-3/references/rendering/html-client/templates/kpi-dashboard.html`** — KPI-focused template (203K)
-- **`./phase-3/references/rendering/html-client/templates/table-dashboard.html`** — Data table template (203K)
-- **`./phase-3/references/rendering/html-client/templates/multi-chart-dashboard.html`** — Multi-chart template (203K)
-  - Only read if user explicitly requests a specific template variant
-  - Otherwise use unified-dashboard.html (covers all three)
-
----
-
 ## Phase 3 Specific Rules (In Addition to Universal Rules)
 
 ### Rule P3-1: Query Source Decision

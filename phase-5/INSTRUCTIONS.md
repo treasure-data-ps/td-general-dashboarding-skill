@@ -73,10 +73,13 @@ Create 4 markdown documentation files for users and operators:
 
 ## ✅ Before You Proceed: Required Reads
 
-**Before executing Phase 5 documentation creation, read:**
-1. **`./phase-5/references/phase-5-walkthrough.md`** — Step-by-step guide for all 4 documentation files
+**Before executing Phase 5 documentation creation, read these reference files:**
+1. **`./phase-5/references/template-architecture-md.md`** — Architecture.md template (if exists)
+2. **`./phase-5/references/template-usage-guide-md.md`** — Usage Guide.md template (if exists)
+3. **`./phase-5/references/template-runbook-md.md`** — Runbook.md template (if exists)
+4. **`./phase-5/references/template-access-ownership-md.md`** — Access & Ownership.md template (if exists)
 
-This walkthrough covers the structure, required sections, and validation gates for Architecture.md, Usage Guide.md, Runbook.md, and Access & Ownership.md (ensures consistent structure, no generic "contact admin" placeholders).
+These templates ensure consistent structure and cover all required sections (no generic "contact admin" placeholder language).
 
 ---
 

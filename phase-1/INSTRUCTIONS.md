@@ -67,10 +67,9 @@ Gather business requirements (Stage A), validate them against real data (Stage B
 
 **Before executing Phase 1 Stage A, read these reference files:**
 1. **`../references/guardrails-lite.md`** — Cross-phase guardrails (re-read on every engagement)
-2. **`./phase-1/references/dashboard-design-questions.md`** — Stage A question patterns and taxonomy
-3. **`./phase-1/references/steps-1a-1o.md`** — Detailed requirement gathering steps (KPIs, dimensions, filters, freshness)
+2. **`./phase-1/references/requirements-questionnaire-patterns.md`** — Requirement gathering patterns (if exists)
 
-These files establish the baseline for all Stage A questions and ensure consistent scoping across all engagements.
+These files establish the baseline for all Stage A questions and ensure consistent scoping.
 
 ---
 

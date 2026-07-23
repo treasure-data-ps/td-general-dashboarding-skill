@@ -63,27 +63,10 @@ Deploy a scheduled Treasure Data workflow that:
 ## ✅ Before You Proceed: Required Reads
 
 **Before executing Phase 2 workflow deployment (step 2a), read these reference files:**
-1. **`./phase-2/references/workflow-setup-configure.md`** — SINK table design patterns, aggregation strategies, workflow configuration (27.8K)
-2. **`./phase-2/references/pre-deployment-checklist.md`** — Validation steps before workflow runs
+1. **`./phase-2/references/sink-architecture-patterns.md`** — SINK table design patterns and aggregation strategies
+2. **`./phase-2/references/workflow-setup-configure.md`** — Workflow configuration best practices
 
 These files establish SINK table structure and workflow patterns to prevent fan-out aggregation errors and query performance issues.
-
----
-
-## ⚠️ Conditional Reads (Only if applicable)
-
-**If using incremental load strategy (not full-refresh):**
-- **`./phase-2/references/incremental_update_patterns.md`** — Incremental load patterns (16K)
-  - Delta detection, deduplication, upsert patterns
-  - State management for incremental runs
-  - Only read if user chooses incremental vs full-refresh
-
-**If using TD-specific time functions (not CAST/string operations):**
-- **`./phase-2/references/td-time-functions.md`** — TD time functions (td_interval, td_time_range, etc.)
-  - Partition pruning with td_interval
-  - Japan fiscal year calculations
-  - Timezone handling
-  - Only read if queries need advanced time operations
 
 ---
 

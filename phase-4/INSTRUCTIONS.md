@@ -65,6 +65,29 @@ Extend the dashboard with two optional automation tracks:
 
 ---
 
+---
+
+## ✅ Before You Proceed: Required Reads
+
+**Before executing Phase 4 (both Track A and Track B), read these reference files:**
+
+**Track A (Skill Extraction):**
+- **`./phase-4/references/track-a-automation.md`** — Skill packaging and extraction best practices
+- **No extra template reads** — Phase 3 hardcodes the skill definition directly from dashboard.html
+
+**Track B (Agent Deployment):**
+- **`./phase-4/references/templates/agent-prompt-template.md`** — Standard agent prompt template (147 lines) — **READ BEFORE writing agent prompt**
+- **`./phase-4/references/templates/knowledge-base-system-prompt-template.md`** — System prompt KB template
+- **`./phase-4/references/templates/knowledge-base-business-context-template.md`** — Business context KB template
+- **`./phase-4/references/templates/knowledge-base-data-dictionary-template.md`** — Data dictionary KB template
+- **`./phase-4/references/templates/knowledge-base-metrics-sql-template.md`** — Metrics & SQL KB template
+
+**Why these reads matter:**
+- `agent-prompt-template.md` ensures all 6 CRITICAL RULES are encoded (not invented from scratch)
+- KB templates ensure consistent structure across all 4 knowledge base files; prevents one-off formatting
+
+---
+
 ## Phase 4 Specific Rules (In Addition to Universal Rules)
 
 ### Rule P4-0: Dry-Run First (Track B Agent Only)
