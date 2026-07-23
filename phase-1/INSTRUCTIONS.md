@@ -373,7 +373,49 @@ SELECT SUM(revenue) FROM sales_table WHERE DATE(created_at) = '2026-07-22';
 
 ---
 
-### Rule P1-9: State.md Creation
+### Rule P1-9: Filter Interaction Rules (REQUIRED BEFORE PHASE 3)
+
+**⚠️ CRITICAL: Specify what happens to metrics when filters are applied. Ask explicitly in Stage A Step 1c.**
+
+For each **KPI/metric** that will have filters applied, specify:
+
+1. **Date filter applied:** Does the metric recalculate? Show `—` if impossible to aggregate to single value?
+2. **Category/dimension filter applied:** Does the metric update? Show adjusted value, `—`, or estimate?
+3. **Custom segment filter applied:** How does this affect the KPI? Show for segment only, show total + segment, or exclude?
+
+**Examples:**
+
+| Metric | Date Filter | Category Filter | Segment Filter |
+|--------|------------|-----------------|---|
+| **Total Revenue** | ✅ Recalculate | ✅ Show by category | ✅ Show for segment |
+| **Unique Customers** | ⚠️ Show `—` (can't aggregate) | ⚠️ Show by category | ✅ Show for segment |
+| **Avg Order Value** | ✅ Recalculate | ✅ Show by category | ✅ Show for segment |
+
+**Questions to ask the user:**
+
+1. "For [Metric X], if someone filters to [specific category], should the value update or show `—`?"
+2. "If a metric can't be accurately filtered (e.g., Unique Customers by date), should we show an estimate, hide it, or show a warning?"
+3. "When multiple filters are applied together, should metrics show the intersection, or revert to unfiltered?"
+
+**Capture in state.md:**
+```yaml
+### Filter Interaction Rules
+
+**Metric: [Metric Name]**
+- Date filter behavior: [Recalculate / Show — / Show estimate]
+- Category filter behavior: [Show by category / Show — / Show estimate]
+- Segment filter behavior: [Show for segment / Show total + segment]
+- Multi-filter behavior: [Intersection / Revert]
+
+**Metric: [Next Metric Name]**
+- [Same structure]
+```
+
+**Why:** Prevents Phase 3 confusion about what filters should do to each metric. Discovered late = rework cycles.
+
+---
+
+### Rule P1-10: State.md Creation
 
 At end of Phase 1, create `state.md` with this structure:
 
@@ -506,7 +548,7 @@ At end of Phase 1, create `state.md` with this structure:
 
 ---
 
-### Rule P1-10: Path Confirmation (ENFORCEMENT)
+### Rule P1-11: Path Confirmation (ENFORCEMENT)
 
 **⚠️ CRITICAL: CANNOT proceed to Phase 2 or Phase 3 without explicit user confirmation of the path.**
 
@@ -534,7 +576,7 @@ After calculating promotion score and recommending a path:
 
 ---
 
-### Rule P1-11: Dashboard Plan Summary Display (ENFORCEMENT)
+### Rule P1-12: Dashboard Plan Summary Display (ENFORCEMENT)
 
 **⚠️ CRITICAL: Before asking for final approval, show the user a dashboard plan summary.**
 
@@ -822,9 +864,9 @@ END Phase 1
 - [ ] All Stage B data validations complete (tables confirmed, columns verified, joins tested)
 - [ ] **HTML Client data size validated** (all widgets checked, feasibility confirmed)
 - [ ] Promotion Score calculated (0-6, with breakdown)
-- [ ] Dashboard Plan Summary displayed to user (Rule P1-11) — includes data validation
+- [ ] Dashboard Plan Summary displayed to user (Rule P1-12) — includes data validation
 - [ ] User reviewed and approved the plan (including data feasibility)
-- [ ] Path Confirmation obtained (Rule P1-10)
+- [ ] Path Confirmation obtained (Rule P1-11)
 - [ ] state.md created with ALL Phase 1 results:
   - Business requirements documented
   - Data findings documented

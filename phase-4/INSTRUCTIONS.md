@@ -41,17 +41,15 @@ Extend the dashboard with two optional automation tracks:
 - [ ] state.md updated through Phase 3
 - [ ] User decided: Track A, Track B, both, or neither?
 
-**Track A: Extract Reusable Skill (CORRECT ORDER)**
-- [ ] 4a-0: Ask scope questions FIRST (name, install scope, known values) ← GATE 1
-- [ ] 4a-0b: Hardcode all known values in SKILL.md (replace <PLACEHOLDER> with actual values)
-- [ ] 4a-0c: Get approval before packaging
+**Track A: Extract Reusable Skill**
+- [ ] 4a-0: Assemble knowledge package
 - [ ] 4a-i: Extract dashboard skill definition
-- [ ] 4a-ii: Extract & parameterize query scripts (verify hardcoded DBs used)
-- [ ] 4a-iii: Create configuration templates (zero placeholders)
-- [ ] 4a-iv: Document deployment checklist (one-command: npm run build)
+- [ ] 4a-ii: Extract & parameterize query scripts
+- [ ] 4a-iii: Create configuration templates
+- [ ] 4a-iv: Document deployment checklist
 - [ ] 4a-v: Validate skill end-to-end (spot-check ±5%)
-- [ ] 4a-vi: Final packaging (Python zipfile, not zip CLI)
-- [ ] 4a-vii: Generate Installation Guide (hardcoded values visible)
+- [ ] 4a-vi: Final packaging (show full zip instructions)
+- [ ] 4a-vii: Generate Installation Guide
 
 **Track B: Deploy Foundry Agent**
 - [ ] 4b-i/ii: Decide agent + capability
@@ -64,29 +62,6 @@ Extend the dashboard with two optional automation tracks:
 - [ ] Update state.md with track(s) run
 - [ ] Record skill name (Track A) or agent name (Track B)
 - [ ] Inform user: Phase 5 (optional) or close engagement
-
----
-
----
-
-## ✅ Before You Proceed: Required Reads
-
-**Before executing Phase 4 (both Track A and Track B), read these reference files:**
-
-**Track A (Skill Extraction):**
-- **`./phase-4/references/track-a-automation.md`** — Skill packaging and extraction best practices
-- **No extra template reads** — Phase 3 hardcodes the skill definition directly from dashboard.html
-
-**Track B (Agent Deployment):**
-- **`./phase-4/references/templates/agent-prompt-template.md`** — Standard agent prompt template (147 lines) — **READ BEFORE writing agent prompt**
-- **`./phase-4/references/templates/knowledge-base-system-prompt-template.md`** — System prompt KB template
-- **`./phase-4/references/templates/knowledge-base-business-context-template.md`** — Business context KB template
-- **`./phase-4/references/templates/knowledge-base-data-dictionary-template.md`** — Data dictionary KB template
-- **`./phase-4/references/templates/knowledge-base-metrics-sql-template.md`** — Metrics & SQL KB template
-
-**Why these reads matter:**
-- `agent-prompt-template.md` ensures all 6 CRITICAL RULES are encoded (not invented from scratch)
-- KB templates ensure consistent structure across all 4 knowledge base files; prevents one-off formatting
 
 ---
 
@@ -312,159 +287,6 @@ If you need to adapt this skill for a different project:
 ```
 
 **Why:** The whole point of extraction is reusability WITHOUT asking the same questions again. If the extracted skill asks for config, it defeats the purpose.
-
----
-
-### Rule P4-1c: One-Command Skill Execution (ENFORCEMENT — NON-NEGOTIABLE)
-
-**⚠️ CRITICAL: Extracted skill MUST run with ONE command. No questions, no config, no prompts.**
-
-**The goal of skill extraction:**
-```
-User runs: npm run build
-           ↓
-Skill uses pre-hardcoded values
-           ↓
-Dashboard.html created + data injected
-           ↓
-Done (< 5 minutes)
-```
-
-**NOT this (defeats skill purpose):**
-```
-User runs: node generate-data.js
-           ↓
-Skill asks: "Which database contains your SINK tables?" ❌
-Skill asks: "Which queries do you want to run?" ❌
-Skill asks: "Which template should we use?" ❌
-           ↓
-User configures (defeats reusability)
-```
-
-**Hardcoding checklist (BEFORE skill is extracted):**
-
-❌ **FAIL: Skill will ask questions if any of these are missing:**
-
-```
-Hardcoded Database:
-  - [ ] SINK_DB hardcoded in generate-data.js: SINK_DB = 'warehouse_sink'
-  - [ ] SRC_DB hardcoded in generate-data.js: SRC_DB = 'raw_events'
-  - If MISSING: Skill will ask "Which database?" ❌
-
-Hardcoded Queries:
-  - [ ] Metrics query hardcoded: SELECT SUM(amount) FROM ${SINK_DB}...
-  - [ ] Chart data query hardcoded: SELECT DATE, region, SUM(amount) FROM ${SINK_DB}...
-  - [ ] Rows query hardcoded: SELECT * FROM ${SINK_DB}.orders...
-  - If MISSING: Skill will ask "Which queries?" ❌
-
-Hardcoded Paths:
-  - [ ] Dashboard template path: ./references/unified-dashboard.html
-  - [ ] Output path: ./output/dashboard.html
-  - If MISSING: Skill will ask "Where should I put the output?" ❌
-
-Hardcoded Schedule (if workflow):
-  - [ ] Workflow schedule: daily at 02:00 UTC
-  - [ ] Retention: 365 days
-  - If MISSING: Skill will ask "How often should it run?" ❌
-
-SKILL.MD Template (no placeholders, no ???? values):
-  - [ ] SKILL.md lists exact DB names
-  - [ ] SKILL.md lists exact query file paths
-  - [ ] SKILL.md lists exact template paths
-  - [ ] Zero "edit this value" instructions (should say "already configured")
-  - If any placeholder remains: Skill will ask ❌
-```
-
-✅ **PASS: Skill runs one-command if ALL are hardcoded:**
-
-```bash
-# User does this ONLY:
-npm install
-npm run build
-
-# Skill does the rest automatically:
-#   - Connects to warehouse_sink (hardcoded)
-#   - Runs existing queries (hardcoded paths)
-#   - Uses unified-dashboard.html (hardcoded path)
-#   - Injects data
-#   - Outputs dashboard.html
-#   - Done
-```
-
-**Validation before extraction:**
-
-```yaml
-### Pre-Extraction Hardcoding Audit
-
-SINK Database:
-  - SINK_DB = 'warehouse_sink' ✓ (hardcoded in line 5 of generate-data.js)
-  - SRC_DB = 'raw_events' ✓ (hardcoded in line 6)
-
-Queries:
-  - queries/metrics.sql ✓ (path hardcoded, SELECT ... FROM warehouse_sink)
-  - queries/chart-data.sql ✓ (path hardcoded, SELECT ... FROM warehouse_sink)
-  - queries/rows.sql ✓ (path hardcoded, SELECT ... FROM warehouse_sink)
-
-Paths:
-  - Dashboard template: ./references/unified-dashboard.html ✓
-  - Output: ./output/dashboard.html ✓
-
-Schedule (if Phase 2 SINK):
-  - Workflow frequency: daily at 02:00 UTC ✓
-
-SKILL.md Content:
-  ```
-  ## Quick Start
-  npm install
-  npm run build
-  # Output: ./output/dashboard.html
-  
-  Pre-Configured:
-  - Database: warehouse_sink
-  - Queries: ./queries/*.sql (metrics, chart-data, rows)
-  - Template: ./references/unified-dashboard.html
-  - Schedule: Daily 02:00 UTC
-  
-  No configuration needed. All values are hardcoded.
-  ```
-
-Result: ✅ PASS (ready for extraction)
-```
-
-**If ANY value is not hardcoded:**
-- ❌ STOP extraction
-- List what's missing (e.g., "SINK_DB is still a placeholder")
-- Have user confirm the values
-- Hardcode them
-- Then extract skill
-
-**Example of what NOT to do (❌ WILL FAIL):**
-
-```javascript
-// generate-data.js (before extraction)
-const SINK_DB = process.env.SINK_DB || '????';  // ❌ NOT HARDCODED
-const SRC_DB = process.env.SRC_DB || '????';    // ❌ NOT HARDCODED
-
-// User runs: node generate-data.js
-// Skill asks: "Which database contains your SINK tables?"
-// Defeats skill purpose ❌
-```
-
-**Example of what TO do (✅ WILL WORK):**
-
-```javascript
-// generate-data.js (before extraction)
-const SINK_DB = 'warehouse_sink';  // ✅ HARDCODED
-const SRC_DB = 'raw_events';        // ✅ HARDCODED
-
-// User runs: npm run build
-// Skill uses hardcoded values
-// Dashboard created in 2 minutes ✅
-```
-
-**Why:** Extracted skill's entire value is "build fast without repeating setup". If skill asks the same questions as Phase 1-4, it's not a skill, it's just the same process again. Defeats the purpose.
-
-**Past incident:** Extracted skill asked "Which database contains your SINK tables?" User had to look up the answer from the original project. Extraction was useless — user could have just run the original dashboard again. Defeated 10x speedup promise.
 
 ---
 
@@ -783,99 +605,6 @@ tdx query "SELECT COUNT(*), SUM(revenue) FROM sales_revenue"
 
 ---
 
-### Rule P4-8a: Track B — Standard 5-Test Validation Template (ENFORCEMENT)
-
-**⚠️ REQUIRED: Test agents with standard 5-test validation BEFORE deployment. Ensures consistent coverage.**
-
-**The 5 tests (run in order):**
-
-```
-Test 1: Connectivity
-  Query: "How many customers do we have?"
-  Expected: Agent connects to KB, queries customer table, returns count
-  Status: ✅ (connectivity works) or ❌ (query failed/timeout)
-
-Test 2: Trend/Time-Series
-  Query: "What's the revenue trend over the last 30 days?"
-  Expected: Agent aggregates by date, shows increasing/decreasing trend
-  Status: ✅ (trend query works) or ❌ (dates wrong/nulls/invalid data)
-
-Test 3: Dimension/Grouping
-  Query: "Show me revenue by region"
-  Expected: Agent groups by region, shows all 6 regions with values
-  Status: ✅ (all regions present, values correct) or ❌ (missing regions/wrong names)
-
-Test 4: Error Handling
-  Query: "Show me revenue for year 3000" (impossible data)
-  Expected: Agent says "no data found" or "outside available range"
-  Status: ✅ (graceful error) or ❌ (returns NULL/crashes/wrong value)
-
-Test 5: Business Question
-  Query: "Which region had the highest revenue in the last 7 days?"
-  Expected: Agent returns correct region + amount, explains reasoning
-  Status: ✅ (correct answer + explanation) or ❌ (wrong region/no explanation)
-```
-
-**Validation matrix:**
-
-```yaml
-### Agent 5-Test Validation
-
-Test 1: Connectivity
-  Input: "How many customers do we have?"
-  KB says: "Customer table = sales.customers, count field = customer_id"
-  Agent response: "1,234,567 customers"
-  DB verification: SELECT COUNT(DISTINCT customer_id) FROM sales.customers = 1,234,567
-  Status: ✅ PASS
-
-Test 2: Trend
-  Input: "Revenue trend last 30 days"
-  KB says: "Revenue table = sales.daily_revenue, partition by date"
-  Agent response: [Line chart showing 30 days, increasing from $100K to $150K]
-  DB verification: SELECT SUM(revenue) BY DATE, verify dates are correct
-  Status: ✅ PASS
-
-Test 3: Dimension
-  Input: "Revenue by region"
-  KB says: "Regions: US, EU, APAC, LATAM, EMEA, Internal"
-  Agent response: Shows all 6 regions with values
-  DB verification: SELECT DISTINCT region FROM sales.revenue = 6 values
-  Status: ✅ PASS
-
-Test 4: Error Handling
-  Input: "Revenue for year 3000"
-  Expected: "No data available for year 3000"
-  Agent response: "Year 3000 is outside available range (2020-2026)"
-  Status: ✅ PASS (graceful error)
-
-Test 5: Business Question
-  Input: "Top region last 7 days?"
-  KB says: "Daily revenue by region available"
-  Agent response: "US had highest revenue at $500K in last 7 days"
-  DB verification: SELECT region, SUM(revenue) ... ORDER BY revenue DESC = US $500K
-  Status: ✅ PASS (correct + explanation)
-
-Overall: ✅ Agent ready for deployment
-```
-
-**If any test fails (❌):**
-- STOP deployment
-- Debug the failure
-  - Test 1 failure: KB table name wrong or connectivity issue
-  - Test 2 failure: Date aggregation logic broken
-  - Test 3 failure: Dimension values not in KB or wrong column names
-  - Test 4 failure: Error handling not implemented in KB
-  - Test 5 failure: Agent reasoning broken or KB incomplete
-- Fix KB or agent prompt
-- Re-run all 5 tests
-- Only deploy when all 5 pass
-
-**Why:** Inconsistent test coverage leads to unvalidated agents. Standard template ensures every agent tested the same way.
-
-**Past incident:** Agent tested with one custom question, deployed with different KB. Discovered gaps during first user interaction (time-series question broke).
-
----
-
 ### Rule P4-9: State.md Append (Phase 4)
 
 Append Phase 4 results to state.md:
@@ -1046,51 +775,30 @@ END Phase 4
 
 ---
 
-## After Phase 4 Completes (Rule 0: Phase Auto-Advance)
+## After Phase 4 Completes
 
-**If Track A or B completes (IMMEDIATE OFFER, ONE QUESTION):**
-
-**Say this (EXACT SCRIPT):**
+**If Track A created:**
 ```
-✅ Phase 4 Complete — [Track A: Skill extracted / Track B: Agent deployed]
-
-### Summary
-[Track details: skill name/version or agent deployed with access]
-
-### Next: Final Step?
-
-**Option A (Recommended):** Phase 5 — Documentation & Handoff
-→ Create: Architecture diagram, Usage guide, Runbook, Access guide, Troubleshooting
-→ Time: 1 hour
-→ Benefit: Support team + CS can self-serve, no escalations
-
-**Option B:** Close engagement
-→ [Track A/B] is production-ready and complete
-
-**→ Phase 5 docs? (YES/NO)**
+✓ Reusable skill ready
+  - Can be shared with other teams
+  - Speeds up future similar dashboards
+  - Documented with parameters
 ```
 
-**Then wait for ONE answer and proceed immediately:**
-- User says YES → Start Phase 5
-- User says NO → "Engagement complete. [Track A/B] is ready."
-
-**If both Track A + B completed:**
+**If Track B created:**
 ```
-✅ Phase 4 Complete — Both skill extracted and agent deployed
-
-### Summary
-- Skill: [name] (ready for reuse)
-- Agent: [name] (deployed and tested)
-
-### Next: Final Step?
-
-Ready for Phase 5 (documentation)?
-→ This completes the full engagement with complete handoff docs
-
-**→ Phase 5? (YES/NO)**
+✓ Foundry agent deployed
+  - Users can ask questions in natural language
+  - Agent queries live or precomputed data
+  - All queries logged for audit
 ```
 
-**Why:** Phase 4 is the last automation step. Must offer Phase 5 immediately, not wait for user to ask.
+**Both or neither:**
+```
+✓ Phase 4 complete (or skipped)
+  Optional: Phase 5 (handoff documentation)
+  Or: Project complete and production-ready
+```
 
 ---
 
