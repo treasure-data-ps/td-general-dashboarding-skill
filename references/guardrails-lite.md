@@ -27,13 +27,15 @@ Query results in `/tmp/` contain customer emails, IDs, counts, and financial dat
 
 ### ALWAYS warn customers that dashboard data is INLINED in HTML (Critical Limitation)
 HTML Client embeds all data directly in the HTML file — no API, no server, no runtime queries. Customers MUST understand upfront:
-- Entire dataset downloads on first page load (not streaming)
+- Full/pre-aggregated dataset downloads on first page load (not streaming)
+  * Data can be pre-aggregated via Phase 2 Workflow on a defined schedule (daily, weekly, hourly, etc.)
+  * Dashboard renders from the latest pre-aggregated snapshot on demand
 - All data visible in browser (view source shows everything)
-- No real-time updates (static snapshot only)
-- File size = data size + code (hard limit: 50MB breaking point)
-- Filtering/interactions fast (in-browser), but only on loaded data
+- Updates available on defined schedule if Phase 2 Workflow is used; otherwise static snapshot
+- File size = aggregated data size + code (hard limit: 50MB breaking point)
+- Filtering/interactions fast (in-browser), but only on loaded/pre-aggregated data
 
-If customer needs real-time updates, streaming, huge datasets (50MB+), or encrypted storage, this approach is OUT OF SCOPE. Discuss feasibility in Phase 1, not discovered during Phase 3 build. This skill is HTML Client only — no server-side options available.
+If customer needs sub-minute real-time updates, streaming data, huge raw datasets (can't be aggregated to 50MB), or encrypted storage, this approach is OUT OF SCOPE. Discuss feasibility in Phase 1, not discovered during Phase 3 build. This skill is HTML Client only — no server-side options available.
 
 ### ALWAYS verify column names against the actual table schema before writing any query or inject script
 Run `tdx describe <db>.<table>` first. Copy exact column names (case-sensitive). Past incident: dashboard showed all zeros because `customers` ≠ `total_customers` in the SINK schema.

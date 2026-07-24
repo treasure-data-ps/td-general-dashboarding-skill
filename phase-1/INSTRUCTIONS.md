@@ -42,7 +42,7 @@ If starting fresh:
 ## Quick Checklist (Quick Reference)
 
 **Stage A: Session Setup + Requirements**
-- [ ] **⚠️ Customer briefed on HTML Client constraints** (data inlined, size limits, no real-time updates)
+- [ ] **⚠️ Customer briefed on HTML Client constraints** (data inlined, size limits, pre-aggregation via optional Phase 2 Workflow)
 - [ ] Project slug chosen (short, kebab-case)
 - [ ] Business goal / dashboard purpose (1 sentence)
 - [ ] Platform target? (Treasure Work / Treasure AI Studio)
@@ -396,19 +396,25 @@ During Step 1c (dashboard design specification), **before** diving into technica
    ⚠️ IMPORTANT: All data is EMBEDDED DIRECTLY in the HTML file itself.
    This means:
    
-   • The entire dataset is downloaded to your browser on first load
-   • Users will see a delay while data loads and renders
-   • Filtering/interactions happen in the browser (fast, but only on loaded data)
-   • The HTML file size = data size + code (can't be separated)
+   • The full/pre-aggregated dataset is downloaded to your browser on first load
+     (Data can be pre-aggregated into summary tables via Phase 2 Workflow on a defined schedule, 
+      if opted. Phase 3 renders from those pre-aggregated tables on demand.)
+   • Users will see a one-time load delay while the complete dataset and rendering happen
+   • Filtering/interactions happen in the browser (fast, but only on loaded/pre-aggregated data)
+   • The HTML file size = aggregated data size + code (can't be separated)
    • Anyone with the file can see the data (view source in browser)
    
    We need to keep the data size reasonable — typically under 10MB 
    for smooth performance, max 50MB before it gets very slow.
    
+   **Updates:** If you need frequent refreshes (hourly, daily, weekly, etc.), 
+   we'll use Phase 2 Workflow to pre-aggregate data on that schedule. 
+   The dashboard then renders from the latest pre-aggregated snapshot on demand.
+   
    If you need:
-   - Real-time data that updates constantly
-   - Huge datasets (GB+) that won't fit in 50MB
-   - Dynamic data that changes hourly
+   - True real-time updates (sub-minute)
+   - Huge raw datasets (GB+) that can't be aggregated to fit 50MB
+   - Streaming data or live connections
    - Encrypted/secure data storage
    
    This approach won't work. We'd need to explore a different solution 
