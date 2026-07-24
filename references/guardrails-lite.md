@@ -143,7 +143,20 @@ Since the whole point of HTML Client is portability, open `dashboard.html` direc
 
 ---
 
-## 4. Requirements
+## 4. Requirements & Workflow Configuration
+
+### NEVER expose workflow incrementality to non-technical users; full-refresh is default
+Incrementality (append-only, 1-day/7-day lookback) is an advanced optimization for large datasets. Non-technical users don't need to know it exists.
+
+**Rule:**
+- Phase 1 Stage A Step 1e: Ask "How far back do you need data?" ONLY to determine if Phase 2 is needed, not to choose incremental mode
+- Phase 2 deployment: Configure full-refresh by default (simple, predictable)
+- Only mention incrementality if: Data size > 500MB + deep history (2+ years) + user is technical
+- In state.md: If user is non-technical, never document incremental mode — just say "full refresh daily"
+
+**Why:** Incrementality adds edge cases (late-arriving data, corrections, re-runs). It's a performance optimization, not a feature. Exposing it to non-technical users causes confusion and misunderstandings.
+
+---
 
 ### ALWAYS resolve metric definition ambiguity explicitly — offer "show both"
 When two valid definitions exist (e.g., unique openers vs total opens), don't force a binary choice. Propose showing both. Past incident: email open rate was 30.5% (unique) vs 87.4% (total) — showing both resolved the ambiguity and gave more insight.

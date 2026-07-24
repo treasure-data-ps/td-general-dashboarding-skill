@@ -408,31 +408,65 @@ WHERE event_time >= CURRENT_DATE - INTERVAL 7 DAY
 
 ---
 
-### Rule P2-6: Incremental Load Strategy
+### Rule P2-6: Incremental Load Strategy (Advanced / Optional)
 
-Phase 2 workflows should be **incremental** (not full refresh):
+**DEFAULT: Full-refresh workflows only. Incrementality is an optional add-on for technical users only.**
 
-- [ ] Partition on time (date or day)
-- [ ] Query only new/updated data since last run
-- [ ] Append to SINK table (or replace day partition)
+#### Phase 1: Always Start with Full-Refresh
+
+Configure workflows to do **full refreshes by default**:
+- Query entire date range each run
+- Replace SINK table completely (or truncate + re-insert)
+- Simple, predictable, no edge cases
+- Best for most dashboards (data sizes < 1GB, date ranges < 2 years)
+
+```yaml
+# Full-refresh (DEFAULT — what users see)
+td:
+  database: <db>
+
++aggregate_metrics:
+  td>: queries/aggregate_metrics.sql
+  
+  # Write to SINK table (full refresh)
+  insert_into: <project_slug>_sink_metrics
+```
+
+#### Phase 2 (Optional): Incrementality Only for Technical Users
+
+**DO NOT expose incrementality to non-technical users.** Only configure if:
+1. **Data size justifies it:** SINK tables > 500MB or growing rapidly
+2. **Deep history requested:** Date range > 2 years of daily data
+3. **User is technical:** Has explicit consent + understanding of complexity
+
+**When to use incremental:**
+- Append-only: Immutable data (events, logs) → append new rows only
+- 1-day lookback: Update last N days (handles late-arriving data)
+- 7-day lookback: Reprocess wide window (handles corrections)
 
 **Pattern:**
 ```yaml
-# Daily incremental load
+# Incremental load (ADVANCED — not shown by default)
 td:
   database: <db>
 
 +aggregate_metrics:
   td>: queries/aggregate_metrics.sql
   parameters:
+    # Only process new/updated data
     start_time: ${session.last_attempt_time}
     end_time: ${moment().format('YYYY-MM-DD HH:mm:ss')}
   
-  # Write to SINK table (incremental)
+  # Append or upsert (not full replace)
   insert_into: <project_slug>_sink_metrics
 ```
 
-**Why:** Incremental loads are cheaper and faster than full refreshes.
+**Why:** Full-refresh is simpler, more predictable, easier to debug. Incrementality adds complexity (late-arriving data, corrections, edge cases). Only use when data size forces it.
+
+**In Phase 1 Step 1e (Freshness/Update Frequency):**
+- Ask user: "How far back do you need data? (90 days, 1 year, 3+ years?)"
+- If < 2 years: Use full-refresh (default)
+- If ≥ 2 years + GB-scale data: Mention incrementality exists, but NOT as primary recommendation
 
 ---
 
