@@ -95,7 +95,8 @@ SELECT COUNT(*) FROM <SOURCE_DB>.<source_table>  # Verify data exists
 - [ ] **Non-additive metrics handled** (COUNT DISTINCT columns documented + properly sourced)
 - [ ] **Payload budget pre-calculated** (documented in state.md; < 2 MB total)
 - [ ] **Known limitations annotated** (all limited widgets have .widget-note)
-- [ ] **Spot-checks passed** (3+ KPIs verified ±0.1% accuracy) ← GATE 3
+- [ ] **Spot-checks passed** (3+ KPIs verified ±0.1% accuracy against SOURCE data) ← GATE 3
+- [ ] **Filter combos tested** (2–3 random dimension + date filter combinations verified) ← GATE 3b
 - [ ] All metrics match Phase 1/2 confirmed values
 - [ ] Performance acceptable (queries < 5s, load < 5s)
 - [ ] No console errors (F12 → Console)
@@ -412,6 +413,74 @@ KPI #3: Conversion Rate
 > I will debug and fix this before presenting for approval."
 
 **Why:** Small data errors destroy trust. If customers spot-check and find mismatches, the entire dashboard loses credibility. Phase 3 requires exact matching.
+
+---
+
+### Rule P3-4b: Test 2–3 Random Filter Combinations Against SOURCE Data (ENFORCEMENT)
+
+**⚠️ CRITICAL: Before finalizing dashboard, test filter combinations in real-world scenarios.**
+
+After KPI spot-checks pass, test 2-3 random filter combinations to ensure filters work correctly together and with date ranges.
+
+**Step 1: Pick 2–3 random filter combos**
+
+Pick realistic combinations that users might try:
+
+**Example 1: Dimension + Date Filter**
+```
+Filter combo: Region = "US West" + Date = "Last 30 days"
+Dashboard shows: Revenue = $245K, Customers = 1,250
+Query against SOURCE: 
+  SELECT SUM(amount), COUNT(DISTINCT customer_id) 
+  FROM source_transactions 
+  WHERE region = 'US West' 
+    AND date_column >= CURRENT_DATE - INTERVAL 30 DAY
+Result: Revenue = $245K, Customers = 1,250 ✓ MATCH
+```
+
+**Example 2: Multiple Dimensions + Date**
+```
+Filter combo: Category = "Electronics" + Status = "Completed" + Date = "Last 90 days"
+Dashboard shows: Total Orders = 3,420
+Query against SOURCE:
+  SELECT COUNT(*) 
+  FROM source_orders 
+  WHERE category = 'Electronics' 
+    AND status = 'Completed' 
+    AND order_date >= CURRENT_DATE - INTERVAL 90 DAY
+Result: 3,420 ✓ MATCH
+```
+
+**Example 3: Edge Case: All Filters Applied**
+```
+Filter combo: Region = "EMEA" + Product = "Premium" + Customer_Segment = "Enterprise" + Date = "Last 180 days"
+Dashboard shows: Revenue = $1.2M
+Query against SOURCE:
+  SELECT SUM(amount) 
+  FROM source_transactions 
+  WHERE region = 'EMEA' 
+    AND product_tier = 'Premium' 
+    AND segment = 'Enterprise' 
+    AND date_column >= CURRENT_DATE - INTERVAL 180 DAY
+Result: $1.2M ✓ MATCH
+```
+
+**Step 2: Verify each combo**
+- [ ] Dashboard numbers match SOURCE query results (exactly)
+- [ ] Focus on: dimension combinations + date ranges
+- [ ] All 2–3 combos pass? → Proceed ✓
+- [ ] Any combo fails? → **STOP and debug** ✗
+
+**Step 3: If any combo fails**
+- Debug filter logic (is WHERE clause applied correctly?)
+- Check dimension grain (are you grouping by the right columns?)
+- Verify date range boundaries (off-by-one errors?)
+- Check join keys (is filter applied to correct table?)
+- Re-render and re-test
+
+**Why:** KPI spot-checks verify individual metrics. Filter combo tests verify that dimensions and dates work together. Filters are how users interact with dashboards — they must be correct under real-world usage patterns.
+
+**Past incident:** Dashboard showed correct total revenue (KPI passed), but filtered by "Region=North" showed $50K instead of $47K. Bug: filter applied to orders table but revenue was summed from order_items (fan-out). Combo test would have caught this immediately.
 
 ---
 
