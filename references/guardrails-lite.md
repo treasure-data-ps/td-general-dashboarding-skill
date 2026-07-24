@@ -25,6 +25,16 @@ Every number in a dashboard must come from a live SQL query result. No estimated
 ### NEVER read raw query output files into AI context
 Query results in `/tmp/` contain customer emails, IDs, counts, and financial data. Always pipe through node scripts (e.g., `render.js`) so data flows through the script only, never through AI context.
 
+### ALWAYS warn customers that dashboard data is INLINED in HTML (Critical Limitation)
+HTML Client embeds all data directly in the HTML file — no API, no server, no runtime queries. Customers MUST understand upfront:
+- Entire dataset downloads on first page load (not streaming)
+- All data visible in browser (view source shows everything)
+- No real-time updates (static snapshot only)
+- File size = data size + code (hard limit: 50MB breaking point)
+- Filtering/interactions fast (in-browser), but only on loaded data
+
+If customer needs real-time, streaming, or encrypted storage, this approach won't work → recommend Phase 4 backend API instead. Discuss this choice in Phase 1, not discovered during Phase 3 build.
+
 ### ALWAYS verify column names against the actual table schema before writing any query or inject script
 Run `tdx describe <db>.<table>` first. Copy exact column names (case-sensitive). Past incident: dashboard showed all zeros because `customers` ≠ `total_customers` in the SINK schema.
 

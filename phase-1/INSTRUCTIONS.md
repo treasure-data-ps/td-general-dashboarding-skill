@@ -42,6 +42,7 @@ If starting fresh:
 ## Quick Checklist (Quick Reference)
 
 **Stage A: Session Setup + Requirements**
+- [ ] **⚠️ Customer briefed on HTML Client constraints** (data inlined, size limits, no real-time updates)
 - [ ] Project slug chosen (short, kebab-case)
 - [ ] Business goal / dashboard purpose (1 sentence)
 - [ ] Platform target? (Treasure Work / Treasure AI Studio)
@@ -387,16 +388,31 @@ If warning/failing, action taken:
 
 During Step 1c (dashboard design specification), **before** diving into technical details:
 
-1. **Set expectations upfront:**
+1. **Set expectations upfront (CRITICAL DATA INLINING WARNING):**
    ```
    "This dashboard will be a single HTML file that opens in your browser 
-   (no server needed, fully portable). This means we need to keep the data 
-   size reasonable — typically under 10MB for smooth performance, 
-   max 50MB before it gets slow.
+   (no server needed, fully portable). 
    
-   If your dashboard needs real-time updates or huge datasets, 
-   we'd build it differently (backend API). Let's make sure 
-   this approach works for you first."
+   ⚠️ IMPORTANT: All data is EMBEDDED DIRECTLY in the HTML file itself.
+   This means:
+   
+   • The entire dataset is downloaded to your browser on first load
+   • Users will see a delay while data loads and renders
+   • Filtering/interactions happen in the browser (fast, but only on loaded data)
+   • The HTML file size = data size + code (can't be separated)
+   • Anyone with the file can see the data (view source in browser)
+   
+   We need to keep the data size reasonable — typically under 10MB 
+   for smooth performance, max 50MB before it gets very slow.
+   
+   If you need:
+   - Real-time data that updates constantly
+   - Huge datasets (GB+)
+   - Dynamic data that changes hourly
+   - Encrypted/secure data storage
+   
+   We'd build it differently (backend API with live queries). 
+   Let's confirm this approach works for you first."
    ```
 
 2. **Ask constraint-discovery questions:**
