@@ -3,7 +3,7 @@ name: fde-tais-dashboard-builder-phase-2
 description: INTERNAL — Phase 2 only. Deploy a scheduled workflow that pre-aggregates metrics into SINK tables.
 ---
 
-# Phase 2: Deploy Dashboard Workflow (Custom Dashboard Agent — Lite)
+# Phase 2: Deploy Dashboard Workflow (FDE TAIS Dashboard Builder)
 
 > **Read in this order:**
 > 1. `../INSTRUCTIONS.md` (master rules, load_order: 0)
@@ -94,6 +94,6 @@ GROUP BY DATE(date), vehicle_make, customer_segment;
 → **See Quick Checklist in `./INSTRUCTIONS.md`** for a condensed Phase 2 decision checklist (setup, deploy, SINK validation gates).
 ---
 
-**Version:** 1.0.0 (Lite)
-**Last Updated:** 15 July 2026
+**Version:** 1.0.0
+**Last Updated:** 23 July 2026
 **Author:** FDE Team

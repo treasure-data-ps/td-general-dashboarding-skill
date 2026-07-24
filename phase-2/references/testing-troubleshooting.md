@@ -485,6 +485,6 @@ Before handing off to Phase 3:
 
 ---
 
-**Version:** 1.0.0 (Lite)
+**Version:** 1.0.0
 **Last Updated:** 15 July 2026
 **Author:** FDE Team

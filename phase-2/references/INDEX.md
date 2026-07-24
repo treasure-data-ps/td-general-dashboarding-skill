@@ -63,6 +63,6 @@ At end of Phase 2:
 - `sql-skills:time-filtering` — `td_time_range()`, `TD_SCHEDULED_TIME()`, `TD_TIME_ADD()` reference
 ---
 
-**Version:** 1.0.0 (Lite)
+**Version:** 1.0.0
 **Last Updated:** 15 July 2026
 **Author:** FDE Team

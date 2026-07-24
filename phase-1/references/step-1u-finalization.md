@@ -271,7 +271,7 @@ Include all fields from the Session Setup block in `steps-1pre.md` plus the busi
 
 ---
 
-**Version:** 1.0.0 (Lite)
+**Version:** 1.0.0
 **Last Updated:** 15 July 2026
 **Author:** FDE Team
 

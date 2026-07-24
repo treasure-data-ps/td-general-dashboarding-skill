@@ -546,6 +546,6 @@ Stage A and Stage B are **designed to work together** within the same phase, not
 
 ---
 
-**Version:** 1.0.0 (Lite)
+**Version:** 1.0.0
 **Last Updated:** 15 July 2026
 **Author:** FDE Team

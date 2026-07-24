@@ -1,11 +1,11 @@
 ---
 name: dashboarding-guardrails-lite
 description: |
-  Mandatory guardrails for the custom-dashboard-agent-lite skill. Load this file FIRST at the start of every session. Enforces strict rules on data integrity, queries, and HTML Client rendering. Violations cause rework — these are non-negotiable.
+  Mandatory guardrails for the FDE TAIS Dashboard Builder. Load this file FIRST at the start of every session. Enforces strict rules on data integrity, queries, and HTML Client rendering. Violations cause rework — these are non-negotiable.
 load_order: 0
 ---
 
-# Custom Dashboard Agent (Lite) — Guardrails
+# FDE TAIS Dashboard Builder — Guardrails
 
 **Read this before doing anything else in a dashboarding session.**
 

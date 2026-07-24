@@ -219,6 +219,6 @@ See `validation-queries.md` for:
 See `stage-b-database-discovery.md` for core discovery patterns across all table types and source kinds.
 ---
 
-**Version:** 1.0.0 (Lite)
+**Version:** 1.0.0
 **Last Updated:** 15 July 2026
 **Author:** FDE Team

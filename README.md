@@ -1,4 +1,4 @@
-# Custom Dashboard Agent (Lite)
+# FDE TAIS Dashboard Builder
 
 Build custom dashboards from Treasure Data databases using a **self-serve 5-phase pipeline** that routes to either **non-workflow** (interactive, ad-hoc) or **workflow** (production, scheduled) paths. HTML Client is the only rendering engine — a single portable `dashboard.html`, no server required.
 
@@ -51,11 +51,11 @@ Phase 1 (Stage A + B): Requirements Gathering & Targeted Data Discovery
 
 1. **Read `SKILL.md`** (this is your entry point) → "How to Start" section
 2. **Execute Phase 1** (Stage A: requirements, Stage B: data discovery):
-   - `./phase-1/requirements-gathering-guide.md` → Output: `state.md` created + **path score (0-6)**
+   - `./phase-1/SKILL.md` → Output: `state.md` created + **path score (0-6)**
 3. **At end of Phase 1 Stage B, score determines your next file:**
-   - **Score 0-2 (Non-Workflow):** `./phase-3/build-interactive-dashboard-guide.md` (skip Phase 2)
+   - **Score 0-2 (Non-Workflow):** `./phase-3/SKILL.md` (skip Phase 2)
    - **Score 3 (Optional):** Ask user: "Quick build or production workflow?" → route accordingly
-   - **Score 4-6 (Workflow):** `./phase-2/deploy-workflow-guide.md` first, then Phase 3
+   - **Score 4-6 (Workflow):** `./phase-2/SKILL.md` first, then Phase 3
 4. **Phase 4-5:** Optional dashboard automation, companion AI agent deployment, and handoff documentation
 
 ### For Resuming Existing Engagements
@@ -96,7 +96,9 @@ Q1: Do you need the dashboard now?
 **Both paths use this:** Non-Workflow and Workflow paths complete Phase 1 identically
 
 **Reference:**
-- **`./phase-1/requirements-gathering-guide.md`** — Stage A: KPIs, dimensions, filters, schedule, compliance. Stage B: database/table discovery, metrics validation, **path decision (0-6 score)**
+- **`./phase-1/SKILL.md`** — Full Phase 1 instructions and steps
+- **`./phase-1/INSTRUCTIONS.md`** — Phase 1 specific rules and quick checklist
+- **`./phase-1/references/phase-1-walkthrough.md`** — Stage A: KPIs, dimensions, filters, schedule, compliance. Stage B: database/table discovery, metrics validation, **path decision (0-6 score)**
 
 ---
 
@@ -104,11 +106,11 @@ Q1: Do you need the dashboard now?
 
 | Phase | Input | Output | Path(s) | Reference |
 |-------|-------|--------|---------|-----------|
-| **1: Requirements + Data Discovery** | Business questions + table exploration | `state.md`, KPIs, dimensions, table catalog, **path decision (0-6 score)** | Both | `./phase-1/requirements-gathering-guide.md` |
-| **2: Deploy Dashboard Workflow** | Workflow config | SINK tables, schedule | Workflow only | `./phase-2/deploy-workflow-guide.md` |
-| **3: Build Dashboard + Validate** | Business context + tables | Accurate interactive `dashboard.html` | Both | `./phase-3/build-interactive-dashboard-guide.md` |
-| **4: Automate & Deploy Agent** | Dashboard + tables | Dashboard skill + AI agent | Both (opt) | `./phase-4/automate-deploy-guide.md` |
-| **5: Handoff Documentation** | Implementation notes | 4 local markdown files | Both (opt) | `./phase-5/handoff-documentation-guide.md` |
+| **1: Requirements + Data Discovery** | Business questions + table exploration | `state.md`, KPIs, dimensions, table catalog, **path decision (0-6 score)** | Both | `./phase-1/SKILL.md` |
+| **2: Deploy Dashboard Workflow** | Workflow config | SINK tables, schedule | Workflow only | `./phase-2/SKILL.md` |
+| **3: Build Dashboard + Validate** | Business context + tables | Accurate interactive `dashboard.html` | Both | `./phase-3/SKILL.md` |
+| **4: Automate & Deploy Agent** | Dashboard + tables | Dashboard skill + AI agent | Both (opt) | `./phase-4/SKILL.md` |
+| **5: Handoff Documentation** | Implementation notes | 4 local markdown files | Both (opt) | `./phase-5/SKILL.md` |
 
 ---
 
@@ -117,22 +119,22 @@ Q1: Do you need the dashboard now?
 | Your Question | Read This |
 |---|---|
 | "What do I need to build a dashboard?" | Start with Phase 1 in `SKILL.md` |
-| "How do I gather requirements?" | `./phase-1/requirements-gathering-guide.md` (Stage A) |
-| "How do I discover the right tables?" | `./phase-1/requirements-gathering-guide.md` (Stage B) |
-| "Should I use Workflow or Non-Workflow?" | Stage B scoring in `./phase-1/references/stage-b-database-discovery.md` (0-2 = Non-Workflow, 3 = Optional, 4-6 = Workflow) |
-| "How do I set up a workflow?" | `./phase-2/deploy-workflow-guide.md` (Workflow path only) |
-| "How do I build the dashboard?" | `./phase-3/build-interactive-dashboard-guide.md` (both paths) |
-| "How do I validate my data?" | `./phase-3/references/steps.md` (Step 4f: Validate Data Accuracy) |
+| "How do I gather requirements?" | `./phase-1/SKILL.md` + `./phase-1/references/phase-1-walkthrough.md` (Stage A) |
+| "How do I discover the right tables?" | `./phase-1/references/phase-1-walkthrough.md` (Stage B) |
+| "Should I use Workflow or Non-Workflow?" | `./phase-1/references/stage-b-path-routing.md` (0-2 = Non-Workflow, 3 = Optional, 4-6 = Workflow) |
+| "How do I set up a workflow?" | `./phase-2/SKILL.md` + `./phase-2/references/phase-2-walkthrough.md` (Workflow path only) |
+| "How do I build the dashboard?" | `./phase-3/SKILL.md` + `./phase-3/references/phase-3-walkthrough.md` (both paths) |
+| "How do I validate my data?" | `./phase-3/references/phase-3-walkthrough.md` (Validation gates) |
 | "How do I test my dashboard?" | `./phase-3/references/testing-troubleshooting.md` |
-| "Can I automate this dashboard?" | `./phase-4/automate-deploy-guide.md` (Track A) |
-| "Can I add an AI agent?" | `./phase-4/automate-deploy-guide.md` (Track B) |
+| "Can I automate this dashboard?" | `./phase-4/SKILL.md` + `./phase-4/references/track-a-automation.md` (Track A) |
+| "Can I add an AI agent?" | `./phase-4/references/track-b-ai-agent.md` (Track B) |
 
 ---
 
 ## Solution Structure
 
 ```
-custom-dashboard-agent-lite/
+fde-tais-dashboard-builder/
 ├── SKILL.md              ← you are here — entry point and phase routing
 ├── README.md              ← this file
 ├── INDEX.md               ← full file & folder index
@@ -150,7 +152,7 @@ custom-dashboard-agent-lite/
 ## Non-Workflow Path (Score 0-2)
 
 **Entry point:** After Phase 1 Stage B, score 0-2
-**What to read:** `./phase-3/build-interactive-dashboard-guide.md`
+**What to read:** `./phase-3/SKILL.md` → `./phase-3/references/phase-3-walkthrough.md`
 **Best for:** Ad-hoc analysis, immediate needs, exploratory work
 
 **Features:**
@@ -167,8 +169,8 @@ custom-dashboard-agent-lite/
 
 **Entry point:** After Phase 1 Stage B, score 4-6
 **What to read (in order):**
-1. `./phase-2/deploy-workflow-guide.md` — Deploy dashboard workflow
-2. `./phase-3/build-interactive-dashboard-guide.md` — Build Dashboard + Validate Loop
+1. `./phase-2/SKILL.md` → `./phase-2/references/phase-2-walkthrough.md` — Deploy dashboard workflow
+2. `./phase-3/SKILL.md` → `./phase-3/references/phase-3-walkthrough.md` — Build Dashboard + Validate Loop
 
 **Best for:** Production dashboards, frequent access, historical tracking
 
@@ -212,7 +214,7 @@ Update state.md
 Phase 2-3 regenerate with new context
 ```
 
-**See `./phase-1/requirements-gathering-guide.md` for template and detailed guidance.**
+**See `./phase-1/references/phase-1-walkthrough.md` for template and detailed guidance.**
 
 ---
 
@@ -257,7 +259,7 @@ HTML Client only — a single portable `dashboard.html` with data inlined at bui
 - [ ] Aggregates calculated (SELECT ... GROUP BY)
 - [ ] Results embedded (exact numbers, not synthetic)
 
-See `./phase-3/references/steps.md` (Step 4f: Validate Data Accuracy) for detailed validation procedures.
+See `./phase-3/references/phase-3-walkthrough.md` (Quality gates section) for detailed validation procedures.
 
 ---
 
@@ -320,14 +322,15 @@ Next conversation: "Generate my revenue dashboard"
 | File | Purpose | Path |
 |------|---------|------|
 | **SKILL.md** | 5-phase workflow entry point | Root |
-| **requirements-gathering-guide.md** | Phase 1 requirements + data discovery (Stage A + B) | `./phase-1/` |
-| **deploy-workflow-guide.md** | Phase 2 workflow deployment (Workflow path only) | `./phase-2/` |
-| **build-interactive-dashboard-guide.md** | Phase 3 dashboard build + validate (both paths) | `./phase-3/` |
-| **automate-deploy-guide.md** | Phase 4 automation & AI agent (optional) | `./phase-4/` |
-| **handoff-documentation-guide.md** | Phase 5 handoff documentation (optional) | `./phase-5/` |
-| **steps.md** (Step 4f) | Data accuracy validation procedures | `./phase-3/references/` |
+| **phase-1-walkthrough.md** | Phase 1 requirements + data discovery (Stage A + B) | `./phase-1/references/` |
+| **phase-2-walkthrough.md** | Phase 2 workflow deployment (Workflow path only) | `./phase-2/references/` |
+| **phase-3-walkthrough.md** | Phase 3 dashboard build + validate (both paths) | `./phase-3/references/` |
+| **phase-3-data-patterns.md** | Data patterns, filters, cardinality, performance | `./phase-3/references/` |
+| **track-a-automation.md** | Phase 4 Track A: skill extraction & automation | `./phase-4/references/` |
+| **track-b-ai-agent.md** | Phase 4 Track B: Foundry AI agent deployment | `./phase-4/references/` |
 | **testing-troubleshooting.md** | Comprehensive dashboard testing checklist + troubleshooting guide | `./phase-3/references/` |
 | **guardrails-lite.md** | Cross-phase guardrails | `./references/` |
+| **treasure-data-theme.md** | Official Treasure AI 2026 brand colors & styling | `./references/` |
 
 ---
 
@@ -341,17 +344,17 @@ Dashboards can join data from multiple Treasure Data databases. Specify all requ
 
 - **On-demand dashboards?** → Read `SKILL.md` → Phase 1 → Score 0-2 → Phase 3
 - **Scheduled production dashboards?** → Read `SKILL.md` → Phase 1 → Score 4-6 → Phase 2 → Phase 3
-- **How to gather requirements?** → `./phase-1/requirements-gathering-guide.md` (Stage A)
-- **How to discover tables?** → `./phase-1/requirements-gathering-guide.md` (Stage B)
-- **Business context strategy?** → `./phase-1/requirements-gathering-guide.md`
-- **Workflow deployment?** → `./phase-2/deploy-workflow-guide.md`
-- **Automation & AI agents?** → `./phase-4/automate-deploy-guide.md`
-- **Handoff documentation?** → `./phase-5/handoff-documentation-guide.md`
-- **Data validation?** → `./phase-3/references/steps.md` (Step 4f: Validate Data Accuracy)
+- **How to gather requirements?** → `./phase-1/SKILL.md` (Stage A)
+- **How to discover tables?** → `./phase-1/references/phase-1-walkthrough.md` (Stage B)
+- **Business context strategy?** → `./phase-1/references/phase-1-walkthrough.md`
+- **Workflow deployment?** → `./phase-2/SKILL.md` + `./phase-2/references/phase-2-walkthrough.md`
+- **Automation & AI agents?** → `./phase-4/SKILL.md` + `./phase-4/references/track-a-automation.md` or `track-b-ai-agent.md`
+- **Handoff documentation?** → `./phase-5/SKILL.md` + `./phase-5/references/phase-5-walkthrough.md`
+- **Data validation?** → `./phase-3/references/phase-3-walkthrough.md` (Quality gates section)
 - **Testing & troubleshooting?** → `./phase-3/references/testing-troubleshooting.md`
 
 ---
 
-**Version:** 1.0.0 (Lite)
-**Last Updated:** 15 July 2026
+**Version:** 1.0.0
+**Last Updated:** 23 July 2026
 **Author:** FDE Team

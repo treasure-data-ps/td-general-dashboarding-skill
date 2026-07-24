@@ -854,6 +854,6 @@ For EACH query used in dashboard:
 - `../../phase-1/requirements-gathering-guide.md` — Stage A/B process; these patterns used in Stage B Steps 2c-2d
 ---
 
-**Version:** 1.0.0 (Lite)
+**Version:** 1.0.0
 **Last Updated:** 15 July 2026
 **Author:** FDE Team

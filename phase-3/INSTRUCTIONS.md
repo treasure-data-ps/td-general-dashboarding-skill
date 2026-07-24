@@ -27,6 +27,13 @@ Build a single portable `dashboard.html` file that:
 
 ---
 
+## Pre-Build Setup
+
+**Before starting dashboard build, re-read styling reference:**
+- **`../references/treasure-data-theme.md`** — Brand colors, fonts, component styles (396 lines)
+
+---
+
 ## Pre-Execution Validation (Checkpoint)
 
 **Cannot execute Phase 3 without validating:**
@@ -1189,5 +1196,5 @@ Adjusting and re-testing...
 ---
 
 **Version:** 1.0.0
-**Last Updated:** 22 July 2026
+**Last Updated:** 23 July 2026
 **Load Order:** 1.3 (read after Phase 1-2 INSTRUCTIONS.md)

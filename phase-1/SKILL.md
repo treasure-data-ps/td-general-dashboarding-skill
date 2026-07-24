@@ -4,7 +4,7 @@ description: |
   INTERNAL — Phase 1 only. Gather business requirements, validate against real data, score promotion (0-6), and route to Phase 2/3. Produces local state.md with requirements, data findings, and path decision.
 ---
 
-# Phase 1: Requirements & Data Discovery (Custom Dashboard Agent — Lite)
+# Phase 1: Requirements & Data Discovery (FDE TAIS Dashboard Builder)
 
 > **Read in this order:**
 > 1. `../INSTRUCTIONS.md` (master rules, load_order: 0)
@@ -188,6 +188,6 @@ If the data source is pre-aggregated (`skip_phase_3` in the old numbering, i.e. 
 
 ---
 
-**Version:** 1.0.0 (Lite)
-**Last Updated:** 15 July 2026
+**Version:** 1.0.0
+**Last Updated:** 23 July 2026
 **Author:** FDE Team

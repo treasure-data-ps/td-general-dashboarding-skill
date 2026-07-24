@@ -5,7 +5,7 @@
     "email": "support@treasuredata.com"
   },
   "metadata": {
-    "description": "Custom Dashboard Agent (Lite) - Build or resume custom dashboards from Treasure Data databases using a self-serve 5-phase pipeline",
+    "description": "FDE TAIS Dashboard Builder - Build or resume custom dashboards from Treasure Data databases using a self-serve 5-phase pipeline",
     "version": "1.0.0"
   },
   "plugins": [

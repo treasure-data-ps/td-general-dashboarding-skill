@@ -3,7 +3,7 @@ name: fde-tais-dashboard-builder-phase-4
 description: INTERNAL — Phase 4 only. Optional: extract reusable skill (Track A) or deploy Foundry agent (Track B).
 ---
 
-# Phase 4: Automate & Deploy (Custom Dashboard Agent — Lite)
+# Phase 4: Automate & Deploy (FDE TAIS Dashboard Builder)
 
 > **Read in this order:**
 > 1. `../INSTRUCTIONS.md` (master rules, load_order: 0)
@@ -58,6 +58,6 @@ Mark engagement complete, share the final artifacts (`dashboard.html`, skill zip
 
 ---
 
-**Version:** 1.0.0 (Lite)
-**Last Updated:** 15 July 2026
+**Version:** 1.0.0
+**Last Updated:** 23 July 2026
 **Author:** FDE Team

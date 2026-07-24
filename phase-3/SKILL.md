@@ -4,7 +4,7 @@ description: |
   INTERNAL — Phase 3 only. Build and validate an interactive HTML Client dashboard.
 ---
 
-# Phase 3: Build + Validate Interactive Dashboard (Custom Dashboard Agent — Lite)
+# Phase 3: Build + Validate Interactive Dashboard (FDE TAIS Dashboard Builder)
 
 > **Read in this order:**
 > 1. `../INSTRUCTIONS.md` (master rules, load_order: 0)
@@ -29,6 +29,6 @@ description: |
 
 ---
 
-**Version:** 1.0.0 (Lite)
-**Last Updated:** 15 July 2026
+**Version:** 1.0.0
+**Last Updated:** 23 July 2026
 **Author:** FDE Team

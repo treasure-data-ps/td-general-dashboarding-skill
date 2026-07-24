@@ -1,6 +1,6 @@
-# Custom Dashboard Agent (Lite) — File & Folder Index
+# FDE TAIS Dashboard Builder — File & Folder Index
 
-Directory of every file under `dashboarding-skills/custom-dashboard-agent-lite/`. Load this when navigating the agent, not during phase execution.
+Directory of every file under `fde-tais-dashboard-builder/`. Load this when navigating the agent, not during phase execution.
 
 Fully self-contained — no runtime dependency on `../shared/` or the private `fde-dashboard-solutions` template repo.
 
@@ -152,6 +152,6 @@ Every phase writes into a single flat project folder created during Phase 1 sess
 
 ---
 
-**Version:** 1.0.0 (Lite)
-**Last Updated:** 15 July 2026
+**Version:** 1.0.0
+**Last Updated:** 23 July 2026
 **Author:** FDE Team

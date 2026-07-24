@@ -156,6 +156,6 @@ tdx query -d <sink_database> < sql/10_create_aggregates.sql
 **ROI:** 4-8x better (30 min investment prevents 2-4 hour problem)
 ---
 
-**Version:** 1.0.0 (Lite)
+**Version:** 1.0.0
 **Last Updated:** 15 July 2026
 **Author:** FDE Team

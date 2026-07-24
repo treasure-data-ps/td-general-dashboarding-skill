@@ -235,6 +235,6 @@ The generated `dashboard.html` is fully self-contained. Delivery options:
 
 ---
 
-**Version:** 1.0.0 (Lite)
+**Version:** 1.0.0
 **Last Updated:** 15 July 2026
 **Author:** FDE Team

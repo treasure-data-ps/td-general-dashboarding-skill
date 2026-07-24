@@ -878,7 +878,7 @@ If **revert**: switch all `insert_into:` back to `create_table:`, remove delete 
 
 ---
 
-**Version:** 1.0.0 (Lite)
+**Version:** 1.0.0
 **Last Updated:** 15 July 2026
 **Author:** FDE Team
 

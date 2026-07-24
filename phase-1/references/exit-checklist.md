@@ -183,6 +183,6 @@ Before marking Stage B complete, verify these are complete:
 
 ---
 
-**Version:** 1.0.0 (Lite)
+**Version:** 1.0.0
 **Last Updated:** 15 July 2026
 **Author:** FDE Team

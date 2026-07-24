@@ -231,6 +231,6 @@ WHERE td_time_range(order_time,
 Without `td_time_range()`, Treasure Data scans ALL rows then filters. With `td_time_range()`, Treasure Data skips entire partitions (typically 10x-100x speedup).
 ---
 
-**Version:** 1.0.0 (Lite)
+**Version:** 1.0.0
 **Last Updated:** 15 July 2026
 **Author:** FDE Team

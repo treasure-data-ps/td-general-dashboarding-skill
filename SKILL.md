@@ -3,7 +3,7 @@ name: fde-tais-dashboard-builder
 description: Build or resume custom HTML dashboards from Treasure Data using a 5-phase self-serve pipeline (local, no Confluence/git).
 ---
 
-# Custom Dashboard Agent (Lite)
+# FDE TAIS Dashboard Builder
 
 > **⚠️ CRITICAL: Read instructions in this order:**
 > 1. **`./INSTRUCTIONS.md`** (master instructions — load first)
@@ -32,7 +32,6 @@ Build custom dashboards from Treasure Data databases using a **self-serve 5-phas
 
 Once you confirm this is a **new engagement**, **re-read these files immediately** (in this order):
 1. **`./references/guardrails-lite.md`** — Cross-phase guardrails (293 lines)
-2. **`./references/treasure-data-theme.md`** — Brand colors, fonts, component styles (396 lines)
 
 Then follow these 2 steps:
 
@@ -40,7 +39,7 @@ Then follow these 2 steps:
 
 2. **Display the 5-phase overview:**
    ```
-   📊 Custom Dashboard Agent (Lite) — Project Phases
+   📊 FDE TAIS Dashboard Builder — Project Phases
 
    ✅ Phase 1: Requirements + Data Discovery
       → Stage A: Understand KPIs, dimensions, filters, audience, success metrics
@@ -51,13 +50,13 @@ Then follow these 2 steps:
       → Deploy a scheduled workflow, pre-aggregate metrics into SINK tables
       → Output: Pre-aggregated tables ready for Phase 3
 
-   🎨 Phase 3: Build Interactive Dashboard
+   🎨 Phase 3: Build Interactive Dashboard (Html)
       → Query SINK tables (or source tables directly) → render a single dashboard.html
       → Test filters, performance, data accuracy
-      → Output: Approved interactive dashboard
+      → Output: Approved interactive dashboard as a HTML with data embedded inline and a generate-data.js data builder
 
-   🤖 Phase 4: Automate & Deploy  [Optional]
-      → Track A: Extract a reusable skill for faster future builds
+   🤖 Phase 4: Automate & Deploy  [Optional but recommended]
+      → Track A: Extract a reusable skill for faster future builds with context/knowledge for natural-language access
       → Track B: Deploy a companion Foundry agent for natural-language access
 
    📚 Phase 5: Handoff Documentation  [Optional]
@@ -76,7 +75,7 @@ Once you confirm this is **resuming an existing project**, **re-read these files
 Then follow these 3 steps:
 
 1. **Ask for the project slug:**
-   - "What's the project slug or folder name you're resuming? (e.g. `./<project-slug>/`)"
+   - "What's the project name or folder name you're resuming? (e.g. `./<project-slug>/`)"
 
 2. **Locate the project state:**
    - Ask the user to paste the contents of `./<project-slug>/state.md` — then read it directly to recover project state
@@ -104,7 +103,7 @@ Then follow these 3 steps:
 
 ## Recommended Model
 
-**This skill works with all Claude models.** Best default: **Claude Sonnet 5** (balanced cost/performance across all 5 phases). Alternatives:
+**This skill works with all Claude models.** Best default: **Claude Sonnet 5** (balanced cost/performance across all 5 phases) or similar. Alternatives can be used but better works with good models with context:
 - **Haiku 4.5:** Fast iteration on Phase 1 requirements gathering
 - **Opus 4.7/4.8:** Complex Phase 4 agent development if needed
 
@@ -174,6 +173,6 @@ Then follow these 3 steps:
 
 ---
 
-**Version:** 1.0.0 (Lite)
-**Last Updated:** 15 July 2026
+**Version:** 1.0.0
+**Last Updated:** 23 July 2026
 **Author:** FDE Team

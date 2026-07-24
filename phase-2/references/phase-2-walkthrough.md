@@ -305,7 +305,7 @@ Phase 3 covers:
 - Validate dashboard accuracy
 - Performance & mobile testing
 
-**Entry point:** `custom-dashboard-agent-lite/phase-3/build-interactive-dashboard-guide.md`
+**Entry point:** `./phase-3/SKILL.md` → `./phase-3/references/phase-3-walkthrough.md`
 
 **Key difference:** Phase 3 queries `dashboard_db.kpi_daily` (SINK from Phase 2) instead of `sales_db.orders` (source from Stage B).
 
@@ -543,7 +543,7 @@ Append to **`state.md`**:
 
 ---
 
-**Version:** 1.0.0 (Lite)
+**Version:** 1.0.0
 **Last Updated:** 15 July 2026
 **Author:** FDE Team
 

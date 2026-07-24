@@ -1,4 +1,4 @@
-# Custom Dashboard Agent (Lite) — Pipeline Architecture & state.md Pattern
+# FDE TAIS Dashboard Builder — Pipeline Architecture & state.md Pattern
 
 ## 5-Phase Pipeline Overview
 

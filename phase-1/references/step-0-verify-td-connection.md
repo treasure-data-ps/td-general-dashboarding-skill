@@ -53,6 +53,6 @@ Proceed to Session Setup questions (Batch 1 in the main guide).
 
 ---
 
-**Version:** 1.0.0 (Lite)
+**Version:** 1.0.0
 **Last Updated:** 15 July 2026
 **Author:** FDE Team
