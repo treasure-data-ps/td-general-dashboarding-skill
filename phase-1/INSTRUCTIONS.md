@@ -338,27 +338,72 @@ HTML Client stores data INLINE in the HTML file (not fetched from API). This cre
    tdx query --output json < query.sql > data.json
    ls -lh data.json
    # If < 5 MB: ✅ Safe
-   # If 5-20 MB: ⚠️ Warning
-   # If > 20 MB: ❌ Likely breaks
+   # If 5-10 MB: ⚠️ Approaching limit (acceptable but watch carefully)
+   # If 10-20 MB: ⚠️ WARNING — approaching breaking point
+   # If > 20 MB: ❌ Likely breaks (must reduce)
    ```
 
-4. **Identify problems:**
-   - High-cardinality filters (customer_id, product_id, user_id)?
+4. **⚠️ WARNING MESSAGE (if dataset ≥ 10 MB):**
+   ```
+   ⚠️ DATASET APPROACHING SIZE LIMIT
+   
+   Current estimated size: [X MB]
+   Safe threshold: < 10 MB
+   Breaking point: > 50 MB
+   
+   This dashboard is getting large. Users may experience slow load times 
+   (> 5 seconds) or performance issues. 
+   
+   REQUIRED ACTION: Apply data size reduction plan below.
+   If unable to get below 10 MB, contact FDE team for alternatives.
+   ```
+
+5. **Identify problems:**
+   - High-cardinality filters (customer_id, product_id, user_id)? ← **START HERE**
    - Too many dimensions (combinations explode)?
    - Raw events instead of aggregated?
    - Too much history (3+ years daily data)?
    - Too many dimensions in GROUP BY?
    - Too many tabs with independent data?
 
-5. **Solutions:**
-   - ✅ Remove high-cardinality filters (use search instead)
-   - ✅ Aggregate more (weekly instead of daily, top 10 categories)
-   - ✅ Filter scope (last 90 days instead of 3 years)
-   - ✅ Reduce dimensions (remove least-used slicing dimension)
-   - ✅ Paginate tables (show top 1,000 rows only)
-   - ✅ Limit to 3-5 low-cardinality filters max
-   - ✅ Limit to 3-5 tabs per dashboard
-   - ❌ If none work: Recommend Phase 4 (backend API) instead
+6. **Data Size Reduction Plan (execute in order):**
+
+   **Phase 1 (High Impact — should fix most cases):**
+   1. **Remove high-cardinality filters** (if > 500 distinct values)
+      - ❌ NOT: customer_id filter (1.2M distinct)
+      - ✅ YES: Region filter (5 distinct)
+      - Impact: -50% to -80% payload
+   
+   2. **Reduce historical scope** (narrow date range)
+      - ❌ NOT: 5 years of daily data
+      - ✅ YES: 1 year of daily OR 5 years of monthly
+      - Impact: -50% to -95% payload
+   
+   3. **Coarsen time grain** (daily → weekly/monthly)
+      - ❌ NOT: 1,095 days × 50 categories = 54,750 rows
+      - ✅ YES: 52 weeks × 50 categories = 2,600 rows
+      - Impact: -95% payload reduction
+   
+   **Phase 2 (Medium Impact):**
+   4. **Coarsen spatial dimensions** (city → state, product SKU → category)
+      - ❌ NOT: 45,000 cities
+      - ✅ YES: 50 states
+      - Impact: -60% to -90% payload
+   
+   5. **Reduce dimensions per widget** (4 dims → 2 main dims)
+      - ❌ NOT: GROUP BY region, category, segment, status
+      - ✅ YES: GROUP BY region, category (use drill-down for detail)
+      - Impact: -40% to -70% payload
+   
+   **Phase 3 (Lower Impact — if still over 10 MB):**
+   6. Remove least-used filters
+   7. Paginate tables (top 1K rows only)
+   8. Reduce number of tabs
+   
+   **If NONE of these work:**
+   - You cannot get below 10 MB with reasonable tradeoffs
+   - **Contact FDE team** for alternative solution options
+   - Don't force dashboard into HTML Client if data doesn't fit
 
 **Capture in state.md:**
 ```yaml
@@ -371,9 +416,15 @@ Widget | Type | Estimated Rows | Estimated Size | Status
 Total Estimated Size: [X MB]
 Feasibility: [✅ Safe / ⚠️ Warning / ❌ Not Feasible]
 
-If warning/failing, action taken:
-  - [Solution applied: e.g., "Reduced to weekly instead of daily"]
-  - [User approved: Yes/No]
+**If dataset ≥ 10 MB:**
+⚠️ WARNING: Dataset approaching size limit. Reduction plan applied:
+  - [Remediation 1: e.g., "Removed customer_id filter (was 1.2M distinct values)"]
+  - [Remediation 2: e.g., "Reduced from 5 years daily to 1 year daily"]
+  - [Remediation 3: e.g., "Coarsened to weekly instead of daily (95% reduction)"]
+
+Final Estimated Size: [Y MB]
+Result: [✅ Safe / ⚠️ Warning (approved by customer) / ❌ Not feasible — Contact FDE team]
+Customer Approval: [Yes/No]
 ```
 
 **See:** `./references/html-client-data-limits.md` for detailed estimation and solutions
