@@ -381,6 +381,143 @@ If warning/failing, action taken:
 
 ---
 
+### Rule P1-C: Communicate HTML Client Payload Constraints to Customer (REQUIRED)
+
+**⚠️ CRITICAL: Phase 1 Stage A must inform the customer about HTML Client payload limits before finalizing dashboard design.**
+
+During Step 1c (dashboard design specification), **before** diving into technical details:
+
+1. **Set expectations upfront:**
+   ```
+   "This dashboard will be a single HTML file that opens in your browser 
+   (no server needed, fully portable). This means we need to keep the data 
+   size reasonable — typically under 10MB for smooth performance, 
+   max 50MB before it gets slow.
+   
+   If your dashboard needs real-time updates or huge datasets, 
+   we'd build it differently (backend API). Let's make sure 
+   this approach works for you first."
+   ```
+
+2. **Ask constraint-discovery questions:**
+   - "How many distinct regions/categories do you filter on?" (cardinality)
+   - "Do you need daily data or is weekly/monthly OK?" (time grain)
+   - "How far back do you need history — 90 days, 1 year, 3 years?" (date range)
+   - "Do you need customer-level detail or aggregate by company?" (granularity)
+
+3. **Run estimation queries for their design:**
+   - Check filter cardinality (how many distinct values)
+   - Estimate total rows (time × dimensions × metrics)
+   - Calculate payload size (run actual query, export to JSON)
+
+4. **Present feasibility verdict WITH remediations:**
+
+### Feasibility Verdict & Remediations
+
+| Status | Action | Examples |
+|--------|--------|----------|
+| ✅ **Safe** (< 10MB, < 100K rows) | Approve design as-is | Daily data, 3-5 low-cardinality dimensions |
+| ⚠️ **Warning** (10-50MB, 100K-500K rows) | Discuss tradeoffs, apply 1-2 remediations | May be slow, but acceptable with user approval |
+| ❌ **Not Feasible** (> 50MB, > 500K rows) | **MUST apply remediations** | Cannot proceed without changing design |
+
+### Remediation Menu (Order by Impact)
+
+**High Impact (Start Here):**
+
+1. **Drop high-cardinality filters** (if cardinality > 500)
+   - Problem: `SELECT COUNT(DISTINCT customer_id) FROM orders` returns 1.2M
+   - Solution: Remove customer_id filter, or provide search autocomplete instead of dropdown
+   - Impact: -50% to -80% payload reduction
+
+2. **Coarsen time grain** (if daily + 3+ years = explosion)
+   - Problem: 1,095 days × 50 categories × 5 statuses = 273,750 rows ❌
+   - Solution: Change to weekly (156 weeks) or monthly (36 months)
+   - Examples: 
+     - Daily → Weekly: 273,750 → 39,000 rows (-86%)
+     - Daily → Monthly: 273,750 → 8,500 rows (-97%)
+   - Impact: -70% to -90% payload reduction
+
+3. **Coarsen spatial dimensions** (geography hierarchy)
+   - Problem: `SELECT COUNT(DISTINCT city)` = 45,000 (too many)
+   - Solution: Change from city → state/region (50-400 values)
+   - Other hierarchies: Product SKU → Product Category, Employee ID → Department
+   - Impact: -60% to -90% payload reduction
+
+4. **Narrow date range** (if history too deep)
+   - Problem: 5 years of daily data + 200 dimensions = huge
+   - Solution: Change from 5 years to 1-2 years rolling window
+   - Examples:
+     - 5 years daily → 2 years daily: -60% rows
+     - 5 years daily → 2 years weekly: -95% rows
+   - Impact: -50% to -95% payload reduction
+
+**Medium Impact:**
+
+5. **Reduce dimensions per widget** (fewer GROUP BY columns)
+   - Problem: Widget groups by Region + Category + Segment + Status (4 dims)
+   - Solution: Group by 2 main dims only, drill-down for detail
+   - Impact: -40% to -70% payload reduction
+
+6. **Segment to top-N values** (when cardinality explodes)
+   - Problem: 10,000 products in data, but only top 50 matter
+   - Solution: `WHERE product IN (SELECT ... ORDER BY revenue DESC LIMIT 50)`
+   - Impact: -80% to -95% payload reduction
+
+7. **Aggregate/calculate once (not per widget)**
+   - Problem: Each widget re-queries overlapping data
+   - Solution: Single overview query with multiple aggregations, widgets share data
+   - Impact: -40% to -60% payload reduction
+
+**Low Impact (If still oversized):**
+
+8. **Paginate large result sets**
+   - Solution: Show top 1,000 rows in table, paginate rest
+   - Impact: -20% to -40% payload reduction
+
+9. **Remove least-used filters**
+   - Solution: If 5 filters exist, user only uses 3, remove the 2 they never touch
+   - Impact: -10% to -25% payload reduction
+
+10. **Reduce number of tabs**
+   - Problem: 10 independent tabs, each with heavy data
+   - Solution: Consolidate to 3-5 tabs, use filters instead of separate tabs
+   - Impact: -50% to -80% payload reduction
+
+**Nuclear Option (Last Resort):**
+
+11. **Recommend Phase 4: Backend API instead of HTML Client**
+   - When: No remediations work, and user needs all the data
+   - Solution: Build backend API, dashboard fetches data on-demand (no size limit)
+   - Trade-off: Requires server, ongoing maintenance, but unlimited data
+   - Impact: ✅ Unlimited payload
+
+---
+
+### Capture Customer Approval in state.md
+
+```yaml
+### HTML Client Payload Constraints & Approval
+
+**Initial Feasibility:** [✅ Safe / ⚠️ Warning / ❌ Not Feasible]
+
+**If Warning/Failing:**
+Remediations Applied:
+  - [Remediation 1: e.g., "Removed customer_id filter (cardinality 1.2M)"]
+  - [Remediation 2: e.g., "Changed from daily to weekly grain"]
+  - [Remediation 3: e.g., "Narrowed date range from 5y to 2y"]
+
+**Final Feasibility:** [✅ Safe / ⚠️ Warning (approved)]
+
+**Customer Sign-Off:**
+  - [ ] Customer understands HTML Client limits (10-50MB range)
+  - [ ] Customer approves remediations (trade-offs explained)
+  - [ ] Customer confirms design is final for Phase 3 build
+```
+
+**Why:** Discussing payload upfront prevents Phase 3 surprises ("Why is my dashboard so slow?") and design rework.
+
+---
+
 ### Rule P1-8: Metrics Validation
 
 For each metric user requests:
