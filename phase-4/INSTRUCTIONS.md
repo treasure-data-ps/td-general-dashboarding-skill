@@ -633,7 +633,8 @@ system_prompt: |
   - Limit results to top 100 rows for tables
   - Explain your query before returning data
 
-model: claude-opus-4-8  # or latest Claude model
+model: claude-opus-4-6  # Foundry model name (NOT Claude API format: claude-opus-4-8)
+# Foundry models: claude-opus-4-6, claude-4.5-sonnet (NOT claude-opus-4-8, claude-sonnet-4-6)
 temperature: 0.7
 max_tokens: 4096
 
@@ -643,6 +644,19 @@ inputs:
 outputs:
   - response: # agent's natural language + data results
 ```
+
+**⚠️ CRITICAL: Foundry Model Name Format**
+
+Use **Foundry format** (not Claude API format) for the `model:` field:
+
+| Use Case | Foundry Name ✓ | Claude API Name ✗ | Notes |
+|----------|---|---|---|
+| **Latest Opus** | `claude-opus-4-6` | `claude-opus-4-8` | Use for complex queries, reasoning |
+| **Latest Sonnet** | `claude-4.5-sonnet` | `claude-sonnet-4-6` | Recommended for most agents (better speed/cost) |
+
+If you paste Claude API format names (like `claude-opus-4-8`), `tdx agent push` returns a **422 error**. Always use the Foundry column names.
+
+---
 
 **Knowledge base format (project_slug_kb.md):**
 

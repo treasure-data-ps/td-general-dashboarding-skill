@@ -34,7 +34,7 @@ The four patterns below describe **capabilities** that can be combined in a sing
 | **Reporting** (summaries) | Weekly/monthly exec summaries, email/Slack | ❌ No | ✅ Yes | 1.5-2h |
 | **Orchestration** (complex workflows) | Multi-step analysis, ML, custom logic | ✅ Yes | ✅ Yes | 2-3h |
 
-**Recommended first deployment:** Insights capability (fastest, most flexible). Add other capabilities later if needed — no re-deployment required; just update the `system_prompt.md` intent-routing rules.
+**Recommended first deployment:** Insights capability (fastest, most flexible). Add other capabilities later if needed — no re-deployment required; just update the `prompt.md` intent-routing rules.
 
 **Example: Composite system_prompt intent-routing:**
 ```markdown
@@ -170,7 +170,7 @@ Mitigation for this agent:
   [ ] Row-level security: Will agent queries include a tenant_id filter?
 ```
 
-**If compliance was flagged and mitigations are not yet in place:** stop and document the required constraints in `system_prompt.md` CRITICAL RULES before deploying. Example:
+**If compliance was flagged and mitigations are not yet in place:** stop and document the required constraints in `prompt.md` CRITICAL RULES before deploying. Example:
 
 ```markdown
 ## CRITICAL RULES (Compliance Gates)
@@ -183,7 +183,7 @@ Mitigation for this agent:
 **Action:**
 - [ ] Read the Phase 1 Step 1l compliance flag from `state.md`
 - [ ] For each flag, confirm the mitigation is implemented
-- [ ] Document all compliance constraints in `system_prompt.md` CRITICAL RULES
+- [ ] Document all compliance constraints in `prompt.md` CRITICAL RULES
 - [ ] Record the compliance check result in `./<project-slug>/agents/compliance-gate.md`
 
 ---
@@ -192,34 +192,52 @@ Mitigation for this agent:
 
 KBs are assembled in **two stages**. Don't wait for fully-populated KBs before the first push — stub most files, populate fully after validation.
 
-**Copy the system prompt template first — never write `system_prompt.md` from scratch:**
+**CRITICAL: Foundry Agent Directory Structure**
+
+The actual Foundry structure differs from earlier versions. Create this exact layout:
 
 ```bash
-mkdir -p ./<project-slug>/agents/knowledge_bases
+# File structure (CORRECT for Foundry)
+agents/
+├── <project-name>/
+│   ├── agent.yml                  ← Agent configuration (model, tools, max_iterations)
+│   ├── prompt.md                  ← System prompt (NOT in knowledge_bases/)
+│   └── knowledge_bases/
+│       ├── business_context.md    ← Text KB
+│       ├── metrics_dictionary.md  ← Text KB
+│       ├── sql_templates.md       ← Text KB
+│       ├── sink_sales_revenue.yml         ← One KB per SINK table
+│       ├── sink_customer_segments.yml     ← One KB per SINK table
+│       └── sink_regional_summary.yml      ← One KB per SINK table
+├── knowledge_bases/               ← (NOT used for agent — per-project folder only)
+└── tdx.json                        ← Foundry project config
+```
 
+**Setup commands:**
+
+```bash
+# 1. Create project structure
+mkdir -p ./<project-slug>/agents/<project-name>/knowledge_bases
+
+# 2. Copy agent configuration template to agent.yml
+cp references/templates/agent-config-template.yml \
+   ./<project-slug>/agents/<project-name>/agent.yml
+
+# 3. Fill [agent-name], [DASHBOARD_PURPOSE], [SINK_DATABASE], [TABLE_NAME] in agent.yml
+vi ./<project-slug>/agents/<project-name>/agent.yml
+
+# 4. Copy agent prompt template to prompt.md (NOT in knowledge_bases/)
 cp references/templates/agent-prompt-template.md \
-   ./<project-slug>/agents/knowledge_bases/system_prompt.md
+   ./<project-slug>/agents/<project-name>/prompt.md
+
+# 5. Fill [DOMAIN], [DATABASE], [SINK_TABLES], [CRITICAL_RULES], [KEY_FACTS] in prompt.md
+vi ./<project-slug>/agents/<project-name>/prompt.md
 ```
 
-Then fill `[DOMAIN]`, `[DATABASE]`, `[SINK_TABLES]`, `[CRITICAL_RULES]`, `[KEY_FACTS]`.
-
-**File format: individual `.yml` files per table, one KB per table**
-
-`tdx agent push` scans `knowledge_bases/` for **individual `.yml` files per table**, one file per knowledge base (KB). Each file is a separate KB that gets registered.
-
-**Format — one `.yml` file per SINK table, named after the table:**
-
-```bash
-# File structure
-knowledge_bases/
-├── system_prompt.md
-├── business_context.md
-├── metrics_dictionary.md
-├── sql_templates.md
-├── sink_sales_revenue.yml         ← One KB per table
-├── sink_customer_segments.yml     ← One KB per table
-└── sink_regional_summary.yml      ← One KB per table
-```
+**Why this structure?** `tdx agent push` expects:
+- `agent.yml` + `prompt.md` as siblings (configuration + behavior)
+- `knowledge_bases/` subfolder for all KBs (per-table `.yml` files + text KBs)
+- Each `.yml` file becomes a separate registered KB in Foundry
 
 **Example: `knowledge_bases/sink_sales_revenue.yml`**
 
@@ -232,10 +250,24 @@ tables:
     td_query: "SELECT * FROM <sink_db>.sink_sales_revenue LIMIT 1000"
     grain: "one row per order_date × region × channel"
     confirmed_totals:
-      total_revenue: 1284302.55
-enable_data: false
-enable_data_index: false
+      total_revenue: 1284302.55          # Must match Phase 2/3 validation within 1%
+    reasoning_effort: "medium"           # OPTIONAL: low|medium|high complexity for agent reasoning
+enable_data: false                        # Never enable live data export
+enable_data_index: false                  # Index not needed for dashboard use
 ```
+
+**`confirmed_totals:` field — REQUIRED:**
+- Value is any key metric you spot-checked in Phase 2/3 validation
+- Agent uses this to self-verify queries are working (answers should match within 1%)
+- Example: if Phase 2 `tdx query` returned `total_revenue = 1284302.55`, place that number here
+- Format: any key metric name + numeric value (can be a sum, count, average, etc.)
+
+**`reasoning_effort:` field — OPTIONAL but recommended:**
+- Set to `low`, `medium`, or `high` based on schema complexity
+- `low`: simple schema, <5 columns, straightforward joins (e.g., daily aggregates)
+- `medium`: moderate complexity, dimension breakdowns, some calculated fields
+- `high`: complex schemas, many joins, non-additive metrics, cardinality nuances
+- The agent uses this to gauge how much analysis effort to apply (affects response depth and tool calls)
 
 **Example: `knowledge_bases/sink_customer_segments.yml`**
 
@@ -253,17 +285,17 @@ enable_data: false
 enable_data_index: false
 ```
 
-**Why individual files?** `tdx agent push` reads each `.yml` file as a separate KB. It registers each one in Foundry with its own name (e.g., `sink_sales_revenue`, `sink_customer_segments`). The agent's `system_prompt.md` and `agent.yml` then reference each KB by name via `@ref(type: "knowledge_base", name: "sink_sales_revenue")`.
+**Why individual files?** `tdx agent push` reads each `.yml` file as a separate KB. It registers each one in Foundry with its own name (e.g., `sink_sales_revenue`, `sink_customer_segments`). The agent's `prompt.md` and `agent.yml` then reference each KB by name via `@ref(type: "knowledge_base", name: "sink_sales_revenue")`.
 
 **Naming convention:** Use table names as KB names (e.g., `sink_orders.yml` creates a KB named `sink_orders`).
 
 ### First Push — Schema + Behavioral Rules Only
 
-Populate `system_prompt.md` and the per-table `.yml` files (e.g. `sink_sales_revenue.yml`) fully. Stub the other three.
+Populate `prompt.md` and the per-table `.yml` files (e.g. `sink_sales_revenue.yml`) fully. Stub the other three.
 
 | File | First-push action | Source |
 |------|-------------------|--------|
-| `system_prompt.md` | ✅ **Populate fully** — CRITICAL RULES at the top | Copied from `references/templates/agent-prompt-template.md`; fill `[DOMAIN]`, `[DATABASE]`, `[SINK_TABLES]`, `[CRITICAL_RULES]`, `[KEY_FACTS]` |
+| `prompt.md` | ✅ **Populate fully** — CRITICAL RULES at the top | Copied from `references/templates/agent-prompt-template.md`; fill `[DOMAIN]`, `[DATABASE]`, `[SINK_TABLES]`, `[CRITICAL_RULES]`, `[KEY_FACTS]` |
 | `<table>.yml` (one per SINK table) | ✅ **Populate fully** — schema is confirmed | Phase 3 schema + Phase 2 confirmed totals (if run); include `confirmed_totals:` and `grain:` for every table; **use ONLY `{name, td_query}` format (not plain table names)** — see format example above |
 | `business_context.md` | ⚡ **Stub** — 3-5 bullets max | Phase 1 requirements (company, industry, dashboard purpose); full distillation happens post-validation |
 | `metrics_dictionary.md` | ⚡ **Stub** — name + SQL formula only | Phase 3 validated queries; NL phrasings added post-validation |
@@ -303,15 +335,36 @@ LIMIT 30;
 
 Don't include workflow SQL (WF-Q1, WF-Q2, etc.) — remove that section entirely for agent KBs.
 
-**Why:** the agent needs the per-table `.yml` files (schema) and `system_prompt.md` (behavioral rules) to pass Test 1 (connectivity). The other KBs can be stubs — Round 1 test failures reveal exactly what's missing before you spend time writing them.
+**Why:** the agent needs the per-table `.yml` files (schema) and `prompt.md` (behavioral rules) to pass Test 1 (connectivity). The other KBs can be stubs — Round 1 test failures reveal exactly what's missing before you spend time writing them.
 
-> **Track A → Track B reuse (avoid re-authoring):** If Track A ran, `./<project-slug>/skills/knowledge/` already has `business_context.md`, `metrics_catalog.md`, and `sql_templates.md`. Copy these directly into `agents/knowledge_bases/` as the starting point — do NOT re-write from scratch. Track B adds the per-table `.yml` files and `system_prompt.md` on top.
+> **Track A → Track B reuse (avoid re-authoring):** If Track A ran, `./<project-slug>/skills/knowledge/` already has `business_context.md`, `metrics_catalog.md`, and `sql_templates.md`. Copy these directly into `agents/knowledge_bases/` as the starting point — do NOT re-write from scratch. Track B adds the per-table `.yml` files and `prompt.md` on top.
+>
+> **Copy commands from Track A to Track B:**
+> ```bash
+> # If Track A skill exists:
+> cp ./<project-slug>/skills/knowledge/business_context.md \
+>    ./<project-slug>/agents/<project-name>/knowledge_bases/business_context.md
+> cp ./<project-slug>/skills/knowledge/sql_templates.md \
+>    ./<project-slug>/agents/<project-name>/knowledge_bases/sql_templates.md
+> 
+> # Rename metrics_catalog.md → metrics_dictionary.md (Track B naming convention)
+> cp ./<project-slug>/skills/knowledge/metrics_catalog.md \
+>    ./<project-slug>/agents/<project-name>/knowledge_bases/metrics_dictionary.md
+> ```
 >
 > ⚠️ **CRITICAL before copying `sql_templates.md` to agents/:** Remove the entire "## Workflow SQL" section (WF-Q1 through WF-Q8 blocks). The agent queries SINK tables directly and does NOT need source→SINK transformation SQL. Workflow SQL blocks inflate the file to 18,000+ characters, exceeding the Foundry KB text limit (~18K chars). Strip these blocks before copying to `agents/knowledge_bases/`.
+>
+> ```bash
+> # After copying, trim sql_templates.md for agent use:
+> # Open file and delete from "## Workflow SQL" to the end of WF-Q8 block
+> vi ./<project-slug>/agents/<project-name>/knowledge_bases/sql_templates.md
+> # Keep only: KPI Summary, Trend Query, Breakdown Query sections
+> # Verify char count after: wc -c sql_templates.md  (should be < 18000)
+> ```
 
 **CRITICAL: System Prompt Character Limit (⚠️ 9,000 CHARACTER MAXIMUM)**
 
-The Foundry agent API enforces a **9,000 character limit** on `system_prompt.md`. A prompt with CRITICAL RULES + intent-routing table + business facts + exclusion rules + tone naturally produces 10,000-12,000+ characters for any dashboard with moderate complexity. You **will hit this limit** with a moderately complex schema or many metrics.
+The Foundry agent API enforces a **9,000 character limit** on `prompt.md`. A prompt with CRITICAL RULES + intent-routing table + business facts + exclusion rules + tone naturally produces 10,000-12,000+ characters for any dashboard with moderate complexity. You **will hit this limit** with a moderately complex schema or many metrics.
 
 **Budget:**
 - CRITICAL RULES (6 rules): ~800 chars
@@ -322,7 +375,7 @@ The Foundry agent API enforces a **9,000 character limit** on `system_prompt.md`
 - Tone section: ~200 chars
 - **Total easily reaches 11,000+ chars — exceeds the 9,000 limit**
 
-**If `system_prompt.md` exceeds 9,000 characters (check with `wc -c`), cut in this order (keeps all behavioral rules intact):**
+**If `prompt.md` exceeds 9,000 characters (check with `wc -c`), cut in this order (keeps all behavioral rules intact):**
 1. **Remove the Data Access table** (redundant — the agent gets live table schema via the `get_table_schema` tool at runtime) → saves ~1,500 chars
 2. **Condense NL phrasing repetitions** (if `metrics_dictionary.md` already lists phrasings, don't repeat them in the system prompt) → saves ~500 chars
 3. **Remove verbose examples** in CRITICAL RULES (keep imperative bullets, drop multi-line explanations) → saves ~300 chars
@@ -331,7 +384,7 @@ The Foundry agent API enforces a **9,000 character limit** on `system_prompt.md`
 
 **Pre-push check:**
 ```bash
-wc -c ./<project-slug>/agents/knowledge_bases/system_prompt.md
+wc -c ./<project-slug>/agents/knowledge_bases/prompt.md
 # If output > 9000: trim using the cut-order above, then re-check with wc -c
 # Push only after confirmed ≤ 9000 chars
 ```
@@ -358,7 +411,7 @@ WRONG:
 
 ```
 ./<project-slug>/agents/knowledge_bases/
-├── system_prompt.md            ← behavioral rules first
+├── prompt.md            ← behavioral rules first
 ├── sink_sales_revenue.yml      ← one .yml per SINK table — schema + confirmed totals
 ├── sink_customer_segments.yml  ← one .yml per SINK table
 ├── business_context.md         ← stub on first push; full distillation post-validation
@@ -375,7 +428,7 @@ After the dashboard is validated and Round 1 test failures are analyzed:
 | `business_context.md` | Full distillation — replace stub; add a `## Exclusion Rules` section (required even if empty — state explicitly that none were found) | Customer-validated Phase 1/3 inferences |
 | `metrics_dictionary.md` | Full definitions — all NL phrasings + confirmed SQL; match **Excludes:** to the actual WHERE clauses | Phase 3 final queries, Phase 1 formulas |
 | `sql_templates.md` | All templates + customer-specific NL patterns | Phase 3 validated queries + Round 1 test failure patterns |
-| `system_prompt.md` | Add a CRITICAL RULE for each exclusion found during validation | Test failure analysis |
+| `prompt.md` | Add a CRITICAL RULE for each exclusion found during validation | Test failure analysis |
 | `<table>.yml` (each per-table file) | Update column descriptions if the schema changed | Phase 3 final schema |
 
 **Example `sink_sales_revenue.yml` with `confirmed_totals` and `grain`:**
@@ -439,8 +492,33 @@ AskUserQuestion:
 **Only run `tdx llm project create` after user explicitly selects "Yes, create now".**
 
 **Step 3 — Confirm knowledge bases are ready for the push round:**
-- Round 1: `system_prompt.md` + per-table `.yml` files fully populated, other 3 files stubbed
+- Round 1: `prompt.md` + per-table `.yml` files fully populated, other 3 files stubbed
 - Round 2: all KB files fully populated
+
+**Pre-Push Verification Checklist (run these commands BEFORE proceeding):**
+
+```bash
+# 1. Verify prompt.md character count (max 9,000 chars)
+wc -c ./<project-slug>/agents/<project-name>/prompt.md
+# If > 9000: trim using the cut-order on line 336-341, re-check
+
+# 2. Verify text KB character counts (max ~18,000 chars each)
+wc -c ./<project-slug>/agents/<project-name>/knowledge_bases/business_context.md
+wc -c ./<project-slug>/agents/<project-name>/knowledge_bases/metrics_dictionary.md
+wc -c ./<project-slug>/agents/<project-name>/knowledge_bases/sql_templates.md
+# If any > 18000: trim by removing examples or condensing descriptions, re-check
+
+# 3. Verify all per-table .yml files exist and have confirmed_totals
+ls ./<project-slug>/agents/<project-name>/knowledge_bases/*.yml
+# Each should have confirmed_totals: field with actual values
+
+# 4. Verify agent.yml exists and model name is in Foundry format
+grep "model:" ./<project-slug>/agents/<project-name>/agent.yml
+# Should show: model: claude-opus-4-6  OR  model: claude-4.5-sonnet
+# NOT Claude API format (claude-opus-4-8, claude-sonnet-4-6)
+```
+
+**Pass all four checks before pushing.**
 
 **Step 4 — CONFIRMATION GATE — Show the deployment preview before pushing:**
 
@@ -465,7 +543,7 @@ AskUserQuestion:
 - Project name: <project-slug>
 - Agent name: <agent-name>
 - Knowledge bases ready:
-  - system_prompt.md: [file size] chars
+  - prompt.md: [file size] chars
   - <table>.yml (one per SINK table): [N table .yml files listed]
   - business_context.md: [stub|full]
   - metrics_dictionary.md: [stub|full]
@@ -476,11 +554,23 @@ AskUserQuestion:
 
 **If user selects "Yes, deploy now":**
 
+**CRITICAL — Step 4b-v, Sub-step 1 (REQUIRED BEFORE PUSH):**
+```bash
+# Ensure the Foundry project exists FIRST
+# If skipped, you'll get: LLM_PROJECT_NOT_FOUND error when running tdx agent push
+tdx llm project create <project-slug>
+# This is safe to run even if the project already exists (idempotent)
+```
+
 **Step 5 — Push:**
 ```bash
-cd ./<project-slug>/agents
+cd ./<project-slug>/agents/<project-name>
+# CRITICAL: cd into the project folder (contains tdx.json + agent.yml + prompt.md)
+# NOT just the parent agents/ folder
 tdx agent push -y
 ```
+
+⚠️ **If you get `LLM_PROJECT_NOT_FOUND` error:** you skipped the `tdx llm project create` step above. Go back and run it, then retry `tdx agent push -y`.
 
 **Step 6 — Verify in the Foundry UI:**
 - Confirm the agent project is visible and the KB files uploaded correctly
@@ -508,7 +598,7 @@ Append to `state.md`:
 
 **⛔ Gate before running:** confirm KBs are ready for the round you're running.
 
-- **Round 1 (first push):** `system_prompt.md` fully populated + all per-table `.yml` files fully populated. Stubs for the other 3 files are acceptable — Round 1 failures tell you what to add before Round 2.
+- **Round 1 (first push):** `prompt.md` fully populated + all per-table `.yml` files fully populated. Stubs for the other 3 files are acceptable — Round 1 failures tell you what to add before Round 2.
 - **Round 2 (post-validation re-push):** all KB files fully populated (not stubs). `business_context.md` has a `## Exclusion Rules` section.
 
 Ask before running: *"KBs ready for Round [1/2]? Reply **run** to execute `tdx agent test --run all`."* Wait for explicit confirmation before executing.
@@ -546,11 +636,11 @@ tdx agent test --run all
 
 | Symptom | Fix |
 |---------|-----|
-| Agent describes instead of executes (any test) | `system_prompt.md` → CRITICAL RULE 1 must be line 1 |
+| Agent describes instead of executes (any test) | `prompt.md` → CRITICAL RULE 1 must be line 1 |
 | Test 1 returns wrong total | Per-table `.yml` → `confirmed_totals`; check `sql_templates.md` KPI-summary template's GROUP BY |
 | Test 3 dimension totals don't match | `sql_templates.md` breakdown template → add all grain columns to GROUP BY |
 | Test 5 metric value wrong | `metrics_dictionary.md` → **Excludes:** field must match the actual WHERE clause |
-| Agent ignores an exclusion | `system_prompt.md` → add a numbered CRITICAL RULE for that exclusion |
+| Agent ignores an exclusion | `prompt.md` → add a numbered CRITICAL RULE for that exclusion |
 
 ### Iteration with --reeval
 
@@ -573,7 +663,7 @@ tdx agent test --reeval --name "dimension-breakdown"
 
 ## Track B Output
 
-✅ `agents/knowledge_bases/` — `system_prompt.md`, one `.yml` file per SINK table, `business_context.md`, `metrics_dictionary.md`, `sql_templates.md` — all fully populated after Round 2
+✅ `agents/knowledge_bases/` — `prompt.md`, one `.yml` file per SINK table, `business_context.md`, `metrics_dictionary.md`, `sql_templates.md` — all fully populated after Round 2
 ✅ `agents/capabilities.md` — chosen capabilities + intent-routing logic
 ✅ `agents/compliance-gate.md` — compliance check result (if a flag was raised in Phase 1)
 ✅ Deployed, verified Foundry agent passing the 5-test validation suite
