@@ -548,16 +548,32 @@ For each metric user requests:
 - [ ] Verify column exists and is numeric
 - [ ] Check for missing/null values
 - [ ] Validate with a sample aggregation
+- [ ] **For COUNT metrics: Ask which entity/column to count** (use COUNT(column), not COUNT(*))
+
+**For COUNT KPIs — ALWAYS ask:**
+> "For your count KPI, which specific entity/column are we counting?"
+
+**Why:** COUNT(*) includes rows with NULLs, which inflates counts. COUNT(column_name) counts only non-NULL values.
+
+**Examples:**
+- "Count of customers" → COUNT(DISTINCT customer_id)
+- "Count of orders" → COUNT(order_id)
+- "Count of transactions" → COUNT(transaction_id)
+- ❌ NOT COUNT(*) — unless explicitly confirmed
 
 **Example queries:**
 ```sql
 -- Verify column exists and is numeric
 SELECT SUM(revenue) FROM sales_table LIMIT 5;
 
--- Check for nulls
-SELECT COUNT(*) total, COUNT(revenue) non_null, 
-       COUNT(*) - COUNT(revenue) AS nulls 
+-- Check for nulls (shows difference between COUNT(*) and COUNT(column))
+SELECT COUNT(*) total_rows, COUNT(revenue) non_null_revenue, 
+       COUNT(*) - COUNT(revenue) AS nulls_in_revenue
 FROM sales_table;
+
+-- For COUNT KPI: count specific column
+SELECT COUNT(DISTINCT customer_id) FROM sales_table;  -- Customers
+SELECT COUNT(order_id) FROM sales_table;              -- Orders (not rows)
 
 -- Quick aggregation test
 SELECT SUM(revenue) FROM sales_table WHERE DATE(created_at) = '2026-07-22';

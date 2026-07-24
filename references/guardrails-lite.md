@@ -40,6 +40,19 @@ If customer needs sub-minute real-time updates, streaming data, huge raw dataset
 ### ALWAYS verify column names against the actual table schema before writing any query or inject script
 Run `tdx describe <db>.<table>` first. Copy exact column names (case-sensitive). Past incident: dashboard showed all zeros because `customers` ≠ `total_customers` in the SINK schema.
 
+### ALWAYS use COUNT(column) instead of COUNT(*) for KPIs — ask customer if unsure
+COUNT(*) counts all rows including those with NULLs, which can inflate counts. COUNT(column_name) counts only non-NULL values in that specific column, which is usually what's intended.
+
+**Rule:** Ask customer: "For your count KPI, which specific entity are we counting?" (e.g., "count distinct customers" → COUNT(DISTINCT customer_id), "count orders placed" → COUNT(order_id), not COUNT(*)).
+
+**Why:** Past incident: COUNT(*) showed 5.2M transactions, but COUNT(order_id) showed 4.8M due to NULL order_ids in data quality issues. Dashboard looked wrong to customer.
+
+**Examples:**
+- ❌ COUNT(*) — may include rows with missing key columns
+- ✅ COUNT(customer_id) — counts actual customers
+- ✅ COUNT(DISTINCT region) — counts unique regions
+- ✅ COUNT(order_id) — counts actual orders
+
 ### ALWAYS spot-check dashboard numbers against the database
 After rendering, pick at least 3 KPIs and verify them with a direct SQL query. Numbers must match to the exact value — not "approximately". If 1% off, something is wrong.
 
