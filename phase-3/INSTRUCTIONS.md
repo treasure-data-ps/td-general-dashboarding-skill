@@ -346,11 +346,20 @@ Manually check (do NOT run code, just look):
 
 **⚠️ CRITICAL: CANNOT approve dashboard without 3+ KPI spot-checks passing.**
 
+**⚠️ IMPORTANT: Always validate against SOURCE data, NOT SINK data**
+
+If Phase 2 created SINK tables:
+- Dashboard queries the SINK tables (pre-aggregated)
+- But spot-checks MUST query the original SOURCE tables (ground truth)
+- This validates that Phase 2 workflow created the right aggregations AND Phase 3 queries the right data
+
+**Why:** If you validate against SINK data, you only verify consistency — not correctness. You miss bugs in Phase 2 aggregations. The source data is the "source of truth."
+
 **Step 1: Render dashboard.html**
 
-**Step 2: Spot-check exactly 3 KPIs**
+**Step 2: Spot-check exactly 3 KPIs against SOURCE data**
 
-For each KPI, run database query and compare:
+For each KPI, run database query AGAINST SOURCE TABLES and compare:
 
 ```
 KPI #1: Total Revenue

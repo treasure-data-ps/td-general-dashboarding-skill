@@ -53,8 +53,13 @@ COUNT(*) counts all rows including those with NULLs, which can inflate counts. C
 - ✅ COUNT(DISTINCT region) — counts unique regions
 - ✅ COUNT(order_id) — counts actual orders
 
-### ALWAYS spot-check dashboard numbers against the database
-After rendering, pick at least 3 KPIs and verify them with a direct SQL query. Numbers must match to the exact value — not "approximately". If 1% off, something is wrong.
+### ALWAYS spot-check dashboard numbers against the SOURCE database, not SINK
+After rendering, pick at least 3 KPIs and verify them with a direct SQL query **against the original SOURCE tables** (not SINK tables). Numbers must match to the exact value — not "approximately". If 1% off, something is wrong.
+
+**Why SOURCE, not SINK?**
+- If Phase 2 created SINK tables, they may have their own transformations/aggregations
+- Validating only against SINK verifies consistency but misses bugs in Phase 2 aggregations
+- Source tables are the "ground truth" — this validates the entire pipeline (Phase 2 + Phase 3)
 
 ### ALWAYS check for join fan-out before writing aggregation queries
 If joining 1-to-many tables, count rows before and after. If `after_join > 2 × before_join`, you have fan-out.
