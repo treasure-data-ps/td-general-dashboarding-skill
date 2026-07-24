@@ -417,9 +417,9 @@ During Step 1c (dashboard design specification), **before** diving into technica
    - Streaming data or live connections
    - Encrypted/secure data storage
    
-   This approach won't work. We'd need to explore a different solution 
-   (not included in this pipeline). Let's confirm this HTML Client 
-   approach is right for you first."
+   This HTML Client approach won't work for your needs. 
+   Please contact the FDE team to explore alternative solutions. 
+   Let's confirm this approach is right for you first before proceeding."
    ```
 
 2. **Ask constraint-discovery questions:**
@@ -511,7 +511,7 @@ During Step 1c (dashboard design specification), **before** diving into technica
 11. **Dashboard is NOT feasible for HTML Client**
    - When: No remediations work, user needs 50MB+, real-time updates, or encrypted storage
    - Recommendation: This dashboard is out of scope for this pipeline (HTML Client only)
-   - User action: Explore alternative solutions outside this project
+   - User action: Contact FDE team to explore alternative solutions
    - Why: This skill is designed for portable, self-contained HTML dashboards only
 
 ---
