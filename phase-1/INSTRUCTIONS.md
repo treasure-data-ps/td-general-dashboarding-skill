@@ -407,12 +407,13 @@ During Step 1c (dashboard design specification), **before** diving into technica
    
    If you need:
    - Real-time data that updates constantly
-   - Huge datasets (GB+)
+   - Huge datasets (GB+) that won't fit in 50MB
    - Dynamic data that changes hourly
    - Encrypted/secure data storage
    
-   We'd build it differently (backend API with live queries). 
-   Let's confirm this approach works for you first."
+   This approach won't work. We'd need to explore a different solution 
+   (not included in this pipeline). Let's confirm this HTML Client 
+   approach is right for you first."
    ```
 
 2. **Ask constraint-discovery questions:**
@@ -499,13 +500,13 @@ During Step 1c (dashboard design specification), **before** diving into technica
    - Solution: Consolidate to 3-5 tabs, use filters instead of separate tabs
    - Impact: -50% to -80% payload reduction
 
-**Nuclear Option (Last Resort):**
+**Nuclear Option (Last Resort — Out of Scope):**
 
-11. **Recommend Phase 4: Backend API instead of HTML Client**
-   - When: No remediations work, and user needs all the data
-   - Solution: Build backend API, dashboard fetches data on-demand (no size limit)
-   - Trade-off: Requires server, ongoing maintenance, but unlimited data
-   - Impact: ✅ Unlimited payload
+11. **Dashboard is NOT feasible for HTML Client**
+   - When: No remediations work, user needs 50MB+, real-time updates, or encrypted storage
+   - Recommendation: This dashboard is out of scope for this pipeline (HTML Client only)
+   - User action: Explore alternative solutions outside this project
+   - Why: This skill is designed for portable, self-contained HTML dashboards only
 
 ---
 

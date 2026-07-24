@@ -33,7 +33,7 @@ HTML Client embeds all data directly in the HTML file — no API, no server, no 
 - File size = data size + code (hard limit: 50MB breaking point)
 - Filtering/interactions fast (in-browser), but only on loaded data
 
-If customer needs real-time, streaming, or encrypted storage, this approach won't work → recommend Phase 4 backend API instead. Discuss this choice in Phase 1, not discovered during Phase 3 build.
+If customer needs real-time updates, streaming, huge datasets (50MB+), or encrypted storage, this approach is OUT OF SCOPE. Discuss feasibility in Phase 1, not discovered during Phase 3 build. This skill is HTML Client only — no server-side options available.
 
 ### ALWAYS verify column names against the actual table schema before writing any query or inject script
 Run `tdx describe <db>.<table>` first. Copy exact column names (case-sensitive). Past incident: dashboard showed all zeros because `customers` ≠ `total_customers` in the SINK schema.
